@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Systems of inequalities</title>
+<style>
+  :root {
+    --ink: #1d232b;
+    --muted: #55606d;
+    --bg: #ffffff;
+    --panel: #f4f6f9;
+    --rule: #d5dae1;
+    --task: #fff8e6;
+    --task-rule: #d9a63a;
+    --sol: #eef5ee;
+    --protein: #1f5fbf;
+    --cal: #c2561a;
+    --budget: #2e7d32;
+    --region: #7d8fb3;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 19px; line-height: 1.55;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+  .course { font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: var(--muted); margin: 0 0 4px; }
+  h1 { font-family: Arial, Helvetica, sans-serif; font-size: 34px; margin: 0 0 20px; line-height: 1.2; }
+  h2 { font-family: Arial, Helvetica, sans-serif; font-size: 25px; margin: 40px 0 10px; line-height: 1.25;
+       border-top: 2px solid var(--rule); padding-top: 18px; }
+  h3 { font-family: Arial, Helvetica, sans-serif; font-size: 19px; margin: 22px 0 6px; }
+  p { margin: 10px 0; }
+  .m { font-style: italic; }
+  .eq { display: block; margin: 10px 0 10px 24px; white-space: nowrap; overflow-x: auto; }
+  .sys { margin: 12px 0 12px 24px; border-collapse: collapse; }
+  .sys td { padding: 2px 14px 2px 0; vertical-align: baseline; white-space: nowrap; }
+  .sys td.lab { color: var(--muted); font-size: 16px; font-family: Arial, Helvetica, sans-serif; white-space: normal; }
+  .tablewrap { overflow-x: auto; margin: 12px 0; }
+  table.data { border-collapse: collapse; font-size: 17px; font-family: Arial, Helvetica, sans-serif; }
+  table.data th, table.data td { border: 1px solid var(--rule); padding: 5px 9px; text-align: right; }
+  table.data th { background: var(--panel); text-align: center; }
+  table.data td.l, table.data th.l { text-align: left; }
+  table.data caption { caption-side: top; text-align: left; font-size: 15px; color: var(--muted); padding-bottom: 6px; }
+  #corners td:nth-child(1) { white-space: nowrap; }
+  .fail { color: #a32020; font-weight: bold; }
+  .ok { color: #1e6b25; }
+  .task { background: var(--task); border: 2px solid var(--task-rule); border-radius: 6px; padding: 12px 16px; margin: 22px 0 0; }
+  .task h3 { margin-top: 2px; }
+  details.solution { background: var(--sol); border: 1px solid #9cc29f; border-radius: 6px; padding: 8px 16px; margin: 8px 0 22px; }
+  details.solution summary { cursor: pointer; font-family: Arial, Helvetica, sans-serif; font-weight: bold; }
+  .method { background: var(--panel); border-left: 5px solid var(--muted); padding: 8px 16px; margin: 16px 0; }
+  .method ol { margin: 6px 0; padding-left: 22px; }
+  .final { border: 2px solid var(--ink); border-radius: 6px; padding: 10px 16px; margin: 20px 0; }
+  .final h3 { margin-top: 4px; }
+  figure { margin: 16px 0; }
+  figure svg { max-width: 680px; width: 100%; height: auto; display: block; background: #fff; border: 1px solid var(--rule); border-radius: 4px; }
+  figcaption { font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: var(--muted); margin-top: 6px; }
+  .src { font-size: 16px; }
+  .src li { margin-bottom: 8px; overflow-wrap: anywhere; }
+  .key { font-family: Arial, Helvetica, sans-serif; font-size: 15px; }
+  .key span { white-space: nowrap; margin-right: 14px; }
+  .sw { display: inline-block; width: 22px; height: 4px; vertical-align: middle; margin-right: 5px; }
+
+  /* interactive graph */
+  #explorer { border: 2px solid var(--rule); border-radius: 6px; padding: 12px; margin: 16px 0; background: var(--panel); }
+  #explorer .controls { font-family: Arial, Helvetica, sans-serif; font-size: 16px; margin-bottom: 10px; }
+  #explorer .row { display: grid; grid-template-columns: 22px auto minmax(0, 1fr) 3.6em; align-items: center; gap: 6px; margin: 4px 0; max-width: 680px; }
+  #explorer .row2 { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: center; margin: 8px 0 4px; }
+  #explorer .row2 label { display: flex; align-items: center; gap: 6px; }
+  #explorer input[type=range] { width: 100%; min-width: 0; margin: 0; }
+  #explorer .ctl { font-weight: bold; white-space: nowrap; }
+  #explorer input[type=number] { width: 80px; font-size: 16px; padding: 3px; }
+  #explorer .val { min-width: 62px; text-align: right; font-variant-numeric: tabular-nums; }
+  #explorer .pointrow { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-family: Arial, Helvetica, sans-serif; font-size: 16px; margin: 8px 0; }
+  #explorer button { font-size: 15px; padding: 4px 10px; }
+  #readout, #cornerlist { font-family: Arial, Helvetica, sans-serif; font-size: 16px; background: #fff; border: 1px solid var(--rule); border-radius: 4px; padding: 8px 10px; }
+  #cornerlist { margin-top: 8px; }
+  #cornerlist[hidden] { display: none; }
+  #readout div { margin: 2px 0; }
+  #explorer svg { touch-action: manipulation; cursor: crosshair; width: 100%; max-width: 680px; height: auto; display: block; margin: 0 auto; background: #fff; border: 1px solid var(--rule); border-radius: 4px; }
+
+  @media (max-width: 600px) {
+    body { font-size: 17px; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 22px; }
+    .eq, .sys { margin-left: 8px; }
+    table.data { font-size: 15px; }
+    table.data th, table.data td { padding: 4px 4px; }
+  }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-03/3-1-inequalities/" style="color:inherit">&larr; 3.1 Inequalities</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-03/3-3-minimizing-cost/" style="color:inherit">3.3 Minimizing cost &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Breakfast on a budget (week 3) · Lecture 2 of 3</p>
+<h1>Systems of inequalities</h1>
+
+<!-- ============================================================ -->
+<h2>1. The breakfast requirements from lecture 3.1</h2>
+
+<p>The breakfast is the one from lecture 3.1: large eggs and 2% milk. Table 1 repeats the values from lecture 3.1. One egg has 50 × 12.6 ÷ 100 = 6.3 g of protein and 71.5 Calories, rounded up to 72 [1]. One cup of 2% milk has 244 × 3.30 ÷ 100 = 8.052 g of protein and 122 Calories [2]. In August 2026 a dozen large eggs cost $2.272 on average in U.S. cities [3], so one egg costs $0.1893, rounded up to $0.19. A gallon of reduced-fat milk cost $3.715 [4, 5], so one cup costs $3.715 ÷ 16 = $0.2322, rounded up to $0.24.</p>
+
+<div class="tablewrap">
+<table class="data">
+<caption>Table 1. The two foods and the three requirements (as in lecture 3.1)</caption>
+<tr><th class="l"></th><th>Protein (g)</th><th>Calories</th><th>Price ($)</th></tr>
+<tr><td class="l">1 large egg, 50 g [1, 3]</td><td>6.3</td><td>72</td><td>0.19</td></tr>
+<tr><td class="l">1 cup of 2% milk, 244 g [2, 4]</td><td>8.052</td><td>122</td><td>0.24</td></tr>
+<tr><td class="l">Requirement for the whole breakfast</td><td>at least 30</td><td>at most 600</td><td>at most 1.25</td></tr>
+</table>
+</div>
+
+<p>The three limits are a choice made for this example. They are not official recommendations. The egg's Calories and both prices are rounded up, so a breakfast that meets the requirements with Table 1 also meets them with the unrounded values. As in lecture 3.1, the prices are national averages, the eggs are counted as cooked without butter or oil, and parts of an egg are allowed, such as 2.5 eggs in a scramble.</p>
+
+<p>Let <span class="m">e</span> be the number of eggs and <span class="m">m</span> the number of cups of milk. A breakfast is a point (<span class="m">e</span>, <span class="m">m</span>); for example, (2, 3) means 2 eggs and 3 cups of milk. Lecture 3.1 wrote the three requirements as inequalities:</p>
+
+<table class="sys">
+<tr><td>6.3<span class="m">e</span> + 8.052<span class="m">m</span> ≥ 30</td><td class="lab">protein, in grams</td></tr>
+<tr><td>72<span class="m">e</span> + 122<span class="m">m</span> ≤ 600</td><td class="lab">Calories</td></tr>
+<tr><td>0.19<span class="m">e</span> + 0.24<span class="m">m</span> ≤ 1.25</td><td class="lab">cost, in dollars</td></tr>
+</table>
+
+<div class="task">
+<h3>Task 1 (about 5 minutes, calculator)</h3>
+<p>For each breakfast, compute its protein, Calories and cost from Table 1. Mark each requirement as met or failed, and say whether the breakfast meets all three. Produce a table with one row per breakfast.</p>
+<ul>
+<li>A: 2 eggs and 2 cups of milk</li>
+<li>B: 2 eggs and 3 cups of milk</li>
+<li>C: 6 eggs and half a cup of milk</li>
+<li>D: 2 eggs and 4 cups of milk</li>
+</ul>
+</div>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<p>For breakfast A: protein 2 × 6.3 + 2 × 8.052 = 12.6 + 16.104 = 28.704 g; Calories 2 × 72 + 2 × 122 = 144 + 244 = 388; cost 2 × 0.19 + 2 × 0.24 = 0.38 + 0.48 = $0.86. The others are computed the same way.</p>
+<div class="tablewrap">
+<table class="data">
+<tr><th class="l">Breakfast</th><th>Protein (g)</th><th>Calories</th><th>Cost ($)</th><th>All three?</th></tr>
+<tr><td class="l">A (2, 2)</td><td class="fail">28.704 fails</td><td>388</td><td>0.86</td><td>No</td></tr>
+<tr><td class="l">B (2, 3)</td><td>36.756</td><td>510</td><td>1.10</td><td class="ok">Yes</td></tr>
+<tr><td class="l">C (6, 0.5)</td><td>41.826</td><td>493</td><td class="fail">1.26 fails</td><td>No</td></tr>
+<tr><td class="l">D (2, 4)</td><td>44.808</td><td class="fail">632 fails</td><td class="fail">1.34 fails</td><td>No</td></tr>
+</table>
+</div>
+<p>Only breakfast B meets all three requirements. One failure is enough to rule a breakfast out: C has plenty of protein and is well under 600 Calories, and it is still 1 cent over budget. A, B and D all have 2 eggs. Lecture 3.1 found that with 2 eggs the milk must be between 2.17 and 3.625 cups, and the three verdicts agree: 2 cups is too little, 3 cups is in the range, 4 cups is too much.</p>
+</details>
+
+<p>Each check settles the question for one breakfast. There are infinitely many breakfasts, such as 4.5 eggs with 1.25 cups of milk, and checking them one at a time never ends. A graph can show every acceptable breakfast at once.</p>
+
+<!-- ============================================================ -->
+<h2>2. Systems of inequalities and non-negative amounts</h2>
+
+<p>The three inequalities accept some breakfasts that cannot exist. For example, (8, −2) passes all three checks: protein 50.4 − 16.104 = 34.296 g, Calories 576 − 244 = 332, cost 1.52 − 0.48 = $1.04. Nobody can drink −2 cups of milk. Two more inequalities rule this out:</p>
+<table class="sys">
+<tr><td><span class="m">e</span> ≥ 0, &nbsp; <span class="m">m</span> ≥ 0</td><td class="lab">no negative amounts</td></tr>
+</table>
+<p>These are called <b>non-negativity conditions</b>.</p>
+
+<p>A <b>system of inequalities</b> is a list of inequalities that must all be true at the same time. A <b>solution</b> of the system is a pair (<span class="m">e</span>, <span class="m">m</span>) that makes every one of them true. The breakfast system is:</p>
+
+<table class="sys">
+<tr><td>6.3<span class="m">e</span> + 8.052<span class="m">m</span> ≥ 30</td><td class="lab">protein</td></tr>
+<tr><td>72<span class="m">e</span> + 122<span class="m">m</span> ≤ 600</td><td class="lab">Calories</td></tr>
+<tr><td>0.19<span class="m">e</span> + 0.24<span class="m">m</span> ≤ 1.25</td><td class="lab">cost</td></tr>
+<tr><td><span class="m">e</span> ≥ 0, &nbsp; <span class="m">m</span> ≥ 0</td><td class="lab">no negative amounts</td></tr>
+</table>
+
+<p>From Task 1, (2, 3) is a solution of this system. (6, 0.5) is not, because it fails the cost inequality.</p>
+
+<!-- ============================================================ -->
+<h2>3. Graphing the system: the feasible region</h2>
+
+<p>In lecture 3.1 the solutions of one inequality in <span class="m">e</span> and <span class="m">m</span> filled a half-plane: a boundary line and all the points on one side of it. With eggs across and cups of milk up, two of the half-planes are already known from lecture 3.1:</p>
+<ul>
+<li>protein: the line 6.3<span class="m">e</span> + 8.052<span class="m">m</span> = 30, through (4.76, 0) and (0, 3.73), and the side above it, away from (0, 0). In slope-intercept form the line is <span class="m">m</span> = −0.782<span class="m">e</span> + 3.73.</li>
+<li>cost: the line 0.19<span class="m">e</span> + 0.24<span class="m">m</span> = 1.25, through (6.58, 0) and (0, 5.21), and the side below it, the side with (0, 0).</li>
+</ul>
+
+<div class="method">
+<p><b>Graphing one inequality (from lecture 3.1)</b></p>
+<ol>
+<li>Replace the inequality symbol by = to get the <b>boundary line</b>. Draw it through its two intercepts. Draw it solid for ≥ or ≤.</li>
+<li>Pick a <b>test point</b> that is not on the line. (0, 0) is easiest when the line misses it. Put it into the inequality.</li>
+<li>If the result is true, shade the side with the test point. If it is false, shade the other side.</li>
+</ol>
+<p>The non-negativity conditions need no test point. The boundary of <span class="m">e</span> ≥ 0 is the line <span class="m">e</span> = 0, the vertical axis, and <span class="m">e</span> ≥ 0 keeps the side to its right. The boundary of <span class="m">m</span> ≥ 0 is the horizontal axis, and <span class="m">m</span> ≥ 0 keeps the side above it.</p>
+</div>
+
+<p>The <b>feasible region</b> of a system is the set of all its solutions: the points that satisfy every inequality at once. On a graph it is the overlap of all the half-planes. Here each point in the feasible region is a breakfast that meets every requirement. "Feasible" means "possible": these are the breakfasts you are allowed to choose.</p>
+
+<div class="task">
+<h3>Task 2 (about 5 minutes, calculator and paper)</h3>
+<p>Work with the Calorie inequality 72<span class="m">e</span> + 122<span class="m">m</span> ≤ 600.</p>
+<ol>
+<li>Find both intercepts of its boundary line, to two decimals.</li>
+<li>Write the boundary line in slope-intercept form, <span class="m">m</span> = (slope)<span class="m">e</span> + (intercept), as lecture 3.1 did for protein.</li>
+<li>Test (0, 0) and say which side of the line to keep.</li>
+<li>On one set of axes, with eggs from 0 to 9 across and cups of milk from 0 to 6 up, draw all three boundary lines. Shade the region that is on the correct side of all three and has <span class="m">e</span> ≥ 0 and <span class="m">m</span> ≥ 0.</li>
+</ol>
+<p>Produce the two intercepts, the equation, the side to keep, and your sketch.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<ol>
+<li>No milk: 72<span class="m">e</span> = 600, so <span class="m">e</span> = 600 ÷ 72 = 8.33; the point (8.33, 0). No eggs: 122<span class="m">m</span> = 600, so <span class="m">m</span> = 600 ÷ 122 = 4.92; the point (0, 4.92).</li>
+<li>Subtract 72<span class="m">e</span> from both sides: 122<span class="m">m</span> = −72<span class="m">e</span> + 600. Divide by 122: <span class="m">m</span> = −0.590<span class="m">e</span> + 4.92. With Calories fixed at 600, each extra egg replaces 0.590 cups of milk.</li>
+<li>72 × 0 + 122 × 0 = 0, and 0 ≤ 600 is true. Keep the side with (0, 0), below the line.</li>
+<li>Compare your sketch with Figure 1 below.</li>
+</ol>
+</details>
+
+<p>An acceptable breakfast is on or above the protein line, on or below the Calorie line and on or below the cost line, with neither amount negative. The feasible region is the band between the protein line and the Calorie line, cut off on the right by the cost line.</p>
+
+<figure>
+<svg id="fig1" viewBox="0 0 600 430" role="img" aria-label="Graph of the three boundary lines for eggs from 0 to 9 and cups of milk from 0 to 6, with the feasible region shaded. The region lies above the protein line, below the Calorie line and below the cost line, in the first quadrant. Breakfast B at (2, 3) is inside it; A at (2, 2) is below the protein line; D at (2, 4) is above the Calorie and cost lines; C at (6, 0.5) is just above the cost line."></svg>
+<figcaption>Figure 1. The feasible region (shaded) for at least 30 g of protein, at most 600 Calories and at most $1.25, with the four breakfasts from Task 1. Across: eggs <span class="m">e</span>. Up: cups of milk <span class="m">m</span>.</figcaption>
+</figure>
+<p class="key"><span><span class="sw" style="background:var(--protein)"></span>protein = 30 g</span><span><span class="sw" style="background:var(--cal)"></span>Calories = 600</span><span><span class="sw" style="background:var(--budget)"></span>cost = $1.25</span></p>
+
+<p>B at (2, 3) is inside the region. A at (2, 2) is below the protein line. D at (2, 4) is above both the Calorie line and the cost line. C at (6, 0.5) is just above the cost line, 1 cent over budget. The points with 2 eggs, from 2.17 up to 3.625 cups, are the part of the vertical line <span class="m">e</span> = 2 inside the region, the interval found in lecture 3.1.</p>
+
+<p>The system contains only these three requirements and non-negativity, so its region includes breakfasts that few people would eat, such as almost 5 cups of milk with no eggs, or six and a half eggs with no milk. A person can add a requirement of their own, such as at most 2 cups of milk (<span class="m">m</span> ≤ 2). Each new inequality adds one boundary line and can cut off part of the region. This lecture and lecture 3.3 keep the three requirements of Table 1.</p>
+
+<!-- ============================================================ -->
+<h2>4. Testing breakfasts on the interactive graph</h2>
+
+<p>Use the checkboxes to switch each requirement on or off, and the sliders to change its number. The color of each requirement matches its boundary line. Type an amount of eggs and milk, or tap the graph, to place a breakfast; the panel under the graph shows each check for that breakfast. Leave "Show corner points" off until Task 4 is done.</p>
+
+<div id="explorer">
+  <div class="controls">
+    <div class="row"><input type="checkbox" id="onP" checked aria-label="Protein requirement on"><label for="pmin" class="ctl" style="color:var(--protein)">Protein at least</label><input type="range" id="pmin" min="0" max="60" step="1" value="30"><span class="val" id="pminV">30 g</span></div>
+    <div class="row"><input type="checkbox" id="onK" checked aria-label="Calorie requirement on"><label for="kmax" class="ctl" style="color:var(--cal)">Calories at most</label><input type="range" id="kmax" min="200" max="1000" step="10" value="600"><span class="val" id="kmaxV">600</span></div>
+    <div class="row"><input type="checkbox" id="onC" checked aria-label="Cost requirement on"><label for="bud" class="ctl" style="color:var(--budget)">Cost at most</label><input type="range" id="bud" min="0.5" max="3" step="0.05" value="1.25"><span class="val" id="budV">$1.25</span></div>
+    <div class="row2">
+      <label><input type="checkbox" id="onN" checked> No negative amounts (<i>e</i> ≥ 0, <i>m</i> ≥ 0)</label>
+      <label><input type="checkbox" id="showC"> Show corner points</label>
+      <button type="button" id="reset">Reset to 30 g, 600, $1.25</button>
+    </div>
+  </div>
+  <svg id="live" viewBox="0 0 600 430" role="img" aria-label="Interactive graph of the breakfast system. The shaded area is the feasible region for the current settings. The dot is the breakfast entered below."></svg>
+  <div id="cornerlist" hidden></div>
+  <div class="pointrow">
+    <label>Eggs <span class="m">e</span> <input type="number" id="px" step="0.1" value="2"></label>
+    <label>Cups of milk <span class="m">m</span> <input type="number" id="py" step="0.1" value="3"></label>
+  </div>
+  <div id="readout" aria-live="polite"></div>
+</div>
+
+<div class="task">
+<h3>Task 3 (about 5 minutes, interactive graph)</h3>
+<ol>
+<li>Enter the breakfasts (4, 0.5), (0.5, 4.8) and (5.5, 1) one at a time. For each, write down which requirements it fails.</li>
+<li>Switch the cost requirement off. Describe which breakfasts join the feasible region, then switch it back on. Do the same with the Calorie requirement.</li>
+<li>From the graph, read the largest amount of milk in any feasible breakfast and the largest number of eggs, each to the nearest half. Say which requirement sets each limit, then compute each limit from that requirement.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<ol>
+<li>(4, 0.5): 29.226 g of protein, 349 Calories, $0.88. It fails the protein requirement and lies just below the protein line.<br>
+(0.5, 4.8): 41.8 g of protein, 621.6 Calories, $1.247. It fails the Calorie requirement.<br>
+(5.5, 1): 42.702 g of protein, 518 Calories, $1.285. It fails the cost requirement.</li>
+<li>With the cost requirement off, a long thin triangle joins the region on the right, between the cost line and the Calorie line. It meets the egg axis between 6.58 and 8.33 eggs. These breakfasts are under 600 Calories and cost more than $1.25.<br>
+With the Calorie requirement off, a small triangle joins at the top left, between the Calorie line and the cost line. It meets the milk axis between 4.92 and 5.21 cups. These breakfasts cost at most $1.25 and have more than 600 Calories.</li>
+<li>Most milk: about 5 cups, at the top of the region on the milk axis, with no eggs. The Calorie requirement sets it: 600 ÷ 122 = 4.92 cups. This breakfast has 8.052 × 4.92 = 39.6 g of protein and costs 0.24 × 4.92 = $1.18.<br>
+Most eggs: about 6.5, at the right end of the region on the egg axis, with no milk. The cost requirement sets it: 1.25 ÷ 0.19 = 6.58 eggs. This breakfast has 6.3 × 6.579 = 41.4 g of protein and 72 × 6.579 = 473.7 Calories.</li>
+</ol>
+</details>
+
+<!-- ============================================================ -->
+<h2>5. Corner points of the feasible region</h2>
+
+<p>A <b>corner point</b> of the feasible region is a point on its edge where two boundary lines meet. The region in Figure 1 has five corners, and its edges are the straight segments joining them in order. Lecture 3.3 uses the corners to compare breakfasts.</p>
+
+<p>Four corners are on the axes, so they are intercepts already found: (4.76, 0) on the protein line and (6.58, 0) on the cost line, along the egg axis; (0, 4.92) on the Calorie line and (0, 3.73) on the protein line, along the milk axis. The fifth corner is where the Calorie line meets the cost line, on neither axis. Finding it means solving two equations in two unknowns, as in week 2.</p>
+
+<div class="method">
+<p><b>Finding the corner points of a feasible region</b></p>
+<ol>
+<li>Draw the region and see which two boundary lines meet at each corner.</li>
+<li>A corner on an axis is an intercept. For a corner off the axes, solve the equations of its two lines together.</li>
+<li>Check each point against every inequality in the system.</li>
+</ol>
+</div>
+
+<div class="task">
+<h3>Task 4 (about 6 minutes, calculator)</h3>
+<p>Find the point where the Calorie line 72<span class="m">e</span> + 122<span class="m">m</span> = 600 meets the cost line 0.19<span class="m">e</span> + 0.24<span class="m">m</span> = 1.25.</p>
+<ol>
+<li>Multiply the cost equation by 100, so it is in cents: 19<span class="m">e</span> + 24<span class="m">m</span> = 125. Solve it for <span class="m">e</span>, then substitute into the Calorie equation and solve for <span class="m">m</span>. Keep four decimals until the end.</li>
+<li>Check that the point meets the protein requirement and has <span class="m">e</span> ≥ 0 and <span class="m">m</span> ≥ 0.</li>
+</ol>
+<p>Produce the point to two decimals and one sentence saying what breakfast it is.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<p>From 19<span class="m">e</span> + 24<span class="m">m</span> = 125: 19<span class="m">e</span> = 125 − 24<span class="m">m</span>, so <span class="m">e</span> = (125 − 24<span class="m">m</span>) ÷ 19.</p>
+<p>Substitute into the Calorie equation:</p>
+<span class="eq">72 × (125 − 24<span class="m">m</span>) ÷ 19 + 122<span class="m">m</span> = 600.</span>
+<p>Multiply both sides by 19 to clear the division. On the left, 122<span class="m">m</span> × 19 = 2318<span class="m">m</span>; on the right, 600 × 19 = 11400.</p>
+<span class="eq">72 × (125 − 24<span class="m">m</span>) + 2318<span class="m">m</span> = 11400</span>
+<span class="eq">9000 − 1728<span class="m">m</span> + 2318<span class="m">m</span> = 11400</span>
+<span class="eq">590<span class="m">m</span> = 2400</span>
+<span class="eq"><span class="m">m</span> = 2400 ÷ 590 = 4.0678</span>
+<p>Then <span class="m">e</span> = (125 − 24 × 4.0678) ÷ 19 = (125 − 97.6272) ÷ 19 = 27.3728 ÷ 19 = 1.4407. The lines meet at (1.44, 4.07).</p>
+<p>Check: protein 6.3 × 1.4407 + 8.052 × 4.0678 = 9.08 + 32.75 = 41.83 g, which is at least 30. Both amounts are positive. So (1.44, 4.07) is a corner. It is a breakfast of about one and a half eggs and just over 4 cups of milk that uses exactly 600 Calories and exactly $1.25.</p>
+</details>
+
+<figure>
+<svg id="fig2" viewBox="0 0 600 430" role="img" aria-label="The feasible region with its five corners numbered: 1 at (4.76, 0), 2 at (6.58, 0), 3 at (1.44, 4.07), 4 at (0, 4.92), 5 at (0, 3.73)."></svg>
+<figcaption>Figure 2. The five corners of the feasible region, numbered in order around it. Their coordinates are in Table 2.</figcaption>
+</figure>
+<p class="key"><span><span class="sw" style="background:var(--protein)"></span>protein = 30 g</span><span><span class="sw" style="background:var(--cal)"></span>Calories = 600</span><span><span class="sw" style="background:var(--budget)"></span>cost = $1.25</span></p>
+
+<div class="tablewrap">
+<table class="data" id="corners">
+<caption>Table 2. The corners of the feasible region, with each breakfast's protein, Calories and cost</caption>
+<tr><th class="l">Corner</th><th class="l">Lines</th><th>Protein (g)</th><th>Calories</th><th>Cost ($)</th></tr>
+<tr><td class="l">1: (4.76, 0)</td><td class="l">protein, egg axis</td><td>30.0</td><td>342.9</td><td>0.90</td></tr>
+<tr><td class="l">2: (6.58, 0)</td><td class="l">cost, egg axis</td><td>41.4</td><td>473.7</td><td>1.25</td></tr>
+<tr><td class="l">3: (1.44, 4.07)</td><td class="l">Calories, cost</td><td>41.8</td><td>600.0</td><td>1.25</td></tr>
+<tr><td class="l">4: (0, 4.92)</td><td class="l">Calories, milk axis</td><td>39.6</td><td>600.0</td><td>1.18</td></tr>
+<tr><td class="l">5: (0, 3.73)</td><td class="l">protein, milk axis</td><td>30.0</td><td>454.5</td><td>0.89</td></tr>
+</table>
+</div>
+
+<p>The protein, Calories and cost in Table 2 are computed at the exact corners. The coordinates are rounded to two decimals, so a rounded corner can land just outside the region. Typed into the interactive graph, (4.76, 0) gives 29.988 g of protein and fails. Rounding in the safe direction from lecture 3.1 gives a breakfast just inside instead, such as (4.77, 0).</p>
+
+<h3>Crossings that are not corners</h3>
+<p>Five lines (protein, Calories, cost and the two axes) give 10 pairs, and only the five pairs in Table 2 meet at corners. The picture shows which pairs to solve, so the other five need no algebra. Two of them are worth a look.</p>
+<p>The Calorie line meets the egg axis at (8.33, 0). That breakfast costs 0.19 × 8.33 = $1.58, so it breaks the cost inequality and is not a corner.</p>
+<p>The protein line and the cost line have slopes −0.782 and −0.792, almost the same. In week 2, parallel lines never cross. These two are nearly parallel, so they cross very far away, at about (160, −122), a breakfast with negative milk. They are nearly parallel because an egg and a cup of milk give almost the same protein per dollar: 6.3 ÷ 0.19 = 33.2 g per dollar for eggs and 8.052 ÷ 0.24 = 33.6 g per dollar for milk.</p>
+
+<div class="final">
+<h3>The breakfast system and its feasible region</h3>
+<p>Variables: <span class="m">e</span> = number of large eggs, <span class="m">m</span> = cups of 2% milk, with the values in Table 1.</p>
+<table class="sys">
+<tr><td>6.3<span class="m">e</span> + 8.052<span class="m">m</span> ≥ 30</td><td class="lab">protein</td></tr>
+<tr><td>72<span class="m">e</span> + 122<span class="m">m</span> ≤ 600</td><td class="lab">Calories</td></tr>
+<tr><td>0.19<span class="m">e</span> + 0.24<span class="m">m</span> ≤ 1.25</td><td class="lab">cost</td></tr>
+<tr><td><span class="m">e</span> ≥ 0, &nbsp; <span class="m">m</span> ≥ 0</td><td class="lab">no negative amounts</td></tr>
+</table>
+<p>Corners, in order around the region: (4.76, 0), (6.58, 0), (1.44, 4.07), (0, 4.92), (0, 3.73). As exact fractions: (100/21, 0), (125/19, 0), (85/59, 240/59), (0, 300/61), (0, 2500/671).</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>6. Empty feasible regions</h2>
+
+<p>Suppose the Calorie limit drops from 600 to 300, a stricter limit made up for this example. The protein and cost requirements stay the same.</p>
+
+<div class="task">
+<h3>Task 5 (about 4 minutes, calculator and interactive graph)</h3>
+<p>Use the requirements at least 30 g of protein, at most 300 Calories and at most $1.25.</p>
+<ol>
+<li>Find both intercepts of the new boundary line 72<span class="m">e</span> + 122<span class="m">m</span> = 300, to two decimals.</li>
+<li>Compare them with the intercepts of the protein line, (4.76, 0) and (0, 3.73). Decide whether any breakfast with <span class="m">e</span> ≥ 0 and <span class="m">m</span> ≥ 0 is both on or above the protein line and on or below the new Calorie line.</li>
+<li>Check your answer by moving the Calorie slider in the interactive graph to 300.</li>
+</ol>
+<p>Produce the two intercepts and a yes or no answer with one sentence of reason.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<ol>
+<li>No milk: 300 ÷ 72 = 4.17, so (4.17, 0). No eggs: 300 ÷ 122 = 2.46, so (0, 2.46).</li>
+<li>No. On both axes the new Calorie line is closer to the origin than the protein line (4.17 &lt; 4.76 and 2.46 &lt; 3.73). Both are straight lines, so between the axes the whole Calorie line lies below the protein line. A breakfast on or below the Calorie line is then below the protein line, so it has less than 30 g of protein.</li>
+<li>With the slider at 300, nothing is shaded, and the panel says the feasible region is empty (Figure 3).</li>
+</ol>
+<figure>
+<svg id="fig3" viewBox="0 0 600 430" role="img" aria-label="The protein line from (0, 3.73) to (4.76, 0) and the 300-Calorie line from (0, 2.46) to (4.17, 0). The Calorie line lies below the protein line everywhere between the axes, and nothing is shaded."></svg>
+<figcaption>Figure 3. At most 300 Calories: the Calorie line (orange) lies below the protein line (blue) between the axes, so no point is on the correct side of both. Nothing is shaded.</figcaption>
+</figure>
+<p class="key"><span><span class="sw" style="background:var(--protein)"></span>protein = 30 g</span><span><span class="sw" style="background:var(--cal)"></span>Calories = 300</span><span><span class="sw" style="background:var(--budget)"></span>cost = $1.25</span></p>
+</details>
+
+<p>When the requirements conflict, the system has no solutions. Its feasible region is <b>empty</b>: no point is on the correct side of every boundary line at once.</p>
+
+<p>Protein per Calorie explains the conflict. An egg gives 6.3 ÷ 72 = 0.0875 g of protein per Calorie, and a cup of milk gives 8.052 ÷ 122 = 0.066 g per Calorie. Eggs give more protein per Calorie, so the most protein that 300 Calories can buy comes from eggs alone: 300 ÷ 72 = 4.17 eggs, which give 6.3 × 300 ÷ 72 = 26.25 g. That is less than 30 g, and any mix with milk gives even less.</p>
+
+<p>An empty feasible region means at least one requirement has to change. With these two foods, 30 g of protein takes at least 30 ÷ 6.3 = 4.76 eggs, which have 4.762 × 72 = 342.9 Calories. Any Calorie limit below 342.9 leaves no acceptable breakfast. On the interactive graph, set the Calorie slider to 350 and switch on "Show corner points": a small triangle remains next to (4.76, 0), with corners (4.76, 0), (4.86, 0) and (4.46, 0.24). At 340 the panel reports an empty region.</p>
+
+<p>The budget can conflict with protein in the same way. The cheapest 30 g of protein is milk alone: 3.726 cups × $0.24 = $0.894 (eggs alone cost 4.762 × $0.19 = $0.905). A budget below $0.894 leaves no acceptable breakfast; with the Calorie limit back at 600, try the cost slider at $0.85.</p>
+
+<!-- ============================================================ -->
+<h2>Sources</h2>
+<ol class="src">
+<li>U.S. Department of Agriculture, FoodData Central, "Egg, whole, raw, fresh," FDC ID 171287, SR Legacy, published April 1, 2019. Per 100 g: protein 12.6 g, energy 143 kcal; one large egg is 50 g. https://fdc.nal.usda.gov/food-details/171287/nutrients, accessed October 4, 2026.</li>
+<li>U.S. Department of Agriculture, FoodData Central, "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D," FDC ID 171267, SR Legacy, published April 1, 2019. Per 100 g: protein 3.30 g, energy 50 kcal; one cup is 244 g. https://fdc.nal.usda.gov/food-details/171267/nutrients, accessed October 4, 2026.</li>
+<li>U.S. Bureau of Labor Statistics, Average Price Data, series APU0000708111, "Average Price: Eggs, Grade A, Large (Cost per Dozen) in U.S. City Average," via FRED, Federal Reserve Bank of St. Louis, updated September 11, 2026. August 2026: $2.272. https://fred.stlouisfed.org/series/APU0000708111, accessed October 4, 2026.</li>
+<li>U.S. Bureau of Labor Statistics, Average Price Data, series APU0000FJ1101, "Average Price: Milk, Fresh, Low-Fat, Reduced Fat, Skim (Cost per Gallon/3.8 Liters) in U.S. City Average," via FRED, Federal Reserve Bank of St. Louis, updated September 11, 2026. August 2026: $3.715. https://fred.stlouisfed.org/series/APU0000FJ1101, accessed October 4, 2026.</li>
+<li>U.S. Bureau of Labor Statistics, Average Price Data item list (ap.item). Item FJ1101 is "Milk, fresh, low-fat, reduced fat, skim, per gal. (3.8 lit)"; no item covers 2% milk alone, so this average stands in for 2% milk, as in lecture 3.1. https://download.bls.gov/pub/time.series/ap/ap.item, accessed October 4, 2026.</li>
+</ol>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var COL = { protein: "#1f5fbf", cal: "#c2561a", budget: "#2e7d32", region: "#7d8fb3", axis: "#1d232b", grid: "#e3e7ec", point: "#8a1c7c" };
+  var FOOD = { p: [6.3, 8.052], k: [72, 122], c: [0.19, 0.24] };
+
+  // A constraint is a*e + b*m <= r. A ">=" constraint is stored with signs flipped.
+  function constraintsFor(s) {
+    var list = [];
+    if (s.onP) list.push({ key: "protein", a: -FOOD.p[0], b: -FOOD.p[1], r: -s.pmin, line: [FOOD.p[0], FOOD.p[1], s.pmin], color: COL.protein, label: "protein = " + s.pmin + " g", lt: s.lt && s.lt.protein });
+    if (s.onK) list.push({ key: "cal", a: FOOD.k[0], b: FOOD.k[1], r: s.kmax, line: [FOOD.k[0], FOOD.k[1], s.kmax], color: COL.cal, label: "Calories = " + s.kmax, lt: s.lt && s.lt.cal });
+    if (s.onC) list.push({ key: "budget", a: FOOD.c[0], b: FOOD.c[1], r: s.bud, line: [FOOD.c[0], FOOD.c[1], s.bud], color: COL.budget, label: "cost = $" + s.bud.toFixed(2), lt: s.lt && s.lt.budget });
+    if (s.onN) {
+      list.push({ key: "nx", a: -1, b: 0, r: 0, axis: true });
+      list.push({ key: "ny", a: 0, b: -1, r: 0, axis: true });
+    }
+    return list;
+  }
+
+  function clip(poly, c) {
+    var out = [], n = poly.length, eps = 1e-12;
+    for (var i = 0; i < n; i++) {
+      var P = poly[i], Q = poly[(i + 1) % n];
+      var fp = c.a * P[0] + c.b * P[1] - c.r, fq = c.a * Q[0] + c.b * Q[1] - c.r;
+      var pin = fp <= eps, qin = fq <= eps;
+      if (pin) out.push(P);
+      if (pin !== qin) {
+        var t = fp / (fp - fq);
+        out.push([P[0] + t * (Q[0] - P[0]), P[1] + t * (Q[1] - P[1])]);
+      }
+    }
+    return out;
+  }
+
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  function fmt(v) { var s = (Math.round(v * 100) / 100).toFixed(2); return s === "-0.00" ? "0.00" : s; }
+  function short(v) { var s = fmt(v); return s.replace(/\.00$/, "").replace(/(\.\d)0$/, "$1").replace(/-/g, "−"); }
+
+  // Segment of line A e + B m = R inside the box
+  function segment(A, B, R, d) {
+    var pts = [];
+    function add(x, y) {
+      if (x >= d.x0 - 1e-9 && x <= d.x1 + 1e-9 && y >= d.y0 - 1e-9 && y <= d.y1 + 1e-9) {
+        for (var i = 0; i < pts.length; i++) if (Math.abs(pts[i][0] - x) < 1e-9 && Math.abs(pts[i][1] - y) < 1e-9) return;
+        pts.push([x, y]);
+      }
+    }
+    if (B !== 0) { add(d.x0, (R - A * d.x0) / B); add(d.x1, (R - A * d.x1) / B); }
+    if (A !== 0) { add((R - B * d.y0) / A, d.y0); add((R - B * d.y1) / A, d.y1); }
+    if (pts.length < 2) return null;
+    pts.sort(function (p, q) { return p[0] - q[0] || q[1] - p[1]; });
+    return [pts[0], pts[pts.length - 1]];
+  }
+
+  // Corners of the region polygon, numbered in order: start at the lowest (then leftmost) one, go counterclockwise.
+  function cornersOf(poly, s) {
+    var d = s.dom, eps = 1e-6, list = [];
+    poly.forEach(function (p) {
+      // a vertex on the drawing box is a corner only if that box edge is an axis kept by e >= 0 or m >= 0
+      var onBox = (Math.abs(p[0] - d.x0) < eps && !(s.onN && d.x0 === 0)) || Math.abs(p[0] - d.x1) < eps ||
+                  (Math.abs(p[1] - d.y0) < eps && !(s.onN && d.y0 === 0)) || Math.abs(p[1] - d.y1) < eps;
+      if (!onBox) {
+        for (var i = 0; i < list.length; i++) if (Math.abs(list[i][0] - p[0]) < 1e-7 && Math.abs(list[i][1] - p[1]) < 1e-7) return;
+        list.push(p);
+      }
+    });
+    if (!list.length) return list;
+    var cx = 0, cy = 0;
+    poly.forEach(function (p) { cx += p[0]; cy += p[1]; }); cx /= poly.length; cy /= poly.length;
+    list.forEach(function (p) { p.ang = Math.atan2(p[1] - cy, p[0] - cx); });
+    list.sort(function (p, q) { return p.ang - q.ang; });
+    var k = 0;
+    for (var i = 1; i < list.length; i++) if (list[i][1] < list[k][1] - 1e-9 || (Math.abs(list[i][1] - list[k][1]) < 1e-9 && list[i][0] < list[k][0])) k = i;
+    var out = list.slice(k).concat(list.slice(0, k));
+    out.cx = cx; out.cy = cy;
+    return out;
+  }
+
+  // Draw a graph. s: settings; svg: target element.
+  function draw(svg, s) {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    // On a narrow screen use a smaller drawing box, so text and points come out larger.
+    var w = svg.getBoundingClientRect().width;
+    var narrow = w > 0 && w < 480;
+    var W = narrow ? 340 : 600, H = narrow ? 300 : 430, L = narrow ? 48 : 56, R = 14, T = 16, B = 54;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var d = s.dom;
+    function X(x) { return L + (x - d.x0) / (d.x1 - d.x0) * (W - L - R); }
+    function Y(y) { return H - B - (y - d.y0) / (d.y1 - d.y0) * (H - T - B); }
+    s._X = X; s._Y = Y; s._box = { L: L, R: W - R, T: T, B: H - B };
+
+    var gx, gy;
+    for (gx = Math.ceil(d.x0); gx <= d.x1; gx++) {
+      el("line", { x1: X(gx), y1: Y(d.y0), x2: X(gx), y2: Y(d.y1), stroke: COL.grid, "stroke-width": 1 }, svg);
+      var tx = el("text", { x: X(gx), y: H - B + 20, "text-anchor": "middle", "font-size": 15, "font-family": "Arial, sans-serif", fill: "#55606d" }, svg);
+      tx.textContent = String(gx).replace("-", "−");
+    }
+    for (gy = Math.ceil(d.y0); gy <= d.y1; gy++) {
+      el("line", { x1: X(d.x0), y1: Y(gy), x2: X(d.x1), y2: Y(gy), stroke: COL.grid, "stroke-width": 1 }, svg);
+      var ty = el("text", { x: L - 8, y: Y(gy) + 5, "text-anchor": "end", "font-size": 15, "font-family": "Arial, sans-serif", fill: "#55606d" }, svg);
+      ty.textContent = String(gy).replace("-", "−");
+    }
+    if (d.y0 <= 0 && d.y1 >= 0) el("line", { x1: X(d.x0), y1: Y(0), x2: X(d.x1), y2: Y(0), stroke: COL.axis, "stroke-width": 1.6 }, svg);
+    if (d.x0 <= 0 && d.x1 >= 0) el("line", { x1: X(0), y1: Y(d.y0), x2: X(0), y2: Y(d.y1), stroke: COL.axis, "stroke-width": 1.6 }, svg);
+    var xl = el("text", { x: (L + W - R) / 2, y: H - 10, "text-anchor": "middle", "font-size": 16, "font-family": "Arial, sans-serif", fill: COL.axis }, svg);
+    xl.textContent = "eggs, e";
+    var yl = el("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 16, "font-family": "Arial, sans-serif", fill: COL.axis, transform: "rotate(-90 14 " + ((T + H - B) / 2) + ")" }, svg);
+    yl.textContent = "cups of milk, m";
+
+    var cons = constraintsFor(s);
+    var poly = [[d.x0, d.y0], [d.x1, d.y0], [d.x1, d.y1], [d.x0, d.y1]];
+    for (var i = 0; i < cons.length && poly.length; i++) poly = clip(poly, cons[i]);
+    var area = 0;
+    for (i = 0; i < poly.length; i++) { var p1 = poly[i], p2 = poly[(i + 1) % poly.length]; area += p1[0] * p2[1] - p2[0] * p1[1]; }
+    var empty = poly.length < 3 || Math.abs(area) < 1e-9;
+    if (!empty) {
+      el("polygon", { points: poly.map(function (p) { return X(p[0]) + "," + Y(p[1]); }).join(" "), fill: COL.region, "fill-opacity": 0.45, stroke: "none" }, svg);
+    }
+    s._empty = empty;
+
+    cons.forEach(function (c) {
+      if (c.axis) return;
+      var seg = segment(c.line[0], c.line[1], c.line[2], d);
+      if (!seg) return;
+      el("line", { x1: X(seg[0][0]), y1: Y(seg[0][1]), x2: X(seg[1][0]), y2: Y(seg[1][1]), stroke: c.color, "stroke-width": 3 }, svg);
+      if (s.labels && c.lt && !narrow) {
+        var lx = c.lt[0], ly = (c.line[2] - c.line[0] * lx) / c.line[1];
+        var sx = X(lx), sy = Y(ly);
+        var ang = Math.atan2(Y(ly - c.line[0] / c.line[1]) - sy, X(lx + 1) - sx) * 180 / Math.PI;
+        var dy = c.lt[1] === "below" ? 17 : -7;
+        var tl = el("text", { x: sx, y: sy + dy, transform: "rotate(" + ang.toFixed(2) + " " + sx.toFixed(2) + " " + sy.toFixed(2) + ")", "font-size": narrow ? 14 : 15, "font-family": "Arial, sans-serif", "font-weight": "bold", fill: c.color, stroke: "#fff", "stroke-width": 4, "paint-order": "stroke" }, svg);
+        tl.textContent = c.label;
+      }
+    });
+
+    // corners: numbered dots, the number placed away from the middle of the region
+    s._corners = [];
+    if (s.showCorners && !empty) {
+      var cs = cornersOf(poly, s);
+      s._corners = cs;
+      cs.forEach(function (p, j) {
+        el("circle", { cx: X(p[0]), cy: Y(p[1]), r: 5, fill: COL.axis }, svg);
+        var vx = X(p[0]) - X(cs.cx), vy = Y(p[1]) - Y(cs.cy), len = Math.sqrt(vx * vx + vy * vy) || 1;
+        var off = (s.cornerOff && s.cornerOff[j]) || [vx / len * 15, vy / len * 15];
+        var ct = el("text", { x: X(p[0]) + off[0], y: Y(p[1]) + off[1] + 5, "text-anchor": "middle", "font-size": 16, "font-weight": "bold", "font-family": "Arial, sans-serif", fill: COL.axis, stroke: "#fff", "stroke-width": 4, "paint-order": "stroke" }, svg);
+        ct.textContent = String(j + 1);
+      });
+    }
+
+    (s.marks || []).forEach(function (m) {
+      el("circle", { cx: X(m.x), cy: Y(m.y), r: 6, fill: m.fill || COL.point, stroke: "#fff", "stroke-width": 1.5 }, svg);
+      var mt = el("text", { x: X(m.x) + (m.dx || 9), y: Y(m.y) + (m.dy || -9), "text-anchor": m.anchor || "start", "font-size": 15, "font-family": "Arial, sans-serif", "font-weight": "bold", fill: m.fill || COL.point, stroke: "#fff", "stroke-width": 4, "paint-order": "stroke" }, svg);
+      mt.textContent = m.text;
+    });
+
+    if (empty && s.sayEmpty) {
+      var et = el("text", { x: X(d.x1) - 8, y: Y(d.y1) + 22, "text-anchor": "end", "font-size": narrow ? 14 : 16, "font-family": "Arial, sans-serif", "font-weight": "bold", fill: "#a32020", stroke: "#fff", "stroke-width": 4, "paint-order": "stroke" }, svg);
+      et.textContent = "No breakfast meets every requirement";
+    }
+    return s;
+  }
+
+  var DOM = { x0: 0, x1: 9, y0: 0, y1: 6 };
+  var base = { onP: true, onK: true, onC: true, onN: true, pmin: 30, kmax: 600, bud: 1.25, labels: true, dom: DOM };
+  function cfg(extra) { var o = {}, k; for (k in base) o[k] = base[k]; for (k in extra) o[k] = extra[k]; return o; }
+  var LT = { protein: [2.4, "below"], cal: [5.2, "above"], budget: [3.9, "above"] };
+
+  var figs = [];
+  function drawFig(svg, c) { figs.push([svg, c]); draw(svg, c); }
+  // Figure 1: whole system with the Task 1 breakfasts
+  drawFig(document.getElementById("fig1"), cfg({ lt: LT,
+    marks: [
+      { x: 2, y: 2, text: "A", dx: 10, dy: 6 },
+      { x: 2, y: 3, text: "B", dx: 10, dy: 6 },
+      { x: 2, y: 4, text: "D", dx: 10, dy: 6 },
+      { x: 6, y: 0.5, text: "C", dx: 10, dy: -6 }
+    ] }));
+  // Figure 2: numbered corners
+  drawFig(document.getElementById("fig2"), cfg({ lt: LT, showCorners: true,
+    cornerOff: [[-12, -16], [12, -16], [8, -16], [14, -14], [14, 12]] }));
+  // Figure 3: empty region at 300 Calories
+  drawFig(document.getElementById("fig3"), cfg({ kmax: 300, sayEmpty: true, lt: { protein: [2.6, "above"], cal: [0.7, "below"], budget: [3.9, "above"] } }));
+
+  // Interactive graph
+  var live = document.getElementById("live");
+  var ids = ["onP", "onK", "onC", "onN", "showC", "pmin", "kmax", "bud", "px", "py"];
+  var E = {}; ids.forEach(function (k) { E[k] = document.getElementById(k); });
+
+  function state() {
+    return cfg({
+      onP: E.onP.checked, onK: E.onK.checked, onC: E.onC.checked, onN: E.onN.checked,
+      showCorners: E.showC.checked,
+      pmin: +E.pmin.value, kmax: +E.kmax.value, bud: +E.bud.value,
+      dom: { x0: -1, x1: 9, y0: -1, y1: 6.5 },
+      labels: false,
+      sayEmpty: true
+    });
+  }
+
+  function line(ok, text) {
+    return "<div>" + text + " → <b class=\"" + (ok ? "ok" : "fail") + "\">" + (ok ? "meets" : "fails") + "</b></div>";
+  }
+  // Show v with dp decimals; if that would print the bound itself while v is not exactly the bound, add digits.
+  function shown(v, dp, bound) {
+    var t = v.toFixed(dp);
+    while (+t === bound && Math.abs(v - bound) > 1e-9 && dp < 8) { dp++; t = v.toFixed(dp); }
+    if (Math.abs(v - bound) <= 1e-9) t = bound.toFixed(Math.min(dp, 2));
+    return t.replace("-", "−");
+  }
+  // print a typed number as the student typed it (minus sign as −)
+  function typed(str) { var s = String(str).trim(); if (/^[-+]?0*\.?0*$/.test(s)) s = "0"; return s.replace(/^\+/, "").replace("-", "−"); }
+
+  function update() {
+    var s = state();
+    document.getElementById("pminV").textContent = s.pmin + " g";
+    document.getElementById("kmaxV").textContent = s.kmax;
+    document.getElementById("budV").textContent = "$" + s.bud.toFixed(2);
+    var xs = E.px.value, ys = E.py.value;
+    var x = parseFloat(xs), y = parseFloat(ys);
+    var have = isFinite(x) && isFinite(y);
+    s.marks = have && x >= -1 && x <= 9 && y >= -1 && y <= 6.5 ? [{ x: x, y: y, text: "(" + typed(xs) + ", " + typed(ys) + ")" }] : [];
+    if (s.marks.length && x > 6.5) { s.marks[0].anchor = "end"; s.marks[0].dx = -9; }
+    draw(live, s);
+    var cl = document.getElementById("cornerlist");
+    if (s.showCorners && s._corners.length) {
+      cl.hidden = false;
+      cl.innerHTML = "<b>Corners of the region:</b> " + s._corners.map(function (p, j) { return (j + 1) + " (" + short(p[0]) + ", " + short(p[1]) + ")"; }).join("; ");
+    } else { cl.hidden = true; cl.innerHTML = ""; }
+    var out = "";
+    if (!have) { out = "<div>Enter numbers for eggs and cups of milk.</div>"; }
+    else {
+      var X = typed(xs), Yv = typed(ys);
+      var p = FOOD.p[0] * x + FOOD.p[1] * y, k = FOOD.k[0] * x + FOOD.k[1] * y, c = FOOD.c[0] * x + FOOD.c[1] * y;
+      var all = true, eps = 1e-9;
+      out += "<div><b>Breakfast: " + X + (x === 1 ? " egg, " : " eggs, ") + Yv + (y === 1 ? " cup" : " cups") + " of milk</b></div>";
+      if (s.onP) { var a = p >= s.pmin - eps; all = all && a; out += line(a, "Protein 6.3 × " + X + " + 8.052 × " + Yv + " = " + shown(p, 3, s.pmin) + " g (need at least " + s.pmin + " g)"); }
+      if (s.onK) { var b = k <= s.kmax + eps; all = all && b; out += line(b, "Calories 72 × " + X + " + 122 × " + Yv + " = " + shown(k, 1, s.kmax) + " (need at most " + s.kmax + ")"); }
+      if (s.onC) { var cc = c <= s.bud + eps; all = all && cc; out += line(cc, "Cost 0.19 × " + X + " + 0.24 × " + Yv + " = " + (c < 0 ? "−$" + (-c).toFixed(3) : "$" + shown(c, 3, s.bud)) + " (need at most $" + s.bud.toFixed(2) + ")"); }
+      if (s.onN) { var nn = x >= 0 && y >= 0; all = all && nn; out += line(nn, "No negative amounts"); }
+      out += "<div><b>" + (all ? "In the feasible region: meets every requirement switched on." : "Not in the feasible region.") + "</b></div>";
+    }
+    if (s._empty) out += "<div class=\"fail\">The feasible region is empty for these settings.</div>";
+    document.getElementById("readout").innerHTML = out;
+  }
+
+  ids.forEach(function (k) { E[k].addEventListener("input", update); E[k].addEventListener("change", update); });
+  document.getElementById("reset").addEventListener("click", function () {
+    E.onP.checked = E.onK.checked = E.onC.checked = E.onN.checked = true;
+    E.pmin.value = 30; E.kmax.value = 600; E.bud.value = 1.25; update();
+  });
+  live.addEventListener("click", function (ev) {
+    var s = state(); draw(live, s);
+    var pt = live.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    var m = live.getScreenCTM(); if (!m) return;
+    var q = pt.matrixTransform(m.inverse());
+    var b = s._box; if (q.x < b.L || q.x > b.R || q.y < b.T || q.y > b.B) { update(); return; }
+    var x = s.dom.x0 + (q.x - b.L) / (b.R - b.L) * (s.dom.x1 - s.dom.x0);
+    var y = s.dom.y0 + (b.B - q.y) / (b.B - b.T) * (s.dom.y1 - s.dom.y0);
+    E.px.value = String(Math.round(x * 10) / 10);
+    E.py.value = String(Math.round(y * 10) / 10);
+    update();
+  });
+  update();
+  function redrawAll() { figs.forEach(function (f) { draw(f[0], f[1]); }); update(); }
+  var timer = null;
+  window.addEventListener("resize", function () { clearTimeout(timer); timer = setTimeout(redrawAll, 150); });
+  Array.prototype.forEach.call(document.querySelectorAll("details"), function (dt) { dt.addEventListener("toggle", redrawAll); });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-03/3-1-inequalities/" style="color:inherit">&larr; 3.1 Inequalities</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-03/3-3-minimizing-cost/" style="color:inherit">3.3 Minimizing cost &rarr;</a></nav>
+</body>
+</html>

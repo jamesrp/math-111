@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breakfast Protein Equations</title>
+<style>
+:root{
+  --bg:#fbfaf7; --fg:#1d1d1b; --muted:#5b5b57; --rule:#d9d6cf;
+  --box:#f1efe9; --boxrule:#b9b4a8; --task:#eef3f8; --taskrule:#5a7fa6;
+  --sol:#f6f6f3; --accent:#2f5f8f; --code:#ece9e2;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#181816; --fg:#e8e6e1; --muted:#a8a59e; --rule:#3a3935;
+    --box:#23221f; --boxrule:#55524b; --task:#1d2733; --taskrule:#7fa3c9;
+    --sol:#202020; --accent:#8db6df; --code:#2b2a27;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181816; --fg:#e8e6e1; --muted:#a8a59e; --rule:#3a3935;
+  --box:#23221f; --boxrule:#55524b; --task:#1d2733; --taskrule:#7fa3c9;
+  --sol:#202020; --accent:#8db6df; --code:#2b2a27;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:1.5rem 16px 4rem}
+.kicker{font-size:.9rem;color:var(--muted);margin:0 0 .3rem}
+h1{font-size:1.75rem;line-height:1.2;margin:0 0 1.5rem}
+h2{font-size:1.3rem;margin:2.4rem 0 .6rem;padding-top:.6rem;border-top:1px solid var(--rule)}
+h3{font-size:1.05rem;margin:1.4rem 0 .4rem}
+p,li{max-width:42rem}
+a{color:var(--accent)}
+i.v{font-family:Georgia,"Times New Roman",serif;font-size:1.08em}
+.eq{display:block;margin:.6rem 0 .6rem 1rem;font-size:1.05rem;overflow-x:auto;white-space:nowrap}
+.steps{border-left:3px solid var(--rule);padding:.2rem 0 .2rem .9rem;margin:.8rem 0}
+.steps .row{display:flex;flex-wrap:wrap;gap:.2rem 1.2rem;align-items:baseline;margin:.35rem 0}
+.steps .row .m{min-width:14rem;white-space:nowrap}
+.steps .row .why{color:var(--muted);font-size:.93rem}
+.tablewrap{overflow-x:auto;margin:.8rem 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-size:.93rem}
+table.wide{min-width:100%}
+caption,.cap{text-align:left;font-weight:600;padding:0 0 .4rem;font-size:.95rem}
+.cap{margin:1rem 0 0}
+.cap+.tablewrap{margin-top:.2rem}
+th,td{border:1px solid var(--rule);padding:.35rem .5rem;text-align:right;vertical-align:top}
+th{background:var(--box);font-weight:600}
+td.l,th.l{text-align:left}
+td.blank{color:var(--muted)}
+.task{background:var(--task);border:1px solid var(--taskrule);border-left-width:5px;border-radius:4px;padding:.8rem 1rem;margin:1.4rem 0 .4rem}
+.task .label{font-weight:700;margin:0 0 .4rem}
+.task ol,.task ul{margin:.3rem 0;padding-left:1.3rem}
+details{background:var(--sol);border:1px solid var(--rule);border-radius:4px;padding:.4rem 1rem;margin:0 0 1.4rem}
+details>summary{cursor:pointer;font-weight:600;color:var(--accent);padding:.2rem 0}
+details[open]>summary{margin-bottom:.4rem}
+.box{background:var(--box);border:1px solid var(--boxrule);border-radius:4px;padding:.7rem 1rem;margin:1rem 0}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88rem;background:var(--code);border-radius:3px}
+code{padding:.05rem .25rem;white-space:nowrap}
+pre{padding:.7rem .8rem;overflow-x:auto;white-space:pre}
+.btns{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0}
+button,.btn{font:inherit;font-size:.92rem;padding:.45rem .9rem;border:1px solid var(--taskrule);background:var(--bg);color:var(--fg);border-radius:4px;cursor:pointer;text-decoration:none}
+button:hover,.btn:hover{background:var(--task)}
+.small{font-size:.9rem;color:var(--muted)}
+ol.sources li{margin:.5rem 0}
+@media (max-width:480px){
+  body{font-size:16px}
+  h1{font-size:1.45rem}
+  .eq{margin-left:0;white-space:normal}
+  .steps .row .m{min-width:0}
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-01/1-3-a-dosage-table-in-a-spreadsheet/" style="color:inherit">&larr; 1.3 A dosage table in a spreadsheet</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-02/2-2-graphing-lines-and-slope/" style="color:inherit">2.2 Graphing lines and slope &rarr;</a></nav>
+
+<main>
+
+<p class="kicker">Math 111 · Module: What's for breakfast? (week 2) · Lecture 1 of 3</p>
+<h1>Linear equations from a nutrition target</h1>
+
+<h2 id="s1">1. Five breakfast foods and their protein</h2>
+
+<p>A student wants about 30 grams of protein at breakfast. The 30 g is the student's own target. They want to reach it with foods they already buy: rolled oats, eggs, plain Greek yogurt, 2% milk and peanut butter. Two questions come up right away. How much of each food reaches 30 g? How many different combinations reach it?</p>
+
+<p>Packaged foods sold in the US must carry a Nutrition Facts label, unless they qualify for an exemption [6]. The label lists a serving size and the grams of protein in one serving. The values here come from USDA FoodData Central, a public database run by the US Department of Agriculture [1–5]. The database gives each nutrient per 100 g of food, plus the weight of common servings such as "1 cup" or "1 large egg".</p>
+
+<p class="cap">Table 1. Nutrients in one serving (USDA FoodData Central [1–5])</p>
+<div class="tablewrap">
+<table class="wide">
+<thead>
+<tr><th class="l">Food</th><th class="l">Serving</th><th>Serving weight (g)</th><th>Protein (g)</th><th>Calories (kcal)</th><th>Carbohydrate (g)</th><th>Fat (g)</th><th>Protein per 100 g (g)</th></tr>
+</thead>
+<tbody>
+<tr><td class="l">Oats, rolled or quick, dry [1]</td><td class="l">1/2 cup</td><td>40.5</td><td>5.346</td><td>153</td><td>27.4</td><td>2.6</td><td>13.2</td></tr>
+<tr><td class="l">Egg, whole, raw [2]</td><td class="l">1 large egg</td><td>50</td><td>6.300</td><td>72</td><td>0.4</td><td>4.8</td><td>12.6</td></tr>
+<tr><td class="l">Greek yogurt, plain, lowfat [3]</td><td class="l">1 container (7 oz)</td><td>200</td><td>19.900</td><td>146</td><td>7.9</td><td>3.8</td><td>9.95</td></tr>
+<tr><td class="l">Milk, 2% [4]</td><td class="l">1 cup</td><td>244</td><td>8.052</td><td>122</td><td>11.7</td><td>4.8</td><td>3.30</td></tr>
+<tr><td class="l">Peanut butter, smooth, unsalted [5]</td><td class="l">2 tablespoons</td><td>32</td><td>7.104</td><td>191</td><td>7.1</td><td>16.4</td><td>22.2</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Each per-serving number is the per-100 g number scaled to the serving weight. For an egg: 12.6 g of protein per 100 g, and a large egg weighs 50 g, so one egg has 12.6 × 50 ÷ 100 = 6.300 g of protein. The database lists 1 cup of dry oats as 81 g, so half a cup is 40.5 g. Protein is given to three decimal places so that the calculations below can use the table directly; calories are rounded to whole numbers.</p>
+
+<p>These are average values for each kind of food. The label on the brand you buy may differ a little, and nonfat or flavored yogurt is different again. The peanut butter record is for unsalted peanut butter; if your jar has added salt, use the protein figure on its label. Using one set of average values is a simplification. The same method works with the numbers from your own labels.</p>
+
+<h2 id="s2">2. Protein as a rate</h2>
+
+<p>"19.900 g of protein per container" is a <b>rate</b>: an amount of one thing (protein) for each unit of another thing (containers of yogurt). In week 1 you wrote rates as fractions, such as 19.900 g protein / 1 container. The same food can have its rate written per serving or per gram.</p>
+
+<h3>Reading a label as a rate</h3>
+<p>A Nutrition Facts label gives the protein in one serving and the weight of that serving in grams. Here is an example label line, made up for this example:</p>
+<span class="eq">Serving size 1/2 cup (40 g) … Protein 5 g</span>
+<p>The rate is protein divided by serving weight:</p>
+<span class="eq">5 g protein / 40 g food = 5 ÷ 40 = 0.125 g protein per gram of food.</span>
+<p>Labels give protein to the nearest gram [6]. A label that says 5 g could mean any amount from 4.5 g up to 5.5 g, so a rate worked out from a label is less exact than its three decimals suggest.</p>
+
+<h3>Rates per 100 g</h3>
+
+<p>To turn "13.2 g protein per 100 g oats" into a rate per gram, divide by 100:</p>
+<span class="eq">13.2 g protein / 100 g oats = 0.132 g protein per gram of oats.</span>
+<p>Then the protein in any amount of oats is</p>
+<span class="eq">protein = amount × rate.</span>
+<p>For 60 g of oats: 60 g × 0.132 g protein per g = 7.92 g protein. The grams of oats cancel, as in the unit conversions of week 1, and grams of protein are left.</p>
+
+<p>When a breakfast has several foods, the protein from each food adds up to the total.</p>
+
+<div class="task" id="task1">
+<p class="label">Task 1 (about 4 minutes, calculator)</p>
+<ol>
+<li>One container of Greek yogurt weighs 200 g and has 19.900 g of protein (Table 1). Write its protein rate in grams of protein per gram of yogurt. Use the rate to find the protein in 150 g of yogurt.</li>
+<li>Find the total protein in this breakfast: 1/2 cup of oats cooked in 1 cup of 2% milk, plus 1 large egg. Use Table 1. How many grams short of 30 g is it?</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 1</summary>
+<ol>
+<li>19.900 g per 200 g is 19.900 ÷ 200 = 0.0995 g of protein per gram of yogurt. (Dividing the per-100 g value gives the same rate: 9.95 ÷ 100 = 0.0995.) For 150 g: 150 × 0.0995 = 14.925, about 14.9 g of protein.</li>
+<li>Oats 5.346 g + milk 8.052 g + egg 6.300 g = 19.698 g, about 19.7 g. That is 30 − 19.698 = 10.302 g, about 10.3 g, short of the target.</li>
+</ol>
+</details>
+
+<h2 id="s3">3. Reaching 30 grams by trial and error</h2>
+
+<p>One way to make overnight oats is to stir rolled oats into yogurt. Take half a cup of oats (40.5 g, 5.346 g of protein) and ask how much Greek yogurt brings the total to 30 g.</p>
+
+<p>A first approach is to guess an amount of yogurt, compute the total, and adjust. With 200 g of yogurt the total is 5.346 + 0.0995 × 200 = 25.246 g, too little, so the next guess should be larger.</p>
+
+<div class="task" id="task2">
+<p class="label">Task 2 (about 3 minutes, calculator)</p>
+<p>Use 40.5 g of oats. Try amounts of yogurt in steps of 10 g (210 g, 220 g, …) until the total protein is between 29.5 g and 30.5 g. Write each guess and its total in a two-column list. Then say how you would get a total of exactly 30 g, with no rounding.</p>
+</div>
+<details>
+<summary>Solution to Task 2</summary>
+<div class="tablewrap"><table>
+<thead><tr><th>Yogurt (g)</th><th>Total protein (g)</th></tr></thead>
+<tbody>
+<tr><td>200</td><td>25.246</td></tr>
+<tr><td>210</td><td>26.241</td></tr>
+<tr><td>220</td><td>27.236</td></tr>
+<tr><td>230</td><td>28.231</td></tr>
+<tr><td>240</td><td>29.226</td></tr>
+<tr><td>250</td><td>30.221</td></tr>
+</tbody></table></div>
+<p>250 g of yogurt gives 30.221 g, inside the range. Each extra 10 g of yogurt adds 0.995 g of protein. To hit exactly 30 g you would try amounts between 240 g and 250 g, then between two of those, and so on. Each round gets you one more decimal place. Two more rounds reach 247.8 g of yogurt, with a total of 30.0021 g. That shows as 30.0 to one decimal place, but it is still not exactly 30, and the search never ends on its own.</p>
+</details>
+
+<p>Trial and error found an answer, but slowly. It also has to start over for every new amount of oats. An equation sets up the calculation once, so it can be solved directly.</p>
+
+<h2 id="s4">4. Writing the protein equation</h2>
+
+<p>A <b>variable</b> is a letter that stands for an amount we do not know yet, or an amount we want to change. Let</p>
+<ul>
+<li><i class="v">x</i> = grams of rolled oats, dry,</li>
+<li><i class="v">y</i> = grams of Greek yogurt.</li>
+</ul>
+
+<p>Protein from oats is amount × rate = <i class="v">x</i> × 0.132. Protein from yogurt is <i class="v">y</i> × 0.0995. Together they must make 30 g:</p>
+<span class="eq">0.132 × <i class="v">x</i> + 0.0995 × <i class="v">y</i> = 30</span>
+<p>The usual short way to write a number times a variable is to put them side by side, so 0.132 × <i class="v">x</i> is written 0.132<i class="v">x</i>:</p>
+<span class="eq">0.132<i class="v">x</i> + 0.0995<i class="v">y</i> = 30</span>
+
+<p>This is an <b>equation</b>: a statement that two amounts are equal. Here the left side is the protein in the breakfast, in grams, and the right side is the target. A <b>solution</b> is a pair of amounts that makes the statement true. For example, <i class="v">x</i> = 0 and <i class="v">y</i> = 301.5 is very nearly a solution, because 0.132 × 0 + 0.0995 × 301.5 = 29.999. The pair <i class="v">x</i> = 40.5, <i class="v">y</i> = 250 from Task 2 is close but is not a solution, since it gives 30.221.</p>
+
+<p>The student's target is <i>about</i> 30 g. Half a cup of oats with 250 g of yogurt is a perfectly good breakfast even though it is not a solution. The equation gives the exact amounts, and the student then rounds them to amounts that are easy to measure.</p>
+
+<p>The same recipe works for any two foods:</p>
+<span class="eq">(amount of food 1) × (rate of food 1) + (amount of food 2) × (rate of food 2) = target.</span>
+<p>Each rate must match the unit of its amount. If the amount of yogurt is in grams, the rate must be per gram (0.0995). If it is in containers, the rate must be per container (19.900).</p>
+
+<h2 id="s5">5. Solving for one amount when the other is fixed</h2>
+
+<p>Once you choose the amount of oats, the equation has only one unknown left, and you can find it exactly. The rule for solving is: <b>do the same thing to both sides</b>. If two amounts are equal and you subtract the same number from both, they are still equal. If you divide both by the same number (other than zero), they are still equal. Each step below uses one of these moves to get <i class="v">y</i> alone on one side.</p>
+
+<h3>Worked example: half a cup of oats</h3>
+<p>Fix <i class="v">x</i> = 40.5 g. Before solving, estimate: the oats give about 5 g, so the yogurt must give about 25 g. Yogurt has about 10 g of protein per 100 g, so the answer should be near 250 g.</p>
+
+<div class="steps">
+<div class="row"><span class="m">0.132 × 40.5 + 0.0995<i class="v">y</i> = 30</span><span class="why">Put 40.5 in place of <i class="v">x</i>.</span></div>
+<div class="row"><span class="m">5.346 + 0.0995<i class="v">y</i> = 30</span><span class="why">Multiply: 0.132 × 40.5 = 5.346 g of protein from oats.</span></div>
+<div class="row"><span class="m">0.0995<i class="v">y</i> = 24.654</span><span class="why">Subtract 5.346 from both sides. The yogurt must supply 24.654 g.</span></div>
+<div class="row"><span class="m"><i class="v">y</i> = 24.654 ÷ 0.0995</span><span class="why">Divide both sides by 0.0995.</span></div>
+<div class="row"><span class="m"><i class="v">y</i> = 247.78…</span><span class="why">Calculator.</span></div>
+</div>
+
+<p><b>Check</b> by putting the answer back into the original equation: 0.132 × 40.5 + 0.0995 × 247.78 = 5.346 + 24.654 = 30.000. The estimate of 250 g was close, so the answer is the right size.</p>
+
+<p><b>Answer:</b> half a cup of oats with about 248 g of Greek yogurt gives 30 g of protein. That is 247.78 ÷ 200 = 1.24 containers, a little more than one container.</p>
+
+<p>The steps undo what the equation does to <i class="v">y</i>. The equation multiplies <i class="v">y</i> by 0.0995 and then adds 5.346. Solving takes these away in reverse order: subtract 5.346 first, then divide by 0.0995.</p>
+
+<div class="task" id="task3">
+<p class="label">Task 3 (about 8 minutes, calculator)</p>
+<p>For each part, solve the equation one step at a time and write the reason for each step. The equation is given for part a; write it yourself for parts b and c. Round final answers to two decimal places. Then check: put the rounded answer back into the equation. A total that differs from 30 by a few hundredths comes from the rounding.</p>
+<ol type="a">
+<li>Eggs and milk. Drink 1 cup of 2% milk (8.052 g of protein). Let <i class="v">e</i> be the number of large eggs (6.300 g each). Solve 6.30<i class="v">e</i> + 8.052 = 30. What does the answer tell you, since eggs come whole?</li>
+<li>Yogurt and oats. Eat one full container of yogurt (200 g). How many grams of oats <i class="v">x</i> reach 30 g? Convert your answer to cups, using 1 cup of dry oats = 81 g.</li>
+<li>If you finish early: 2 large eggs, 3/4 cup of 2% milk and <i class="v">t</i> tablespoons of peanut butter. One tablespoon has half the protein of the 2-tablespoon serving in Table 1. Use Table 1 for the eggs and milk too. Find <i class="v">t</i>.</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 3</summary>
+<p><b>a.</b></p>
+<div class="steps">
+<div class="row"><span class="m">6.30<i class="v">e</i> + 8.052 = 30</span><span class="why">Protein from eggs plus protein from milk equals the target.</span></div>
+<div class="row"><span class="m">6.30<i class="v">e</i> = 21.948</span><span class="why">Subtract 8.052 from both sides.</span></div>
+<div class="row"><span class="m"><i class="v">e</i> = 21.948 ÷ 6.30 = 3.48</span><span class="why">Divide both sides by 6.30.</span></div>
+</div>
+<p>Check with the rounded answer: 6.30 × 3.48 + 8.052 = 29.976, about 29.98. The 0.02 gap comes from rounding <i class="v">e</i>. Eggs come whole, so no real breakfast hits 30 g exactly with these two foods. The answer 3.48 says 3 eggs fall short (6.30 × 3 + 8.052 = 26.95 g) and 4 eggs go over (33.25 g).</p>
+<p><b>b.</b></p>
+<div class="steps">
+<div class="row"><span class="m">0.132<i class="v">x</i> + 0.0995 × 200 = 30</span><span class="why">Put 200 in place of <i class="v">y</i>.</span></div>
+<div class="row"><span class="m">0.132<i class="v">x</i> + 19.9 = 30</span><span class="why">Multiply: one container has 19.9 g.</span></div>
+<div class="row"><span class="m">0.132<i class="v">x</i> = 10.1</span><span class="why">Subtract 19.9 from both sides.</span></div>
+<div class="row"><span class="m"><i class="v">x</i> = 10.1 ÷ 0.132 = 76.52</span><span class="why">Divide both sides by 0.132.</span></div>
+</div>
+<p>Check with the rounded answer: 0.132 × 76.52 + 19.9 = 30.0006, about 30.00. In cups: 76.52 g × (1 cup / 81 g) = 0.94 cup, a little less than 1 cup of dry oats.</p>
+<p><b>c.</b> One tablespoon of peanut butter has 7.104 ÷ 2 = 3.552 g of protein. Three quarters of a cup of milk has 3/4 × 8.052 = 6.039 g. Two eggs have 2 × 6.300 = 12.6 g.</p>
+<div class="steps">
+<div class="row"><span class="m">12.6 + 6.039 + 3.552<i class="v">t</i> = 30</span><span class="why">Eggs plus milk plus peanut butter equals the target.</span></div>
+<div class="row"><span class="m">18.639 + 3.552<i class="v">t</i> = 30</span><span class="why">Add the known amounts.</span></div>
+<div class="row"><span class="m">3.552<i class="v">t</i> = 11.361</span><span class="why">Subtract 18.639 from both sides.</span></div>
+<div class="row"><span class="m"><i class="v">t</i> = 11.361 ÷ 3.552 = 3.20</span><span class="why">Divide both sides by 3.552.</span></div>
+</div>
+<p>Check with the rounded answer: 12.6 + 6.039 + 3.552 × 3.20 = 30.0054, about 30.01. The 0.01 gap comes from rounding <i class="v">t</i> (before rounding, <i class="v">t</i> is about 3.1985). About 3 1/5 tablespoons of peanut butter.</p>
+</details>
+
+<h2 id="s6">6. Many combinations by hand</h2>
+
+<p>To see the whole range of choices, repeat the calculation for several amounts of oats and put the results in a table. The steps are the same as in the worked example, so each row has three columns of arithmetic:</p>
+<ul>
+<li>protein from oats = 0.132 × (oats),</li>
+<li>protein still needed = 30 − (protein from oats),</li>
+<li>yogurt needed = (protein still needed) ÷ 0.0995.</li>
+</ul>
+
+<div class="task" id="task4">
+<p class="label">Task 4 (about 4 minutes, calculator)</p>
+<p>Copy the table and fill in the empty cells, rounding yogurt to two decimal places. Then find how much the yogurt column changes from one row to the next.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Oats <i class="v">x</i> (g)</th><th>Protein from oats (g)</th><th>Protein still needed (g)</th><th>Yogurt needed <i class="v">y</i> (g)</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0</td><td>30</td><td>301.51</td></tr>
+<tr><td>50</td><td class="blank">?</td><td class="blank">?</td><td class="blank">?</td></tr>
+<tr><td>100</td><td class="blank">?</td><td class="blank">?</td><td class="blank">?</td></tr>
+<tr><td>150</td><td class="blank">?</td><td class="blank">?</td><td class="blank">?</td></tr>
+<tr><td>200</td><td class="blank">?</td><td class="blank">?</td><td class="blank">?</td></tr>
+</tbody></table></div>
+</div>
+<details>
+<summary>Solution to Task 4</summary>
+<div class="tablewrap"><table>
+<thead><tr><th>Oats <i class="v">x</i> (g)</th><th>Protein from oats (g)</th><th>Protein still needed (g)</th><th>Yogurt needed <i class="v">y</i> (g)</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0</td><td>30</td><td>301.51</td></tr>
+<tr><td>50</td><td>6.6</td><td>23.4</td><td>235.18</td></tr>
+<tr><td>100</td><td>13.2</td><td>16.8</td><td>168.84</td></tr>
+<tr><td>150</td><td>19.8</td><td>10.2</td><td>102.51</td></tr>
+<tr><td>200</td><td>26.4</td><td>3.6</td><td>36.18</td></tr>
+</tbody></table></div>
+<p>The yogurt goes down by 66.33 g in each row (66.34 once, from rounding). The reason: 50 g more oats adds 0.132 × 50 = 6.6 g of protein, so the yogurt must supply 6.6 g less, and 6.6 ÷ 0.0995 = 66.33 g of yogurt.</p>
+</details>
+
+<h2 id="s7">7. Many combinations in a spreadsheet</h2>
+
+<p>The same table takes a few minutes by hand for five rows. A spreadsheet does each row with the same formulas, so you type them once and copy them down. Each column holds one step of the solution from Section 5.</p>
+
+<p class="cap">Spreadsheet layout (formulas)</p>
+<div class="tablewrap"><table class="wide">
+<thead><tr><th></th><th class="l">A</th><th class="l">B</th><th class="l">C</th><th class="l">D</th><th class="l">E</th></tr></thead>
+<tbody>
+<tr><th>1</th><td class="l">Oats (g)</td><td class="l">Protein from oats (g)</td><td class="l">Protein still needed (g)</td><td class="l">Yogurt needed (g)</td><td class="l">Check: total protein (g)</td></tr>
+<tr><th>2</th><td class="l"><code>0</code></td><td class="l"><code>=0.132*A2</code></td><td class="l"><code>=30-B2</code></td><td class="l"><code>=C2/0.0995</code></td><td class="l"><code>=B2+0.0995*D2</code></td></tr>
+<tr><th>3</th><td class="l"><code>=A2+20</code></td><td class="l"><code>=0.132*A3</code></td><td class="l"><code>=30-B3</code></td><td class="l"><code>=C3/0.0995</code></td><td class="l"><code>=B3+0.0995*D3</code></td></tr>
+<tr><th>4–14</th><td class="l" colspan="5">Row 3 copied down to row 14</td></tr>
+</tbody></table></div>
+
+<p>Column A starts at 0 g of oats, and each row below adds 20 g. Column E puts the answer back into the protein equation; every row of column E should show 30.</p>
+
+<p>In Task 5 you type the layout yourself. If you get stuck, download the layout as a CSV file and open it in Excel or Google Sheets, or copy it and paste it into cell A1 of an empty sheet. The copied version uses tabs between cells so each entry lands in its own cell. The download and the copied layout were not tested in Excel or Google Sheets.</p>
+<div class="btns">
+<button type="button" id="dl">Download CSV (oats-yogurt.csv)</button>
+<button type="button" id="cp">Copy layout for pasting</button>
+<span class="small" id="cpmsg" aria-live="polite"></span>
+</div>
+
+<div class="task" id="task5">
+<p class="label">Task 5 (about 9 minutes, laptop with Excel or Google Sheets)</p>
+<ol>
+<li>Build the spreadsheet above, rows 1 to 14 (oats from 0 g to 240 g). Type rows 1 to 3 yourself, then copy row 3 down. Use the download or the copy button only if you get stuck.</li>
+<li>Find how much the yogurt in column D goes down from one row to the next.</li>
+<li>Look at the row with 240 g of oats. Write one sentence saying what its yogurt value means for the breakfast.</li>
+</ol>
+<p>If you finish early: change cell A3 to <code>=A2+10</code> and copy it down again. Write down the yogurt needed for 30 g of oats.</p>
+</div>
+<details>
+<summary>Solution to Task 5</summary>
+<div class="tablewrap"><table>
+<thead><tr><th>A: Oats (g)</th><th>B: Protein from oats (g)</th><th>C: Still needed (g)</th><th>D: Yogurt (g)</th><th>E: Check</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0</td><td>30</td><td>301.51</td><td>30</td></tr>
+<tr><td>20</td><td>2.64</td><td>27.36</td><td>274.97</td><td>30</td></tr>
+<tr><td>40</td><td>5.28</td><td>24.72</td><td>248.44</td><td>30</td></tr>
+<tr><td>60</td><td>7.92</td><td>22.08</td><td>221.91</td><td>30</td></tr>
+<tr><td>80</td><td>10.56</td><td>19.44</td><td>195.38</td><td>30</td></tr>
+<tr><td>100</td><td>13.2</td><td>16.8</td><td>168.84</td><td>30</td></tr>
+<tr><td>120</td><td>15.84</td><td>14.16</td><td>142.31</td><td>30</td></tr>
+<tr><td>140</td><td>18.48</td><td>11.52</td><td>115.78</td><td>30</td></tr>
+<tr><td>160</td><td>21.12</td><td>8.88</td><td>89.25</td><td>30</td></tr>
+<tr><td>180</td><td>23.76</td><td>6.24</td><td>62.71</td><td>30</td></tr>
+<tr><td>200</td><td>26.4</td><td>3.6</td><td>36.18</td><td>30</td></tr>
+<tr><td>220</td><td>29.04</td><td>0.96</td><td>9.65</td><td>30</td></tr>
+<tr><td>240</td><td>31.68</td><td>−1.68</td><td>−16.88</td><td>30</td></tr>
+</tbody></table></div>
+<p>(Yogurt is shown to two decimal places. The spreadsheet shows more digits unless you change the number format.)</p>
+<ol start="2">
+<li>Column D goes down by about 26.53 g per row: 20 g more oats adds 0.132 × 20 = 2.64 g of protein, and 2.64 ÷ 0.0995 = 26.53 g less yogurt is needed.</li>
+<li>At 240 g of oats the yogurt is −16.88 g. You cannot eat a negative amount of yogurt. The oats alone already give 31.68 g, more than the target, so this row is not a real breakfast. The equation is still true for these numbers, but the situation rules them out.</li>
+</ol>
+<p>If you finished early: with steps of 10 g, the row for 30 g of oats shows 261.71 g of yogurt.</p>
+</details>
+
+<h2 id="s8">8. How many combinations reach 30 grams</h2>
+
+<p>For every amount of oats there is exactly one amount of yogurt that brings the total to 30 g. The amount of oats can be any number from 0 g up to the amount that gives 30 g by itself, 30 ÷ 0.132 = 227.27 g (about 2.8 cups). It does not have to be a whole number or a multiple of 10: 40 g, 40.5 g and 40.25 g all work, each with its own amount of yogurt. Between any two amounts of oats there is always another one, so there are <b>infinitely many</b> combinations that reach 30 g. No table, however long, lists them all. The upper end, 227.27 g, is a limit of the equation. At 379 kcal per 100 g [1], 227 g of dry oats is about 860 kcal, which is not a sensible breakfast; calories come back in lectures 2.2 and 2.3.</p>
+
+<p>Every extra gram of oats needs 0.132 ÷ 0.0995 = 1.33 g less yogurt, wherever you start. That is why the yogurt column in Tasks 4 and 5 went down by the same amount in every row: 66.33 g per 50 g of oats, and 26.53 g per 20 g of oats.</p>
+
+<p>Each combination is a pair of numbers (oats, yogurt), such as (0, 301.51), (40.5, 247.78) and (100, 168.84), with yogurt rounded to two decimal places. If each pair is plotted as a point on a graph, with oats across and yogurt up, the constant drop suggests the points lie on a straight line. Lecture 2.2 plots them and checks whether they do.</p>
+
+<h2 id="sources">Sources</h2>
+<p class="small">Sources 1 to 5: all values are from the SR Legacy data set in USDA FoodData Central (U.S. Department of Agriculture, Agricultural Research Service). Each record was last updated 1 April 2019 and was retrieved 4 October 2026. Per-serving values in Table 1 are computed from the per-100 g values and serving weights below.</p>
+<ol class="sources">
+<li>USDA FoodData Central, "Cereals, oats, regular and quick, not fortified, dry", FDC ID 173904. Per 100 g: protein 13.2 g, energy 379 kcal, carbohydrate 67.7 g, fat 6.52 g. Serving weight: 1 cup = 81 g. <a href="https://fdc.nal.usda.gov/food-details/173904/nutrients">fdc.nal.usda.gov/food-details/173904/nutrients</a></li>
+<li>USDA FoodData Central, "Egg, whole, raw, fresh", FDC ID 171287. Per 100 g: protein 12.6 g, energy 143 kcal, carbohydrate 0.72 g, fat 9.51 g. Serving weight: 1 large egg = 50 g. <a href="https://fdc.nal.usda.gov/food-details/171287/nutrients">fdc.nal.usda.gov/food-details/171287/nutrients</a></li>
+<li>USDA FoodData Central, "Yogurt, Greek, plain, lowfat", FDC ID 170903. Per 100 g: protein 9.95 g, energy 73 kcal, carbohydrate 3.94 g, fat 1.92 g. Serving weight: 1 container (7 oz) = 200 g. <a href="https://fdc.nal.usda.gov/food-details/170903/nutrients">fdc.nal.usda.gov/food-details/170903/nutrients</a></li>
+<li>USDA FoodData Central, "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D", FDC ID 171267. Per 100 g: protein 3.30 g, energy 50 kcal, carbohydrate 4.80 g, fat 1.98 g. Serving weight: 1 cup = 244 g. <a href="https://fdc.nal.usda.gov/food-details/171267/nutrients">fdc.nal.usda.gov/food-details/171267/nutrients</a></li>
+<li>USDA FoodData Central, "Peanut butter, smooth style, without salt", FDC ID 172470. Per 100 g: protein 22.2 g, energy 598 kcal, carbohydrate 22.3 g, fat 51.4 g. Serving weight: 2 tablespoons = 32 g. <a href="https://fdc.nal.usda.gov/food-details/172470/nutrients">fdc.nal.usda.gov/food-details/172470/nutrients</a></li>
+<li>Code of Federal Regulations, Title 21, Section 101.9, "Nutrition labeling of food", current text, retrieved 4 October 2026 from the Legal Information Institute, Cornell Law School. Paragraph (a): nutrition information "shall be provided for all products intended for human consumption and offered for sale unless an exemption is provided". Paragraph (c)(7): protein per serving is "expressed to the nearest gram". <a href="https://www.law.cornell.edu/cfr/text/21/101.9">law.cornell.edu/cfr/text/21/101.9</a></li>
+</ol>
+
+</main>
+<script>
+(function(){
+  var rows=[["Oats (g)","Protein from oats (g)","Protein still needed (g)","Yogurt needed (g)","Check: total protein (g)"],
+            ["0","=0.132*A2","=30-B2","=C2/0.0995","=B2+0.0995*D2"]];
+  for(var r=3;r<=14;r++){
+    rows.push(["=A"+(r-1)+"+20","=0.132*A"+r,"=30-B"+r,"=C"+r+"/0.0995","=B"+r+"+0.0995*D"+r]);
+  }
+  function q(s){return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+  var csv=rows.map(function(r){return r.map(q).join(",");}).join("\r\n")+"\r\n";
+  var tsv=rows.map(function(r){return r.join("\t");}).join("\n");
+  document.getElementById("dl").addEventListener("click",function(){
+    try{
+      var blob=new Blob([csv],{type:"text/csv"});
+      var a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);a.download="oats-yogurt.csv";
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+    }catch(e){
+      window.location.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+    }
+  });
+  var msg=document.getElementById("cpmsg");
+  function fallback(){
+    var t=document.createElement("textarea");t.value=tsv;t.setAttribute("readonly","");
+    t.style.position="absolute";t.style.left="-9999px";document.body.appendChild(t);t.select();
+    var ok=false;try{ok=document.execCommand("copy");}catch(e){}
+    t.remove();msg.textContent=ok?"Copied. Paste into cell A1.":"Copy failed. Use the CSV download instead.";
+  }
+  document.getElementById("cp").addEventListener("click",function(){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(tsv).then(function(){msg.textContent="Copied. Paste into cell A1.";},fallback);
+    }else{fallback();}
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-01/1-3-a-dosage-table-in-a-spreadsheet/" style="color:inherit">&larr; 1.3 A dosage table in a spreadsheet</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-02/2-2-graphing-lines-and-slope/" style="color:inherit">2.2 Graphing lines and slope &rarr;</a></nav>
+</body>
+</html>

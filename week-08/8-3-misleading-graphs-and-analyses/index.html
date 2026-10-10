@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Misleading Graphs and Analyses</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1d1d1f; --muted: #5a5a60; --line: #d4d4d8;
+  --box: #f4f6fa; --boxline: #9aa7bd; --sol: #f7f7f2;
+  --c1: #7a8ca8; --c2: #c2552d; --accent: #2a5db0; --win: #f1e4c8;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 18px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { max-width: 780px; margin: 0 auto; padding: 24px 16px 64px; }
+.course { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 24px; }
+h2 { font-size: 1.4rem; margin: 40px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.1rem; margin: 24px 0 8px; }
+p, li { max-width: 70ch; }
+figure { margin: 20px 0; }
+figure svg, .sim svg { width: 100%; height: auto; display: block; }
+.pair { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.pair svg { flex: 1 1 260px; max-width: 360px; }
+figcaption { color: var(--muted); font-size: 0.92rem; margin-top: 6px; }
+table { border-collapse: collapse; margin: 12px 0; font-variant-numeric: tabular-nums; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+th { background: var(--box); }
+.scroll { overflow-x: auto; }
+#sheetTable td:last-child { white-space: nowrap; }
+#sheetTable td, #sheetTable th { text-align: left; font-family: Consolas, Menlo, monospace; font-size: 0.95rem; }
+.task { border: 2px solid var(--boxline); background: var(--box); border-radius: 8px; padding: 12px 16px; margin: 24px 0 8px; }
+.task h3 { margin: 0 0 8px; }
+details { border: 1px solid var(--line); background: var(--sol); border-radius: 8px; padding: 8px 16px; margin: 0 0 24px; }
+details summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 8px; }
+.calc { font-variant-numeric: tabular-nums; }
+blockquote { margin: 12px 0; padding: 4px 16px; border-left: 4px solid var(--line); color: var(--fg); }
+.sources li { margin-bottom: 8px; font-size: 0.95rem; overflow-wrap: anywhere; }
+svg text { font-family: inherit; }
+svg .tick { font-size: 13px; fill: var(--muted); }
+svg .val { font-size: 14px; fill: var(--fg); font-weight: 600; }
+svg .ttl { font-size: 15px; fill: var(--fg); font-weight: 600; }
+svg .grid { stroke: var(--line); stroke-width: 1; }
+svg .axis { stroke: var(--fg); stroke-width: 1.2; }
+svg .bar1 { fill: var(--c1); }
+svg .bar2 { fill: var(--c2); }
+svg .line { fill: none; stroke: var(--c1); stroke-width: 2; }
+svg .pt { fill: var(--c1); }
+svg .hl { fill: var(--c2); }
+svg .seg { stroke: var(--c2); stroke-width: 3; stroke-dasharray: 6 4; }
+svg .window { fill: var(--win); }
+svg .over { fill: var(--c2); }
+svg .under { fill: var(--c1); }
+svg .cut { stroke: var(--fg); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.sim { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin: 16px 0; }
+.sim .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+button { font: inherit; font-size: 1rem; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--accent);
+  background: var(--accent); color: #fff; cursor: pointer; }
+button.secondary { background: var(--bg); color: var(--accent); }
+.result { font-weight: 600; margin: 8px 0 0; }
+.log { font-size: 0.95rem; color: var(--muted); margin: 4px 0 0; }
+.var { font-style: italic; }
+.xbar, .yhat { font-style: italic; position: relative; display: inline-block; line-height: 1; }
+.xbar::before { content: ""; position: absolute; left: 0.1em; right: -0.1em; top: 0.1em; border-top: 0.07em solid currentColor; }
+.yhat::before { content: "^"; font-style: normal; position: absolute; left: 0.12em; top: -0.42em; font-size: 0.8em; }
+.groups { display: flex; flex-wrap: wrap; gap: 0 24px; }
+.groups table caption { text-align: left; font-weight: 600; font-size: 0.95rem; padding-bottom: 4px; }
+pre { background: var(--box); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.6rem; }
+  th, td { padding: 4px 6px; }
+  .wide-only { display: none !important; }
+  .narrow-only { display: block !important; }
+}
+.narrow-only { display: none; }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-08/8-2-scatterplots-and-regression-lines/" style="color:inherit">&larr; 8.2 Scatterplots and regression lines</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-09/9-1-stable-matchings/" style="color:inherit">9.1 Stable matchings &rarr;</a></nav>
+
+<main>
+<p class="course">Math 111 · Module: Statistics and regression (week 8) · Lecture 3 of 3</p>
+<h1>Misleading graphs and analyses</h1>
+
+<p>Graphs and statistics reach you through news stories, ads and research summaries. A graph can show only correct numbers and still leave a wrong impression. The tools of lectures 8.1 and 8.2 (the mean <span class="xbar">x</span>, the sample size <span class="var">n</span>, scatterplots, association and the regression line) help to check such a graph or claim.</p>
+
+<!-- ============================================================ -->
+<h2>1. Bar charts with an axis that does not start at zero</h2>
+
+<p>In 2012, Fox News showed a bar chart titled “If Bush tax cuts expire” [1]. One bar showed the top federal income tax rate at the time, 35%. The other showed the top rate that would apply on January 1, 2013, if the tax cuts expired: 39.6%. Both numbers were correct. The vertical axis started at 34% [1].</p>
+
+<figure>
+<div class="pair"><svg viewBox="0 0 270 290" role="img" aria-label="Bar chart of 35% and 39.6% with the axis starting at 34%: the second bar is 5.6 times as tall.">
+<text class="ttl" x="130.0" y="22" text-anchor="middle">Axis starts at 34%</text>
+<line class="grid" x1="50" x2="240" y1="250.0" y2="250.0"/>
+<text class="tick" x="44" y="254.0" text-anchor="end">34%</text>
+<line class="grid" x1="50" x2="240" y1="200.0" y2="200.0"/>
+<text class="tick" x="44" y="204.0" text-anchor="end">36%</text>
+<line class="grid" x1="50" x2="240" y1="150.0" y2="150.0"/>
+<text class="tick" x="44" y="154.0" text-anchor="end">38%</text>
+<line class="grid" x1="50" x2="240" y1="100.0" y2="100.0"/>
+<text class="tick" x="44" y="104.0" text-anchor="end">40%</text>
+<line class="grid" x1="50" x2="240" y1="50.0" y2="50.0"/>
+<text class="tick" x="44" y="54.0" text-anchor="end">42%</text>
+<rect class="bar1" x="75" y="225.0" width="56" height="25.0"/>
+<text class="val" x="103.0" y="219.0" text-anchor="middle">35%</text>
+<text class="tick" x="103.0" y="268" text-anchor="middle">Now</text>
+<rect class="bar2" x="165" y="110.0" width="56" height="140.0"/>
+<text class="val" x="193.0" y="104.0" text-anchor="middle">39.6%</text>
+<text class="tick" x="193.0" y="268" text-anchor="middle">Jan. 1, 2013</text>
+<line class="axis" x1="50" x2="50" y1="50" y2="250"/>
+<line class="axis" x1="50" x2="240" y1="250" y2="250"/>
+</svg>
+<svg viewBox="0 0 270 290" role="img" aria-label="Bar chart of 35% and 39.6% with the axis starting at 0%: the bars are nearly equal.">
+<text class="ttl" x="130.0" y="22" text-anchor="middle">Axis starts at 0%</text>
+<line class="grid" x1="50" x2="240" y1="250.0" y2="250.0"/>
+<text class="tick" x="44" y="254.0" text-anchor="end">0%</text>
+<line class="grid" x1="50" x2="240" y1="200.0" y2="200.0"/>
+<text class="tick" x="44" y="204.0" text-anchor="end">10%</text>
+<line class="grid" x1="50" x2="240" y1="150.0" y2="150.0"/>
+<text class="tick" x="44" y="154.0" text-anchor="end">20%</text>
+<line class="grid" x1="50" x2="240" y1="100.0" y2="100.0"/>
+<text class="tick" x="44" y="104.0" text-anchor="end">30%</text>
+<line class="grid" x1="50" x2="240" y1="50.0" y2="50.0"/>
+<text class="tick" x="44" y="54.0" text-anchor="end">40%</text>
+<rect class="bar1" x="75" y="75.0" width="56" height="175.0"/>
+<text class="val" x="103.0" y="69.0" text-anchor="middle">35%</text>
+<text class="tick" x="103.0" y="268" text-anchor="middle">Now</text>
+<rect class="bar2" x="165" y="52.0" width="56" height="198.0"/>
+<text class="val" x="193.0" y="46.0" text-anchor="middle">39.6%</text>
+<text class="tick" x="193.0" y="268" text-anchor="middle">Jan. 1, 2013</text>
+<line class="axis" x1="50" x2="50" y1="50" y2="250"/>
+<line class="axis" x1="50" x2="240" y1="250" y2="250"/>
+</svg></div>
+<figcaption>Figure 1. First chart: the axis starts at 34%, as in the broadcast chart. Second chart: the same two numbers with the axis starting at 0%. Both redrawn from the numbers in [1].</figcaption>
+</figure>
+
+<p>Readers of a bar chart compare the lengths of the bars.</p>
+
+<div class="task">
+<h3>Task 1 (about 3 minutes, calculator)</h3>
+<p>Use the rates 35% and 39.6%. Write down three numbers:</p>
+<ol type="a">
+<li>In the first chart of Figure 1, read the length of each bar from the axis, measured up from the bottom of the chart at 34%. How many times as tall is the 39.6% bar as the 35% bar?</li>
+<li>How many times as large 39.6 is as 35, to two decimal places. This is the ratio the second chart shows.</li>
+<li>The percent increase from a 35% tax rate to a 39.6% tax rate, to one decimal place.</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 1</summary>
+<p class="calc">(a) The 35% bar has length 35 − 34 = 1 and the 39.6% bar has length 39.6 − 34 = 5.6, in units of the axis. Then 5.6 ÷ 1 = 5.6: the second bar is 5.6 times as tall.</p>
+<p class="calc">(b) 39.6 ÷ 35 = 1.1314…, about 1.13.</p>
+<p class="calc">(c) The increase is 39.6 − 35 = 4.6. As a share of the old rate, 4.6 ÷ 35 = 0.1314, an increase of 13.1%. The same answer comes from (b): a multiplier of 1.131 means an increase of 13.1% (week 4).</p>
+<p>The first chart makes the new rate look more than five times the old one. The actual rate is 1.13 times the old one.</p>
+</details>
+
+<p>Part (c) uses two different words for change. The difference of two percentages, 39.6 − 35 = 4.6, is a change of 4.6 <strong>percentage points</strong>. The <strong>percent change</strong> divides that difference by the starting value: 4.6 ÷ 35 = 13.1%. A headline can report either one, and they sound very different: “up 4.6 points” and “up 13%” describe the same tax change.</p>
+
+<p>Bar charts should start at zero, because the length of a bar stands for its value. Line graphs are different. A line graph of something that never comes near zero, such as body temperature, can start its axis elsewhere, because the reader looks at the rise and fall of the line and reads values from the axis labels. A line graph can still mislead through the shape of its frame. Stretching the vertical axis, or squeezing the horizontal axis, makes the same line look steeper. The slope in numbers (change in <span class="var">y</span> ÷ change in <span class="var">x</span>, from week 2) does not change. Reading the slope from the axis labels is the way to check (Section 3 has an example).</p>
+
+<!-- ============================================================ -->
+<h2>2. Pictures that grow in two or three directions</h2>
+
+<p>The New York Times once printed a graphic of the fuel economy standards the U.S. Department of Transportation required for new cars, from 18 miles per gallon (mpg) for 1978 models to 27.5 mpg for 1985 models. Edward Tufte measured the graphic: the line for 18 mpg was 0.6 inches long and the line for 27.5 mpg was 5.3 inches long [2][3].</p>
+
+<p>Tufte defined the <strong>lie factor</strong> of a graphic as the size of a change shown in the graphic divided by the size of the change in the data [2]. Both sizes are percent changes.</p>
+<ul>
+<li class="calc">Change in the data: (27.5 − 18) ÷ 18 = 0.528, an increase of 52.8%.</li>
+<li class="calc">Change in the graphic: (5.3 − 0.6) ÷ 0.6 = 7.83, an increase of 783%.</li>
+<li class="calc">Lie factor: 783 ÷ 52.8 = 14.8.</li>
+</ul>
+<p>A graphic whose lengths are in proportion to the data has lie factor 1. This one shows the change about 15 times as large as it was. In Figure 2, the lower pair of lines keeps the 1985 line at 5.3 inches and makes the 1978 line the matching length, 5.3 × 18 ÷ 27.5 = 3.47 inches.</p>
+
+<figure>
+<svg class="wide-only" viewBox="0 0 600 230" role="img" aria-label="Lines for 1978 and 1985. As drawn: 0.6 and 5.3 inches. In proportion to the data: 3.47 and 5.3 inches.">
+<text class="ttl" x="0" y="24">As drawn in the 1978 graphic</text>
+<text class="tick" x="142" y="55" text-anchor="end">1978: 18 mpg</text>
+<rect class="bar1" x="150" y="40" width="43.2" height="22"/>
+<text class="val" x="199.2" y="56">0.6 in</text>
+<text class="tick" x="142" y="87" text-anchor="end">1985: 27.5 mpg</text>
+<rect class="bar2" x="150" y="72" width="381.6" height="22"/>
+<text class="val" x="537.6" y="88">5.3 in</text>
+<text class="ttl" x="0" y="122">In proportion to the data</text>
+<text class="tick" x="142" y="153" text-anchor="end">1978: 18 mpg</text>
+<rect class="bar1" x="150" y="138" width="249.8" height="22"/>
+<text class="val" x="405.8" y="154">3.47 in</text>
+<text class="tick" x="142" y="185" text-anchor="end">1985: 27.5 mpg</text>
+<rect class="bar2" x="150" y="170" width="381.6" height="22"/>
+<text class="val" x="537.6" y="186">5.3 in</text>
+</svg>
+<svg class="narrow-only" viewBox="0 0 360 300" role="img" aria-label="Lines for 1978 and 1985. As drawn: 0.6 and 5.3 inches. In proportion to the data: 3.47 and 5.3 inches.">
+<text class="ttl" x="0" y="18">As drawn in the 1978 graphic</text>
+<text class="tick" x="0" y="40">1978: 18 mpg</text>
+<rect class="bar1" x="0" y="46" width="31.2" height="20"/>
+<text class="val" x="37.2" y="61">0.6 in</text>
+<text class="tick" x="0" y="90">1985: 27.5 mpg</text>
+<rect class="bar2" x="0" y="96" width="275.6" height="20"/>
+<text class="val" x="281.6" y="111">5.3 in</text>
+<text class="ttl" x="0" y="154">In proportion to the data</text>
+<text class="tick" x="0" y="176">1978: 18 mpg</text>
+<rect class="bar1" x="0" y="182" width="180.4" height="20"/>
+<text class="val" x="186.4" y="197">3.47 in</text>
+<text class="tick" x="0" y="226">1985: 27.5 mpg</text>
+<rect class="bar2" x="0" y="232" width="275.6" height="20"/>
+<text class="val" x="281.6" y="247">5.3 in</text>
+</svg>
+<figcaption>Figure 2. Top: line lengths as measured in the newspaper graphic [3]. Bottom: lengths in proportion to 18 and 27.5 mpg.</figcaption>
+</figure>
+
+<p>Pictures of objects cause a second problem. A chart may draw a small gas pump for 18 mpg and a larger one for 27.5 mpg, with the height of each pump matching its number. To keep the pump's shape, the artist also makes it wider by the same factor. The reader sees the area of the picture. From week 5, when every length is multiplied by a scale factor <i>k</i>, area is multiplied by <i>k</i>² and volume by <i>k</i>³. Figure 3 shows this for a scale factor of 1.5.</p>
+
+<figure>
+<svg viewBox="0 0 400 172" style="max-width:420px" role="img" aria-label="Two squares. The second has sides 1.5 times as long and 2.25 times the area.">
+<rect class="bar1" x="20" y="70" width="80" height="80"/>
+<rect class="bar2" x="150" y="30.0" width="120.0" height="120.0"/>
+<text class="tick" x="60.0" y="166" text-anchor="middle">side 1, area 1</text>
+<text class="tick" x="210.0" y="166" text-anchor="middle">side 1.5, area 2.25</text>
+</svg>
+<figcaption>Figure 3. Multiplying each side by 1.5 multiplies the area by 1.5 × 1.5 = 2.25.</figcaption>
+</figure>
+
+<div class="task">
+<h3>Task 2 (about 3 minutes, calculator)</h3>
+<p>A made-up pictogram shows the 1978 and 1985 standards as gas pump icons. The 1985 icon has its height and its width both multiplied by 27.5 ÷ 18. Write down:</p>
+<ol type="a">
+<li>The scale factor 27.5 ÷ 18, to three decimal places.</li>
+<li>The factor by which the area of the icon grows, and the percent increase in area.</li>
+<li>The lie factor if readers judge the change by area. Use 52.8% for the change in the data.</li>
+<li>The lie factor if the icon is drawn as a 3D object and readers judge by volume.</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 2</summary>
+<p class="calc">(a) 27.5 ÷ 18 = 1.528.</p>
+<p class="calc">(b) Area factor: 1.528² = 2.33. The area increases by 133%.</p>
+<p class="calc">(c) 133 ÷ 52.8 = 2.5.</p>
+<p class="calc">(d) Volume factor: 1.528³ = 3.57, an increase of 257%. Lie factor 257 ÷ 52.8 = 4.9.</p>
+<p>The icon's height is honest, yet a reader who compares the pictures sees a change two and a half times too large, and almost five times too large for a 3D drawing.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2>3. Choosing the time window</h2>
+
+<p>A claim that circulated for years was “It hasn't warmed since 1998” [4]. Figure 4 plots NOAA's yearly global average temperatures for 1998 through 2008 only [5]. The claim named 1998 as its start [4]; the end year 2008 is chosen here as an example of a window that ends in a cooler year. Each value is how far that year's average temperature over land and ocean was above the 1901–2000 average, in degrees Celsius (°C).</p>
+
+<figure>
+<svg class="wide-only" viewBox="0 0 600 300" role="img" aria-label="Global temperature 1998 to 2008 only. 1998 is 0.61, 2008 is 0.52.">
+<line class="grid" x1="56" x2="580" y1="262.0" y2="262.0"/>
+<text class="tick" x="50" y="266.0" text-anchor="end">0.3</text>
+<line class="grid" x1="56" x2="580" y1="216.4" y2="216.4"/>
+<text class="tick" x="50" y="220.4" text-anchor="end">0.4</text>
+<line class="grid" x1="56" x2="580" y1="170.8" y2="170.8"/>
+<text class="tick" x="50" y="174.8" text-anchor="end">0.5</text>
+<line class="grid" x1="56" x2="580" y1="125.2" y2="125.2"/>
+<text class="tick" x="50" y="129.2" text-anchor="end">0.6</text>
+<line class="grid" x1="56" x2="580" y1="79.6" y2="79.6"/>
+<text class="tick" x="50" y="83.6" text-anchor="end">0.7</text>
+<line class="grid" x1="56" x2="580" y1="34.0" y2="34.0"/>
+<text class="tick" x="50" y="38.0" text-anchor="end">0.8</text>
+<text class="tick" x="84.1" y="280" text-anchor="middle">1998</text>
+<line class="axis" x1="84.1" x2="84.1" y1="262" y2="266"/>
+<text class="tick" x="177.6" y="280" text-anchor="middle">2000</text>
+<line class="axis" x1="177.6" x2="177.6" y1="262" y2="266"/>
+<text class="tick" x="271.2" y="280" text-anchor="middle">2002</text>
+<line class="axis" x1="271.2" x2="271.2" y1="262" y2="266"/>
+<text class="tick" x="364.8" y="280" text-anchor="middle">2004</text>
+<line class="axis" x1="364.8" x2="364.8" y1="262" y2="266"/>
+<text class="tick" x="458.4" y="280" text-anchor="middle">2006</text>
+<line class="axis" x1="458.4" x2="458.4" y1="262" y2="266"/>
+<text class="tick" x="551.9" y="280" text-anchor="middle">2008</text>
+<line class="axis" x1="551.9" x2="551.9" y1="262" y2="266"/>
+<polyline class="line" points="84.1,120.6 130.9,216.4 177.6,216.4 224.4,157.1 271.2,129.8 318.0,125.2 364.8,157.1 411.6,97.8 458.4,111.5 505.1,116.1 551.9,161.7"/>
+<circle class="pt" cx="84.1" cy="120.6" r="4"/>
+<circle class="pt" cx="130.9" cy="216.4" r="4"/>
+<circle class="pt" cx="177.6" cy="216.4" r="4"/>
+<circle class="pt" cx="224.4" cy="157.1" r="4"/>
+<circle class="pt" cx="271.2" cy="129.8" r="4"/>
+<circle class="pt" cx="318.0" cy="125.2" r="4"/>
+<circle class="pt" cx="364.8" cy="157.1" r="4"/>
+<circle class="pt" cx="411.6" cy="97.8" r="4"/>
+<circle class="pt" cx="458.4" cy="111.5" r="4"/>
+<circle class="pt" cx="505.1" cy="116.1" r="4"/>
+<circle class="pt" cx="551.9" cy="161.7" r="4"/>
+<line class="seg" x1="84.1" y1="120.6" x2="551.9" y2="161.7"/>
+<circle class="hl" cx="84.1" cy="120.6" r="6"/>
+<text class="val" x="84.1" y="108.6" text-anchor="start">1998: 0.61</text>
+<circle class="hl" cx="551.9" cy="161.7" r="6"/>
+<text class="val" x="551.9" y="185.7" text-anchor="end">2008: 0.52</text>
+<line class="axis" x1="56" x2="56" y1="34" y2="262"/>
+<line class="axis" x1="56" x2="580" y1="262" y2="262"/>
+<text class="tick" x="16" y="16">°C above the 1901–2000 average</text>
+</svg>
+<svg class="narrow-only" viewBox="0 0 360 280" role="img" aria-label="Global temperature 1998 to 2008 only. 1998 is 0.61, 2008 is 0.52.">
+<line class="grid" x1="40" x2="346" y1="246.0" y2="246.0"/>
+<text class="tick" x="34" y="250.0" text-anchor="end">0.3</text>
+<line class="grid" x1="40" x2="346" y1="203.6" y2="203.6"/>
+<text class="tick" x="34" y="207.6" text-anchor="end">0.4</text>
+<line class="grid" x1="40" x2="346" y1="161.2" y2="161.2"/>
+<text class="tick" x="34" y="165.2" text-anchor="end">0.5</text>
+<line class="grid" x1="40" x2="346" y1="118.8" y2="118.8"/>
+<text class="tick" x="34" y="122.8" text-anchor="end">0.6</text>
+<line class="grid" x1="40" x2="346" y1="76.4" y2="76.4"/>
+<text class="tick" x="34" y="80.4" text-anchor="end">0.7</text>
+<line class="grid" x1="40" x2="346" y1="34.0" y2="34.0"/>
+<text class="tick" x="34" y="38.0" text-anchor="end">0.8</text>
+<text class="tick" x="56.4" y="268" text-anchor="middle">1998</text>
+<line class="axis" x1="56.4" x2="56.4" y1="246" y2="250"/>
+<text class="tick" x="111.0" y="268" text-anchor="middle">2000</text>
+<line class="axis" x1="111.0" x2="111.0" y1="246" y2="250"/>
+<text class="tick" x="165.7" y="268" text-anchor="middle">2002</text>
+<line class="axis" x1="165.7" x2="165.7" y1="246" y2="250"/>
+<text class="tick" x="220.3" y="268" text-anchor="middle">2004</text>
+<line class="axis" x1="220.3" x2="220.3" y1="246" y2="250"/>
+<text class="tick" x="275.0" y="268" text-anchor="middle">2006</text>
+<line class="axis" x1="275.0" x2="275.0" y1="246" y2="250"/>
+<text class="tick" x="329.6" y="268" text-anchor="middle">2008</text>
+<line class="axis" x1="329.6" x2="329.6" y1="246" y2="250"/>
+<polyline class="line" points="56.4,114.6 83.7,203.6 111.0,203.6 138.4,148.5 165.7,123.0 193.0,118.8 220.3,148.5 247.6,93.4 275.0,106.1 302.3,110.3 329.6,152.7"/>
+<circle class="pt" cx="56.4" cy="114.6" r="4"/>
+<circle class="pt" cx="83.7" cy="203.6" r="4"/>
+<circle class="pt" cx="111.0" cy="203.6" r="4"/>
+<circle class="pt" cx="138.4" cy="148.5" r="4"/>
+<circle class="pt" cx="165.7" cy="123.0" r="4"/>
+<circle class="pt" cx="193.0" cy="118.8" r="4"/>
+<circle class="pt" cx="220.3" cy="148.5" r="4"/>
+<circle class="pt" cx="247.6" cy="93.4" r="4"/>
+<circle class="pt" cx="275.0" cy="106.1" r="4"/>
+<circle class="pt" cx="302.3" cy="110.3" r="4"/>
+<circle class="pt" cx="329.6" cy="152.7" r="4"/>
+<line class="seg" x1="56.4" y1="114.6" x2="329.6" y2="152.7"/>
+<circle class="hl" cx="56.4" cy="114.6" r="6"/>
+<text class="val" x="56.4" y="102.6" text-anchor="start">1998: 0.61</text>
+<circle class="hl" cx="329.6" cy="152.7" r="6"/>
+<text class="val" x="329.6" y="176.7" text-anchor="end">2008: 0.52</text>
+<line class="axis" x1="40" x2="40" y1="34" y2="246"/>
+<line class="axis" x1="40" x2="346" y1="246" y2="246"/>
+<text class="tick" x="0" y="16">°C above the 1901–2000 average</text>
+</svg>
+<figcaption>Figure 4. Global land and ocean temperature, 1998–2008 only. Data: NOAA [5].</figcaption>
+</figure>
+
+<div class="task">
+<h3>Task 3 (about 3 minutes, calculator)</h3>
+<p>Use these NOAA values [5] (°C above the 1901–2000 average).</p>
+<div class="scroll"><table>
+<tr><th>Year</th><th>°C above average</th></tr>
+<tr><td>1970</td><td>0.04</td></tr><tr><td>1998</td><td>0.61</td></tr><tr><td>2008</td><td>0.52</td></tr><tr><td>2020</td><td>1.01</td></tr>
+</table></div>
+<ol type="a">
+<li>Write each year as a point (<span class="var">x</span>, <span class="var">y</span>), with <span class="var">x</span> the year and <span class="var">y</span> the temperature. Find the slope from 1998 to 2008 in °C per year, using the two points (1998, 0.61) and (2008, 0.52). Multiply by 10 to get °C per decade.</li>
+<li>Find the slope from 1970 to 2020 the same way, in °C per year and in °C per decade.</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 3</summary>
+<p class="calc">(a) (0.52 − 0.61) ÷ (2008 − 1998) = −0.09 ÷ 10 = −0.009 °C per year, or −0.09 °C per decade. Temperature went down slightly between these two years.</p>
+<p class="calc">(b) (1.01 − 0.04) ÷ (2020 − 1970) = 0.97 ÷ 50 = 0.0194 °C per year, or about 0.19 °C per decade.</p>
+<p>A claim of “no warming since 1998” rests on a slope like the one in (a).</p>
+</details>
+
+
+<figure>
+<svg class="wide-only" viewBox="0 0 600 300" role="img" aria-label="Global temperature 1970 to 2025, rising from about 0 to about 1.2 degrees, with the 1998 to 2008 window shaded.">
+<line class="grid" x1="56" x2="580" y1="262.0" y2="262.0"/>
+<text class="tick" x="50" y="266.0" text-anchor="end">-0.2</text>
+<line class="grid" x1="56" x2="580" y1="205.0" y2="205.0"/>
+<text class="tick" x="50" y="209.0" text-anchor="end">0.2</text>
+<line class="grid" x1="56" x2="580" y1="148.0" y2="148.0"/>
+<text class="tick" x="50" y="152.0" text-anchor="end">0.6</text>
+<line class="grid" x1="56" x2="580" y1="91.0" y2="91.0"/>
+<text class="tick" x="50" y="95.0" text-anchor="end">1.0</text>
+<line class="grid" x1="56" x2="580" y1="34.0" y2="34.0"/>
+<text class="tick" x="50" y="38.0" text-anchor="end">1.4</text>
+<text class="tick" x="60.7" y="280" text-anchor="middle">1970</text>
+<line class="axis" x1="60.7" x2="60.7" y1="262" y2="266"/>
+<text class="tick" x="154.2" y="280" text-anchor="middle">1980</text>
+<line class="axis" x1="154.2" x2="154.2" y1="262" y2="266"/>
+<text class="tick" x="247.8" y="280" text-anchor="middle">1990</text>
+<line class="axis" x1="247.8" x2="247.8" y1="262" y2="266"/>
+<text class="tick" x="341.4" y="280" text-anchor="middle">2000</text>
+<line class="axis" x1="341.4" x2="341.4" y1="262" y2="266"/>
+<text class="tick" x="435.0" y="280" text-anchor="middle">2010</text>
+<line class="axis" x1="435.0" x2="435.0" y1="262" y2="266"/>
+<text class="tick" x="528.5" y="280" text-anchor="middle">2020</text>
+<line class="axis" x1="528.5" x2="528.5" y1="262" y2="266"/>
+<rect class="window" x="322.7" y="34" width="93.6" height="228"/>
+<polyline class="line" points="60.7,227.8 70.0,244.9 79.4,226.4 88.8,209.3 98.1,240.6 107.5,234.9 116.8,242.0 126.2,205.0 135.5,217.8 144.9,206.4 154.2,192.2 163.6,186.5 173.0,212.1 182.3,187.9 191.7,209.3 201.0,213.6 210.4,202.1 219.8,186.5 229.1,179.3 238.5,196.4 247.8,173.6 257.2,176.5 266.5,200.7 275.9,196.4 285.2,187.9 294.6,167.9 304.0,185.0 313.3,165.1 322.7,146.6 332.0,176.5 341.4,176.5 350.8,158.0 360.1,149.4 369.5,148.0 378.8,158.0 388.2,139.4 397.5,143.7 406.9,145.1 416.2,159.4 425.6,140.9 435.0,132.3 444.3,148.0 453.7,143.7 463.0,139.4 472.4,129.5 481.8,108.1 491.1,91.0 500.5,101.0 509.8,110.9 519.2,92.4 528.5,89.6 537.9,110.9 547.2,106.7 556.6,66.8 566.0,55.4 575.3,73.9"/>
+<circle class="pt" cx="60.7" cy="227.8" r="3"/>
+<circle class="pt" cx="70.0" cy="244.9" r="3"/>
+<circle class="pt" cx="79.4" cy="226.4" r="3"/>
+<circle class="pt" cx="88.8" cy="209.3" r="3"/>
+<circle class="pt" cx="98.1" cy="240.6" r="3"/>
+<circle class="pt" cx="107.5" cy="234.9" r="3"/>
+<circle class="pt" cx="116.8" cy="242.0" r="3"/>
+<circle class="pt" cx="126.2" cy="205.0" r="3"/>
+<circle class="pt" cx="135.5" cy="217.8" r="3"/>
+<circle class="pt" cx="144.9" cy="206.4" r="3"/>
+<circle class="pt" cx="154.2" cy="192.2" r="3"/>
+<circle class="pt" cx="163.6" cy="186.5" r="3"/>
+<circle class="pt" cx="173.0" cy="212.1" r="3"/>
+<circle class="pt" cx="182.3" cy="187.9" r="3"/>
+<circle class="pt" cx="191.7" cy="209.3" r="3"/>
+<circle class="pt" cx="201.0" cy="213.6" r="3"/>
+<circle class="pt" cx="210.4" cy="202.1" r="3"/>
+<circle class="pt" cx="219.8" cy="186.5" r="3"/>
+<circle class="pt" cx="229.1" cy="179.3" r="3"/>
+<circle class="pt" cx="238.5" cy="196.4" r="3"/>
+<circle class="pt" cx="247.8" cy="173.6" r="3"/>
+<circle class="pt" cx="257.2" cy="176.5" r="3"/>
+<circle class="pt" cx="266.5" cy="200.7" r="3"/>
+<circle class="pt" cx="275.9" cy="196.4" r="3"/>
+<circle class="pt" cx="285.2" cy="187.9" r="3"/>
+<circle class="pt" cx="294.6" cy="167.9" r="3"/>
+<circle class="pt" cx="304.0" cy="185.0" r="3"/>
+<circle class="pt" cx="313.3" cy="165.1" r="3"/>
+<circle class="pt" cx="322.7" cy="146.6" r="3"/>
+<circle class="pt" cx="332.0" cy="176.5" r="3"/>
+<circle class="pt" cx="341.4" cy="176.5" r="3"/>
+<circle class="pt" cx="350.8" cy="158.0" r="3"/>
+<circle class="pt" cx="360.1" cy="149.4" r="3"/>
+<circle class="pt" cx="369.5" cy="148.0" r="3"/>
+<circle class="pt" cx="378.8" cy="158.0" r="3"/>
+<circle class="pt" cx="388.2" cy="139.4" r="3"/>
+<circle class="pt" cx="397.5" cy="143.7" r="3"/>
+<circle class="pt" cx="406.9" cy="145.1" r="3"/>
+<circle class="pt" cx="416.2" cy="159.4" r="3"/>
+<circle class="pt" cx="425.6" cy="140.9" r="3"/>
+<circle class="pt" cx="435.0" cy="132.3" r="3"/>
+<circle class="pt" cx="444.3" cy="148.0" r="3"/>
+<circle class="pt" cx="453.7" cy="143.7" r="3"/>
+<circle class="pt" cx="463.0" cy="139.4" r="3"/>
+<circle class="pt" cx="472.4" cy="129.5" r="3"/>
+<circle class="pt" cx="481.8" cy="108.1" r="3"/>
+<circle class="pt" cx="491.1" cy="91.0" r="3"/>
+<circle class="pt" cx="500.5" cy="101.0" r="3"/>
+<circle class="pt" cx="509.8" cy="110.9" r="3"/>
+<circle class="pt" cx="519.2" cy="92.4" r="3"/>
+<circle class="pt" cx="528.5" cy="89.6" r="3"/>
+<circle class="pt" cx="537.9" cy="110.9" r="3"/>
+<circle class="pt" cx="547.2" cy="106.7" r="3"/>
+<circle class="pt" cx="556.6" cy="66.8" r="3"/>
+<circle class="pt" cx="566.0" cy="55.4" r="3"/>
+<circle class="pt" cx="575.3" cy="73.9" r="3"/>
+<line class="seg" x1="322.7" y1="146.6" x2="416.2" y2="159.4"/>
+<circle class="hl" cx="322.7" cy="146.6" r="6"/>
+<text class="val" x="322.7" y="134.6" text-anchor="middle">1998: 0.61</text>
+<circle class="hl" cx="416.2" cy="159.4" r="6"/>
+<text class="val" x="416.2" y="183.4" text-anchor="middle">2008: 0.52</text>
+<line class="axis" x1="56" x2="56" y1="34" y2="262"/>
+<line class="axis" x1="56" x2="580" y1="262" y2="262"/>
+<text class="tick" x="16" y="16">°C above the 1901–2000 average</text>
+</svg>
+<svg class="narrow-only" viewBox="0 0 360 280" role="img" aria-label="Global temperature 1970 to 2025, rising from about 0 to about 1.2 degrees, with the 1998 to 2008 window shaded.">
+<line class="grid" x1="40" x2="346" y1="246.0" y2="246.0"/>
+<text class="tick" x="34" y="250.0" text-anchor="end">-0.2</text>
+<line class="grid" x1="40" x2="346" y1="193.0" y2="193.0"/>
+<text class="tick" x="34" y="197.0" text-anchor="end">0.2</text>
+<line class="grid" x1="40" x2="346" y1="140.0" y2="140.0"/>
+<text class="tick" x="34" y="144.0" text-anchor="end">0.6</text>
+<line class="grid" x1="40" x2="346" y1="87.0" y2="87.0"/>
+<text class="tick" x="34" y="91.0" text-anchor="end">1.0</text>
+<line class="grid" x1="40" x2="346" y1="34.0" y2="34.0"/>
+<text class="tick" x="34" y="38.0" text-anchor="end">1.4</text>
+<text class="tick" x="42.7" y="268" text-anchor="middle">1970</text>
+<line class="axis" x1="42.7" x2="42.7" y1="246" y2="250"/>
+<text class="tick" x="97.4" y="268" text-anchor="middle">1980</text>
+<line class="axis" x1="97.4" x2="97.4" y1="246" y2="250"/>
+<text class="tick" x="152.0" y="268" text-anchor="middle">1990</text>
+<line class="axis" x1="152.0" x2="152.0" y1="246" y2="250"/>
+<text class="tick" x="206.7" y="268" text-anchor="middle">2000</text>
+<line class="axis" x1="206.7" x2="206.7" y1="246" y2="250"/>
+<text class="tick" x="261.3" y="268" text-anchor="middle">2010</text>
+<line class="axis" x1="261.3" x2="261.3" y1="246" y2="250"/>
+<text class="tick" x="315.9" y="268" text-anchor="middle">2020</text>
+<line class="axis" x1="315.9" x2="315.9" y1="246" y2="250"/>
+<rect class="window" x="195.7" y="34" width="54.6" height="212"/>
+<polyline class="line" points="42.7,214.2 48.2,230.1 53.7,212.9 59.1,197.0 64.6,226.1 70.1,220.8 75.5,227.4 81.0,193.0 86.4,204.9 91.9,194.3 97.4,181.1 102.8,175.8 108.3,199.6 113.8,177.1 119.2,197.0 124.7,200.9 130.2,190.3 135.6,175.8 141.1,169.1 146.6,185.0 152.0,163.8 157.5,166.5 162.9,189.0 168.4,185.0 173.9,177.1 179.3,158.6 184.8,174.4 190.3,155.9 195.7,138.7 201.2,166.5 206.7,166.5 212.1,149.3 217.6,141.3 223.1,140.0 228.5,149.3 234.0,132.0 239.4,136.0 244.9,137.3 250.4,150.6 255.8,133.4 261.3,125.4 266.8,140.0 272.2,136.0 277.7,132.0 283.2,122.8 288.6,102.9 294.1,87.0 299.6,96.3 305.0,105.5 310.5,88.3 315.9,85.7 321.4,105.5 326.9,101.6 332.3,64.5 337.8,53.9 343.3,71.1"/>
+<circle class="pt" cx="42.7" cy="214.2" r="3"/>
+<circle class="pt" cx="48.2" cy="230.1" r="3"/>
+<circle class="pt" cx="53.7" cy="212.9" r="3"/>
+<circle class="pt" cx="59.1" cy="197.0" r="3"/>
+<circle class="pt" cx="64.6" cy="226.1" r="3"/>
+<circle class="pt" cx="70.1" cy="220.8" r="3"/>
+<circle class="pt" cx="75.5" cy="227.4" r="3"/>
+<circle class="pt" cx="81.0" cy="193.0" r="3"/>
+<circle class="pt" cx="86.4" cy="204.9" r="3"/>
+<circle class="pt" cx="91.9" cy="194.3" r="3"/>
+<circle class="pt" cx="97.4" cy="181.1" r="3"/>
+<circle class="pt" cx="102.8" cy="175.8" r="3"/>
+<circle class="pt" cx="108.3" cy="199.6" r="3"/>
+<circle class="pt" cx="113.8" cy="177.1" r="3"/>
+<circle class="pt" cx="119.2" cy="197.0" r="3"/>
+<circle class="pt" cx="124.7" cy="200.9" r="3"/>
+<circle class="pt" cx="130.2" cy="190.3" r="3"/>
+<circle class="pt" cx="135.6" cy="175.8" r="3"/>
+<circle class="pt" cx="141.1" cy="169.1" r="3"/>
+<circle class="pt" cx="146.6" cy="185.0" r="3"/>
+<circle class="pt" cx="152.0" cy="163.8" r="3"/>
+<circle class="pt" cx="157.5" cy="166.5" r="3"/>
+<circle class="pt" cx="162.9" cy="189.0" r="3"/>
+<circle class="pt" cx="168.4" cy="185.0" r="3"/>
+<circle class="pt" cx="173.9" cy="177.1" r="3"/>
+<circle class="pt" cx="179.3" cy="158.6" r="3"/>
+<circle class="pt" cx="184.8" cy="174.4" r="3"/>
+<circle class="pt" cx="190.3" cy="155.9" r="3"/>
+<circle class="pt" cx="195.7" cy="138.7" r="3"/>
+<circle class="pt" cx="201.2" cy="166.5" r="3"/>
+<circle class="pt" cx="206.7" cy="166.5" r="3"/>
+<circle class="pt" cx="212.1" cy="149.3" r="3"/>
+<circle class="pt" cx="217.6" cy="141.3" r="3"/>
+<circle class="pt" cx="223.1" cy="140.0" r="3"/>
+<circle class="pt" cx="228.5" cy="149.3" r="3"/>
+<circle class="pt" cx="234.0" cy="132.0" r="3"/>
+<circle class="pt" cx="239.4" cy="136.0" r="3"/>
+<circle class="pt" cx="244.9" cy="137.3" r="3"/>
+<circle class="pt" cx="250.4" cy="150.6" r="3"/>
+<circle class="pt" cx="255.8" cy="133.4" r="3"/>
+<circle class="pt" cx="261.3" cy="125.4" r="3"/>
+<circle class="pt" cx="266.8" cy="140.0" r="3"/>
+<circle class="pt" cx="272.2" cy="136.0" r="3"/>
+<circle class="pt" cx="277.7" cy="132.0" r="3"/>
+<circle class="pt" cx="283.2" cy="122.8" r="3"/>
+<circle class="pt" cx="288.6" cy="102.9" r="3"/>
+<circle class="pt" cx="294.1" cy="87.0" r="3"/>
+<circle class="pt" cx="299.6" cy="96.3" r="3"/>
+<circle class="pt" cx="305.0" cy="105.5" r="3"/>
+<circle class="pt" cx="310.5" cy="88.3" r="3"/>
+<circle class="pt" cx="315.9" cy="85.7" r="3"/>
+<circle class="pt" cx="321.4" cy="105.5" r="3"/>
+<circle class="pt" cx="326.9" cy="101.6" r="3"/>
+<circle class="pt" cx="332.3" cy="64.5" r="3"/>
+<circle class="pt" cx="337.8" cy="53.9" r="3"/>
+<circle class="pt" cx="343.3" cy="71.1" r="3"/>
+<line class="seg" x1="195.7" y1="138.7" x2="250.4" y2="150.6"/>
+<circle class="hl" cx="195.7" cy="138.7" r="6"/>
+<text class="val" x="195.7" y="126.7" text-anchor="middle">1998: 0.61</text>
+<circle class="hl" cx="250.4" cy="150.6" r="6"/>
+<text class="val" x="250.4" y="174.6" text-anchor="middle">2008: 0.52</text>
+<line class="axis" x1="40" x2="40" y1="34" y2="246"/>
+<line class="axis" x1="40" x2="346" y1="246" y2="246"/>
+<text class="tick" x="0" y="16">°C above the 1901–2000 average</text>
+</svg>
+<figcaption>Figure 5. Global land and ocean temperature, 1970–2025, with 1998–2008 shaded. Data: NOAA [5].</figcaption>
+</figure>
+
+<p>Figures 4 and 5 also show how the frame of a line graph changes its look. From 1998 to 1999 the temperature fell 0.61 − 0.40 = 0.21 °C. In Figure 4, whose vertical axis covers only 0.5 °C, that drop takes up 0.21 ÷ 0.5 = 42% of the height of the chart. In Figure 5, whose axis covers 1.6 °C, the same drop takes up 0.21 ÷ 1.6 = 13%, about an eighth.</p>
+
+<p>In Figure 5 the year 1998 stands well above the years around it. A strong El Niño, a periodic warming of the tropical Pacific Ocean, made 1998 unusually warm [4]. In the NOAA data, 8 of the 14 years from 1999 through 2012 were cooler than 1998, and 2005 was the first year warmer than 1998 [5]. A window that starts at an unusually high year and ends at a low one can make almost any rising series look flat.</p>
+
+<p>Lecture 8.2 gives a better tool than two points: the least-squares regression line <span class="var">y</span> = <span class="var">m</span><span class="var">x</span> + <span class="var">b</span>, which uses every year in the window. For 1998–2008, its slope is <span class="var">m</span> = 0.012 °C per year, or 0.12 °C per decade, even though the two endpoints fall. For 1970–2025, it is 0.019 °C per year, or 0.19 °C per decade. The five warmest years in the record are 2024, 2023, 2025, 2020 and 2016 [5]. Two endpoint values can be chosen to tell either story. A regression line over a long window is much harder to steer.</p>
+
+
+<!-- ============================================================ -->
+<h2>4. Correlation, causation and a confounding variable</h2>
+
+<p>In May 1999, researchers at the Children's Hospital of Philadelphia reported a study of 479 children aged 2 to 16 [6]. Among children who had slept in darkness before age 2, 10% were nearsighted (myopic). Among those who had slept with a night light, 34% were. Among those who had slept with the room light on, 55% were, 5.5 times the rate for darkness [6]. The hospital's news release said that children who sleep with a light on before age 2 “may be at significantly higher risk” of nearsightedness [6].</p>
+
+<p>In 2000, two other research groups reported similar rates of nearsightedness for children who had and had not slept with a light before age 2. They also noted that nearsighted parents were more likely to leave a light on in their child's room [7]. Children of nearsighted parents are at higher risk of nearsightedness themselves [8]. So the parents' nearsightedness can raise both the chance of a night light and the chance that the child is nearsighted.</p>
+
+<p>A <strong>confounding variable</strong> is a third variable that affects both the variable thought of as the cause and the outcome. Here the suspected cause is the night light, the outcome is the child's nearsightedness, and the confounding variable is the parents' nearsightedness. A confounding variable can produce a strong association between two things when neither one causes the other. In lecture 8.2 an association was a tilt in a scatterplot, measured by <span class="var">r</span>; with yes/no groups it shows up as a difference in percentages. Lecture 8.2 (Section 6) gave a warning of the same kind: richer countries differ from poorer ones in other ways that affect health, so the regression line does not show that more income causes longer lives.</p>
+
+<div class="task">
+<h3>Task 4 (about 4 minutes, calculator)</h3>
+<p>The counts below are <strong>made up</strong> to show how a confounding variable works. They describe 400 children.</p>
+<div class="groups">
+<table>
+<caption>Group 1: at least one nearsighted parent</caption>
+<tr><th>Light at night</th><th>Children</th><th>Nearsighted</th></tr>
+<tr><td>yes</td><td>150</td><td>60</td></tr>
+<tr><td>no</td><td>50</td><td>20</td></tr>
+</table>
+<table>
+<caption>Group 2: no nearsighted parent</caption>
+<tr><th>Light at night</th><th>Children</th><th>Nearsighted</th></tr>
+<tr><td>yes</td><td>50</td><td>5</td></tr>
+<tr><td>no</td><td>150</td><td>15</td></tr>
+</table>
+</div>
+<ol type="a">
+<li>For each of the four rows (two in each group), compute the percent of children who are nearsighted.</li>
+<li>Combine both parent groups. Compute the percent nearsighted among all 200 children who slept with a light, and among all 200 who did not.</li>
+<li>Write one sentence comparing your answers to (a) and (b).</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 4</summary>
+<p class="calc">(a) Group 1: 60 ÷ 150 = 40% with a light, 20 ÷ 50 = 40% without. Group 2: 5 ÷ 50 = 10% with a light, 15 ÷ 150 = 10% without.</p>
+<p class="calc">(b) With a light: (60 + 5) ÷ (150 + 50) = 65 ÷ 200 = 32.5%. Without a light: (20 + 15) ÷ (50 + 150) = 35 ÷ 200 = 17.5%.</p>
+<p>(c) Within each parent group the light makes no difference, yet the combined numbers show nearly twice the rate with a light. The combined difference comes from the fact that most children who slept with a light (150 of 200) have a nearsighted parent.</p>
+</details>
+
+<p>Comparing within groups, as in part (a), is one way researchers check for a confounding variable they have measured. It works only for confounders someone thought to record. The stronger check is an experiment that assigns the suspected cause at random, for example by a coin flip. Random assignment makes the two groups alike on average in every other way, measured or not. The 1999 study observed children and did not assign night lights, so it could show an association and could not settle the cause [6].</p>
+
+<!-- ============================================================ -->
+<h2>5. Small samples</h2>
+
+<p>In 1974, Amos Tversky and Daniel Kahneman published this question [9]:</p>
+<blockquote>A certain town is served by two hospitals. In the larger hospital about 45 babies are born each day, and in the smaller hospital about 15 babies are born each day. As you know, about 50 percent of all babies are boys. However, the exact percentage varies from day to day. Sometimes it may be higher than 50 percent, sometimes lower. For a period of 1 year, each hospital recorded the days on which more than 60 percent of the babies born were boys. Which hospital do you think recorded more such days?</blockquote>
+<p>Of 95 undergraduate students, 21 answered “the larger hospital”, 21 answered “the smaller hospital” and 53 answered “about the same” [9].</p>
+
+<p>The share of boys on one day is a mean in the sense of lecture 8.1. Give each baby the value 1 for a boy and 0 for a girl. With <span class="var">n</span> babies born that day, the share of boys is the mean <span class="xbar">x</span> of these <span class="var">n</span> values. The two hospitals differ only in the sample size: <span class="var">n</span> = 45 a day and <span class="var">n</span> = 15 a day.</p>
+
+<p>Each press of a button below plays out one year (365 days) at a hospital, using the simplification that each baby is a boy with probability exactly 0.5, independently of the others. Each bar counts the days on which a given percent of the babies were boys. Days with more than 60% boys are drawn in orange, to the right of the dashed line. A day with exactly 60% boys (9 of 15, or 27 of 45) does not count.</p>
+
+<div class="sim" id="sim">
+  <div class="controls">
+    <button id="run15" type="button">Simulate a year: 15 births a day</button>
+    <button id="run45" type="button">Simulate a year: 45 births a day</button>
+    <button id="clear" type="button" class="secondary">Clear list</button>
+  </div>
+  <svg id="simSvg" viewBox="0 0 600 280" role="img" aria-label="Bar chart of the number of days at each percent of boys, for one simulated year."></svg>
+  <p class="result" id="simResult">Press one of the buttons above.</p>
+  <p class="log" id="simLog"></p>
+</div>
+
+<div class="task">
+<h3>Task 5 (about 3 minutes, the simulation above on a phone or laptop)</h3>
+<p>Press “15 births a day” three times and write down the number of days with more than 60% boys each time. Then do the same with “45 births a day”. Write one sentence saying which hospital records more such days, and about how many times as many.</p>
+</div>
+<details>
+<summary>Solution to Task 5</summary>
+<p>Simulated counts change from run to run. With <span class="var">n</span> = 15 births a day, most years give between about 40 and 70 days. With <span class="var">n</span> = 45, most years give between about 15 and 35 days. The smaller hospital records roughly twice as many days with more than 60% boys.</p>
+<p>Week 7 counting gives the exact chance. With 15 births, “more than 60% boys” means 10 or more boys, since 9 of 15 is exactly 60%. Each of the 2<sup>15</sup> = 32,768 boy–girl sequences is equally likely, and the number of sequences with exactly <i>k</i> boys is the number of combinations C(15, <i>k</i>), the nCr key on many calculators:</p>
+<p class="calc">C(15,10) + C(15,11) + C(15,12) + C(15,13) + C(15,14) + C(15,15) = 3003 + 1365 + 455 + 105 + 15 + 1 = 4944.</p>
+<p class="calc">Probability: 4944 ÷ 32,768 = 0.151. Expected days: 0.151 × 365 = 55 days.</p>
+<p class="calc">With 45 births, the day needs 28 or more boys. The same sum, with more terms, gives a probability of 0.068, so about 0.068 × 365 = 25 days.</p>
+</details>
+
+<p>A mean <span class="xbar">x</span> computed from a small sample size <span class="var">n</span> moves around much more by chance than one computed from a large <span class="var">n</span>. The smaller hospital has more extreme days in both directions, above 60% boys and below 40%. Real rankings show the same pattern: the U.S. counties with the lowest and with the highest kidney cancer rates are both mostly small rural counties, and small schools crowd both the top and the bottom of a ranking by average test score [10].</p>
+
+<!-- ============================================================ -->
+<h2>6. Base rates and screening tests</h2>
+
+<p>A screening mammogram is an X-ray of the breast given to women with no symptoms, to look for breast cancer. A large study from the Breast Cancer Surveillance Consortium looked at 1,682,504 screening mammograms done in the United States from 2007 to 2013 [11]. It reports two numbers that describe how good the test is.</p>
+<ul>
+<li>The <strong>sensitivity</strong> is the percent of women who have cancer whose test comes back positive. For screening mammograms it was 86.9% [11]. Out of 1,000 women with cancer, about 869 test positive.</li>
+<li>The <strong>specificity</strong> is the percent of women who do not have cancer whose test comes back negative. It was 88.9% [11]. Out of 1,000 women without cancer, about 889 test negative and the other 111 test positive.</li>
+</ul>
+<p>A <strong>true positive</strong> is a positive test for someone with the condition. A <strong>false positive</strong> is a positive test for someone without the condition, and a <strong>false negative</strong> is a negative test for someone with it.</p>
+<p>Both numbers are close to 90%, so the test could be called “about 90% accurate”. The question a patient with a positive result has is a third number: given a positive test, what is the probability of cancer? That number depends on the <strong>base rate</strong>, the percent of the people tested who have the condition (also called the prevalence).</p>
+
+<p>The study found 5.1 cancers per 1,000 screens, and the test finds 86.9% of the cancers that are there [11]. So about 5.1 ÷ 0.869 = 5.87 women per 1,000 screened had cancer. We round this to 5.9 per 1,000, which is 59 women out of 10,000. This is a simplification: it treats the cancers the study counted as all the cancers present.</p>
+
+<div class="task">
+<h3>Task 6 (about 5 minutes, calculator)</h3>
+<p>Copy and fill in this table for 10,000 women screened. Round each count to a whole number. Then compute the percent of women who test positive who actually have cancer.</p>
+<div class="scroll"><table>
+<tr><th></th><th>Test positive</th><th>Test negative</th><th>Total</th></tr>
+<tr><td>Cancer</td><td>?</td><td>?</td><td>59</td></tr>
+<tr><td>No cancer</td><td>?</td><td>?</td><td>9,941</td></tr>
+<tr><td>Total</td><td>?</td><td>?</td><td>10,000</td></tr>
+</table></div>
+<p>Use the sensitivity 86.9% for the cancer row and the specificity 88.9% for the no-cancer row.</p>
+</div>
+<details>
+<summary>Solution to Task 6</summary>
+<p class="calc">Cancer, test positive: 59 × 0.869 = 51.3, about 51. Cancer, test negative: 59 − 51 = 8.</p>
+<p class="calc">No cancer, test negative: 9,941 × 0.889 = 8,837.55, about 8,838. No cancer, test positive: 9,941 × 0.111 = 1,103.45, about 1,103. Check: 1,103 + 8,838 = 9,941.</p>
+<div class="scroll"><table>
+<tr><th></th><th>Test positive</th><th>Test negative</th><th>Total</th></tr>
+<tr><td>Cancer</td><td>51</td><td>8</td><td>59</td></tr>
+<tr><td>No cancer</td><td>1,103</td><td>8,838</td><td>9,941</td></tr>
+<tr><td>Total</td><td>1,154</td><td>8,846</td><td>10,000</td></tr>
+</table></div>
+<p class="calc">Of the 1,154 positive tests, 51 are women with cancer: 51 ÷ 1,154 = 0.044, or 4.4%. The other 1,103 ÷ 1,154 = 95.6% of positive tests are false positives.</p>
+</details>
+
+<p>The study itself reports that 4.4% of positive screening mammograms led to a cancer diagnosis [11], the same as the table. It also reports that 11.6% of screens were positive [11]; the table gives 1,154 ÷ 10,000 = 11.5%, close to that.</p>
+
+<p>The test is right for (51 + 8,838) ÷ 10,000 = 88.9% of women, yet most of its positives are false because of the base rate. Its 11.1% error rate for women without cancer applies to a large group, 9,941 women, and produces 1,103 false positives. Its 86.9% sensitivity applies to a small group, 59 women, and produces 51 true positives. A negative result, on the other hand, is very reliable here: 8,838 of the 8,846 negatives, or 99.9%, are women without cancer. A positive screening result leads to further tests, which sort the 51 from the 1,103.</p>
+
+<p>In the language of week 7, the table finds a probability by counting: P(cancer, given a positive test) = (positives with cancer) ÷ (all positives). The same method works for any test. With made-up round numbers, a test with 90% sensitivity and 90% specificity, used where 1% of people have the condition, gives 90 true positives and 990 false positives out of 10,000 people, so 90 ÷ 1,080 = 8.3% of positives are correct.</p>
+
+<h3>The same table in a spreadsheet</h3>
+<p>Column A holds labels and column B holds values and formulas. Each formula refers to cells above it, so changing the base rate in B3 updates every count.</p>
+
+<div class="scroll"><table id="sheetTable">
+<tr><th>Row</th><th>A</th><th>B</th></tr>
+</table></div>
+<p>
+<button id="dlCsv" type="button">Download CSV</button>
+<button id="copyLayout" type="button" class="secondary">Copy layout</button>
+<span id="copyMsg" class="log"></span>
+</p>
+<p>“Copy layout” copies the table with tabs between columns, so it can be pasted into cell A1 of an empty sheet. These formulas were not tested in Excel or Google Sheets.</p>
+
+<div class="task">
+<h3>Task 7 (about 4 minutes, spreadsheet)</h3>
+<p>Enter the layout above in a spreadsheet, starting at cell A1. Check that B13 shows about 0.0444. Then change the base rate in B3 to each of the two made-up values below and write down B13 each time, as a percent to one decimal place.</p>
+<ol type="a">
+<li>B3 = 0.1, a group in which 1 in 10 women tested has cancer.</li>
+<li>B3 = 0.001, a group in which 1 in 1,000 women tested has cancer.</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 7</summary>
+<p class="calc">With B3 = 0.0059, B13 = 51.271 ÷ 1,154.722 = 0.0444, or 4.4%. The spreadsheet does not round the counts, so its answer can differ slightly from the rounded table.</p>
+<p class="calc">(a) B3 = 0.1: 869 true positives and 999 false positives, so B13 = 869 ÷ 1,868 = 0.465, or 46.5%.</p>
+<p class="calc">(b) B3 = 0.001: 8.69 true positives and 1,108.89 false positives, so B13 = 0.0078, or 0.8%.</p>
+<p>The test is the same in all three cases. Only the base rate changed, and the chance that a positive result is correct went from under 1% to almost one half.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2>7. Questions to ask before believing a graph or statistic</h2>
+<ol>
+<li>Where does the vertical axis start, and are the bar lengths in proportion to the numbers? (Section 1)</li>
+<li>Is the change reported in percentage points or in percent? (Section 1)</li>
+<li>Does the size of a picture grow in more than one direction, so its area or volume exaggerates the change? (Section 2)</li>
+<li>Why does the time window start and end where it does, and what does a regression line over a longer window show? (Section 3)</li>
+<li>Was this an experiment with random assignment, or an observation in which a confounding variable could explain the pattern? (Section 4)</li>
+<li>What is the sample size <span class="var">n</span> behind each mean or percent: how many people, days or places? (Section 5)</li>
+<li>For a test result, what is the base rate in the group being tested? (Section 6)</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2>Sources</h2>
+<ol class="sources">
+<li>Nathan Yau, “Fox News continues charting excellence”, <i>FlowingData</i>, August 6, 2012. https://flowingdata.com/2012/08/06/fox-news-continues-charting-excellence/ . Figures quoted: top tax rate 35% “now” and 39.6% on January 1, 2013 (the chart title and bar labels are read from the chart image in the article); “The value axis starts at 34 percent instead of zero.”</li>
+<li>Edward R. Tufte, <i>The Visual Display of Quantitative Information</i>, Graphics Press, 1983, p. 57, as quoted by Michael Friendly, “Lie factor”, DataVis.ca gallery, York University, 2007. https://www.datavis.ca/gallery/lie-factor.php . Figures quoted: New York Times fuel economy graphic, standard from 18 to 27.5 mpg, “an increase of 53%”, increase shown in the graph 783%, lie factor 14.8; definition of the lie factor.</li>
+<li>CS 519, Lecture 15, “Information Visualization Design”, University of Illinois, Fall 2017, summarizing Tufte (1983). https://courses.grainger.illinois.edu/cs519/fa2017/519-Lecture%2015%20-%20Information%20Visualization%20Design.pdf . Figures quoted: “Line representing 18 MPG in 1978 is 0.6 inches long”; “Line representing 27.5 MPG in 1985 is 5.3 inches long.”</li>
+<li>John Mason, “It hasn't warmed since 1998”, <i>Skeptical Science</i>, last updated March 8, 2024. https://skepticalscience.com/global-warming-stopped-in-1998.htm . Quoted: the myth statement, and that 1998 “featured a massive El Nino” whose temperature spike “was a huge outlier.”</li>
+<li>NOAA National Centers for Environmental Information, “Climate at a Glance: Global Time Series”, global land and ocean, January–December average temperature departures from the 1901–2000 average, 1970–2025, retrieved October 4, 2026. https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series . Figures quoted: 1970: 0.04 °C, 1998: 0.61 °C, 2008: 0.52 °C, 2020: 1.01 °C; all yearly values 1970–2025 in Figures 4 and 5.</li>
+<li>“Near-sightedness in children linked to light exposure during sleep before age two”, news release from The Children's Hospital of Philadelphia, <i>ScienceDaily</i>, May 13, 1999, reporting G. E. Quinn, C. H. Shin, M. G. Maguire and R. A. Stone, “Myopia and ambient lighting at night”, <i>Nature</i> 399, 113–114 (1999). https://www.sciencedaily.com/releases/1999/05/990513065840.htm . Figures quoted: 479 children aged 2 to 16; 10% myopic after sleeping in darkness, 34% with a night light, 55% with room light; children who sleep with a light on before age 2 “may be at significantly higher risk of developing myopia”; “The study does not establish that nighttime lighting during early childhood is a direct cause of myopia.”</li>
+<li>National Eye Institute, “Myopia development and nighttime light exposure in infancy”, news release, March 1, 2000. https://www.nei.nih.gov/about/news-and-events/news/myopia-development-and-nighttime-light-exposure-infancy . Quoted: studies by Gwiazda and by Zadnik “reported similar percentages of myopia in children who had slept with and without nighttime lighting before age two”; “myopic parents were more likely to use night lighting in their children's rooms.”</li>
+<li>National Eye Institute, “Nearsightedness (Myopia)”, web page, last updated December 4, 2024. https://www.nei.nih.gov/learn-about-eye-health/eye-conditions-and-diseases/nearsightedness-myopia (read October 4, 2026). Quoted: “Anyone can be nearsighted, but you're at higher risk if you have family members who are nearsighted too.”</li>
+<li>Amos Tversky and Daniel Kahneman, “Judgment under Uncertainty: Heuristics and Biases”, <i>Science</i> 185 (4157), 1124–1131, September 27, 1974. Figures quoted: the hospital question (45 and 15 births per day, more than 60% boys) and the answers of 95 students: 21, 21 and 53.</li>
+<li>Alex Reinhart, <i>Statistics Done Wrong</i>, No Starch Press, 2015, section 6.3 “Little Extremes”. https://stats.libretexts.org/Bookshelves/Introductory_Statistics/Statistics_Done_Wrong_(Reinhart) . Quoted: the lowest and the highest county kidney cancer rates are both found in small rural counties; “smaller schools have more widely varying average test scores, entirely because they have fewer students.”</li>
+<li>C. D. Lehman, R. F. Arao, B. L. Sprague and others, “National Performance Benchmarks for Modern Screening Digital Mammography: Update from the Breast Cancer Surveillance Consortium”, <i>Radiology</i> 283 (1), 49–58, April 2017 (online December 5, 2016). https://pubs.rsna.org/doi/10.1148/radiol.2016161174 . Figures quoted: 1,682,504 screening mammograms, 2007–2013; sensitivity 86.9%; specificity 88.9%; cancer detection rate 5.1 per 1,000 screens; abnormal interpretation rate 11.6%; positive predictive value 4.4%.</li>
+</ol>
+</main>
+
+<script>
+(function () {
+  // ---------- Small-sample simulation (Section 5) ----------
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.getElementById("simSvg");
+  var resultEl = document.getElementById("simResult");
+  var logEl = document.getElementById("simLog");
+  var log = [];
+
+  function el(name, attrs, text) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function simulateYear(n) {
+    var counts = new Array(n + 1).fill(0);
+    for (var d = 0; d < 365; d++) {
+      var boys = 0;
+      for (var b = 0; b < n; b++) if (Math.random() < 0.5) boys++;
+      counts[boys]++;
+    }
+    return counts;
+  }
+
+  // Layout: on a narrow screen the chart uses a narrower viewBox, so its text stays readable.
+  function draw(n, counts) {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var narrow = svg.getBoundingClientRect().width < 500;
+    var W = narrow ? 400 : 600, H = 280;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var fs = narrow ? 15 : 13;
+    var L = 44, R = 14, T = 34, B = 220;
+    var maxC = 10;
+    if (counts) for (var i = 0; i <= n; i++) maxC = Math.max(maxC, counts[i]);
+    maxC = Math.ceil(maxC / 10) * 10;
+    function X(p) { return L + p / 100 * (W - L - R); }
+    function Y(c) { return B - c / maxC * (B - T); }
+    function txt(attrs, t) { attrs.style = "font-size:" + fs + "px"; attrs["class"] = attrs["class"] || "tick"; return el("text", attrs, t); }
+    var step = maxC <= 50 ? 10 : (maxC <= 100 ? 20 : 50);
+    for (var t = step; t <= maxC; t += step) {
+      svg.appendChild(el("line", { "class": "grid", x1: L, x2: W - R, y1: Y(t), y2: Y(t) }));
+      svg.appendChild(txt({ x: L - 6, y: Y(t) + 5, "text-anchor": "end" }, String(t)));
+    }
+    for (var p = 0; p <= 100; p += (narrow ? 25 : 20)) {
+      svg.appendChild(txt({ x: X(p), y: B + 20, "text-anchor": p === 100 ? "end" : (p === 0 && narrow ? "start" : "middle") }, p + "%"));
+    }
+    svg.appendChild(txt({ x: (L + W - R) / 2, y: B + 46, "text-anchor": "middle" }, "percent of babies that are boys"));
+    svg.appendChild(txt({ x: 4, y: 16 }, "number of days"));
+    // Cut line halfway between the last count at or below 60% and the first count above it.
+    var kCut = Math.floor(0.6 * n) + 0.5;
+    var cutX = X(kCut / n * 100);
+    if (counts) {
+      var bw = Math.max(1.5, (W - L - R) / (n + 1) * 0.8);
+      for (var k = 0; k <= n; k++) {
+        if (!counts[k]) continue;
+        var pct = k / n * 100;
+        svg.appendChild(el("rect", { "class": (k * 10 > 6 * n) ? "over" : "under",
+          x: X(pct) - bw / 2, y: Y(counts[k]), width: bw, height: B - Y(counts[k]) }));
+      }
+    }
+    svg.appendChild(el("line", { "class": "cut", x1: cutX, x2: cutX, y1: T, y2: B }));
+    svg.appendChild(txt({ x: cutX + 4, y: T + 14 }, "more than 60%"));
+    svg.appendChild(el("line", { "class": "axis", x1: L, x2: W - R, y1: B, y2: B }));
+    svg.appendChild(el("line", { "class": "axis", x1: L, x2: L, y1: T, y2: B }));
+  }
+
+  var last = { n: 15, counts: null };
+  function run(n) {
+    var counts = simulateYear(n);
+    var over = 0;
+    for (var k = 0; k <= n; k++) if (k * 10 > 6 * n) over += counts[k];
+    last = { n: n, counts: counts };
+    draw(n, counts);
+    resultEl.textContent = "Days with more than 60% boys: " + over + " of 365 (" + n + " births a day).";
+    log.push(n + " births: " + over + " days");
+    logEl.textContent = "Runs so far: " + log.join("; ");
+  }
+
+  document.getElementById("run15").addEventListener("click", function () { run(15); });
+  document.getElementById("run45").addEventListener("click", function () { run(45); });
+  document.getElementById("clear").addEventListener("click", function () { log = []; logEl.textContent = ""; });
+  window.addEventListener("resize", function () { draw(last.n, last.counts); });
+  draw(15, null);
+
+  // ---------- Spreadsheet layout (Section 6) ----------
+  var rows = [
+    ["Quantity", "Value"],
+    ["People screened", "10000"],
+    ["Base rate (share with cancer)", "0.0059"],
+    ["Sensitivity", "0.869"],
+    ["Specificity", "0.889"],
+    ["Have cancer", "=B2*B3"],
+    ["No cancer", "=B2-B6"],
+    ["True positives", "=B6*B4"],
+    ["False negatives", "=B6-B8"],
+    ["False positives", "=B7*(1-B5)"],
+    ["True negatives", "=B7-B10"],
+    ["All positives", "=B8+B10"],
+    ["Share of positives with cancer", "=B8/B12"]
+  ];
+  var table = document.getElementById("sheetTable");
+  rows.forEach(function (r, i) {
+    var tr = document.createElement("tr");
+    [String(i + 1), r[0], r[1]].forEach(function (c) {
+      var td = document.createElement("td"); td.textContent = c; tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+  var csv = rows.map(function (r) { return r.join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (r) { return r.join("\t"); }).join("\n");
+
+  document.getElementById("dlCsv").addEventListener("click", function () {
+    var a = document.createElement("a");
+    try {
+      var blob = new Blob([csv], { type: "text/csv" });
+      a.href = URL.createObjectURL(blob);
+    } catch (e) {
+      a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    }
+    a.download = "base-rate-table.csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+
+  var msg = document.getElementById("copyMsg");
+  function fallbackCopy() {
+    var ta = document.createElement("textarea");
+    ta.value = tsv; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    msg.textContent = ok ? "Copied." : "Copy did not work here; select the table and copy it by hand.";
+  }
+  document.getElementById("copyLayout").addEventListener("click", function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () { msg.textContent = "Copied."; }, fallbackCopy);
+    } else { fallbackCopy(); }
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-08/8-2-scatterplots-and-regression-lines/" style="color:inherit">&larr; 8.2 Scatterplots and regression lines</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-09/9-1-stable-matchings/" style="color:inherit">9.1 Stable matchings &rarr;</a></nav>
+</body>
+</html>

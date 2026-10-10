@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monthly Payment Formula</title>
+<style>
+:root {
+  --bg: #fdfcf9;
+  --text: #1d1d1f;
+  --muted: #5a5a60;
+  --rule: #d9d6cf;
+  --accent: #1f5f8b;
+  --task-bg: #eef4f8;
+  --task-border: #1f5f8b;
+  --sol-bg: #f6f5f1;
+  --code-bg: #f0eee8;
+  --table-head: #ece9e1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b;
+    --text: #e8e6e1;
+    --muted: #a8a6a0;
+    --rule: #3a3b40;
+    --accent: #7fb6dd;
+    --task-bg: #1d2a34;
+    --task-border: #7fb6dd;
+    --sol-bg: #212226;
+    --code-bg: #26272b;
+    --table-head: #2a2b30;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b;
+  --text: #e8e6e1;
+  --muted: #a8a6a0;
+  --rule: #3a3b40;
+  --accent: #7fb6dd;
+  --task-bg: #1d2a34;
+  --task-border: #7fb6dd;
+  --sol-bg: #212226;
+  --code-bg: #26272b;
+  --table-head: #2a2b30;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  line-height: 1.55;
+}
+main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+.course { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 0.85rem; color: var(--muted); margin: 0 0 0.3rem; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1.5rem; }
+h2 { font-size: 1.35rem; margin: 2.4rem 0 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+p, li { margin: 0.6rem 0; }
+a { color: var(--accent); }
+.display { margin: 1rem 0; padding: 0.4rem 0; text-align: center; overflow-x: auto; }
+.lines { display: inline-block; text-align: left; }
+.lines div { margin: 0.25rem 0; white-space: nowrap; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 0.15em; }
+.frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 0.2em; }
+.frac > span:last-child { padding: 0 0.2em; }
+.sig { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; line-height: 1; margin: 0 0.15em; }
+.sig .big { font-size: 1.7em; line-height: 1; }
+.sig .lim { font-size: 0.7em; }
+.box { font-weight: bold; }
+.nw { white-space: nowrap; }
+i + sup { margin-left: 0.1em; }
+.cond { display: block; font-weight: normal; margin-top: 0.5rem; }
+table.align { border-collapse: collapse; margin: 0 auto; font-size: 1em; }
+table.align td { border: none; padding: 0.1rem 0.18em; text-align: center; white-space: nowrap; }
+table.align td.lhs { text-align: right; padding-right: 0.4em; }
+table.align tr.sub td { border-top: 1px solid var(--rule); }
+table.align .gone { color: var(--muted); text-decoration: line-through; }
+.task {
+  background: var(--task-bg);
+  border-left: 5px solid var(--task-border);
+  padding: 0.8rem 1rem;
+  margin: 1.4rem 0 0.4rem;
+  border-radius: 4px;
+}
+.task .label { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--accent); margin: 0 0 0.3rem; }
+.task ol, .task ul { padding-left: 1.3rem; }
+details.sol {
+  background: var(--sol-bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  margin: 0 0 1.4rem;
+  padding: 0.4rem 1rem;
+}
+details.sol summary { cursor: pointer; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--accent); padding: 0.3rem 0; }
+.tablewrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; font-size: 0.92rem; }
+th, td { border: 1px solid var(--rule); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+th { background: var(--table-head); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+code, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.85em; background: var(--code-bg); padding: 0.05em 0.3em; border-radius: 3px; }
+td code { white-space: nowrap; }
+pre { background: var(--code-bg); padding: 0.7rem; overflow-x: auto; font-size: 0.8rem; border-radius: 4px; }
+.buttons { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.8rem 0; }
+button {
+  font: 600 0.9rem system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+#copystatus { font-family: system-ui, sans-serif; font-size: 0.85rem; color: var(--muted); align-self: center; }
+.sources li { margin: 0.8rem 0; }
+.small { font-size: 0.9rem; color: var(--muted); }
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.6rem; }
+  .lines div { white-space: normal; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-04/4-1-monthly-mortgage-payment/" style="color:inherit">&larr; 4.1 Monthly mortgage payment</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-04/4-3-saving-for-the-down-payment/" style="color:inherit">4.3 Saving for the down payment &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Buying a house (week 4) · Lecture 2 of 3</p>
+<h1>A formula for the monthly payment</h1>
+
+<h2 id="s1">1. The payment from lecture 4.1</h2>
+
+<p>The median sale price of a home in King County in August 2026 was $845,000 [1]. With 20% down, the buyer borrows 80% of the price:</p>
+<p class="display">0.80 × 845,000 = 676,000 dollars.</p>
+<p>On October 1, 2026 the average rate for a 30-year fixed mortgage was 7.28% a year [2]. The bank charges interest every month at the monthly rate</p>
+<p class="display"><span class="nw"><i>r</i> = 0.0728</span> ÷ 12 = 0.0060666…</p>
+<p>In lecture 4.1 the spreadsheet ran the balance rule</p>
+<p class="display">new balance = old balance × (1 + <i>r</i>) − payment</p>
+<p>for 360 months, and we changed the payment by hand until the balance at month 360 came out as close to zero as whole cents allow. The payment that did it was <b>$4,625.28</b>. Taxes, insurance and fees are left out here, as they were in lecture 4.1, so this is the payment of loan and interest only.</p>
+<p>Trial and error worked, but it took a 360-row spreadsheet and many guesses. Every new loan, rate or length means starting over.</p>
+
+<div class="task" id="task1">
+<p class="label">Task 1 (about 3 minutes, spreadsheet)</p>
+<p>The same survey gives 6.60% a year for a 15-year fixed loan [2]. Open your spreadsheet from lecture 4.1, change the annual rate to 0.066, and look at the balance in the row for month 180 (15 years). Change the payment by trial and error until that balance is close to zero. Stop after 2 minutes and write down your best bracket: one payment, to the dollar, that leaves money owing and one that overpays.</p>
+</div>
+<details class="sol"><summary>Solution to Task 1</summary>
+<p>A payment of $5,925 leaves $279.10 owing at month 180, and $5,926 overpays by $27.07. So the 15-year payment is between $5,925 and $5,926. Pinning it down to the cent takes several more guesses. Task 6 finds it in one step: $5,925.91.</p>
+</details>
+
+<p>The question is whether one calculation gives the payment for any loan amount, rate and length, and whether that calculation gives $4,625.28 for the 30-year loan.</p>
+<p>We write <span class="nw"><i>f</i> = 1</span> + <i>r</i> for the number the balance is multiplied by each month. For this loan <span class="nw"><i>f</i> = 1.0060666…</span></p>
+
+<h2 id="s2">2. The balance after n months</h2>
+
+<p>Write <i>L</i> for the loan amount and <i>P</i> for the monthly payment. Apply the balance rule one month at a time and multiply out the brackets each time. At month 3, the last step takes out the common factor <i>P</i> from the payment terms.</p>
+<div class="display"><div class="lines">
+<div>After 1 month: <i>L f</i> − <i>P</i></div>
+<div>After 2 months: <span class="nw">(<i>L f</i> − <i>P</i>) <i>f</i> − <i>P</i></span> <span class="nw">= <i>L f</i><sup>2</sup> − <i>P f</i> − <i>P</i></span></div>
+<div>After 3 months: <span class="nw">(<i>L f</i><sup>2</sup> − <i>P f</i> − <i>P</i>) <i>f</i> − <i>P</i></span> <span class="nw">= <i>L f</i><sup>3</sup> − <i>P f</i><sup>2</sup> − <i>P f</i> − <i>P</i></span> <span class="nw">= <i>L f</i><sup>3</sup> − <i>P</i> (<i>f</i><sup>2</sup> + <i>f</i> + 1)</span></div>
+</div></div>
+<p>Each month adds one more power of <i>f</i> to the loan and one more term to the bracket of payments. The payment made in the last month has not grown at all (factor 1), the payment made one month earlier has grown once (factor <i>f</i>), and so on. After <i>n</i> months</p>
+<p class="display">balance = <span class="nw"><i>L f</i><sup><i>n</i></sup> − <i>P</i> (1 + <i>f</i> + <i>f</i><sup>2</sup> + … + <i>f</i><sup><i>n</i>−1</sup>).</span></p>
+<p>For the 30-year loan, <span class="nw"><i>n</i> = 360</span> and the bracket is the sum 1 + <i>f</i> + <i>f</i><sup>2</sup> + … + <i>f</i><sup>359</sup> from the end of lecture 4.1.</p>
+
+<div class="task" id="task2">
+<p class="label">Task 2 (about 4 minutes, calculator)</p>
+<p>A made-up loan: $1,000 at 1% a month, so <span class="nw"><i>r</i> = 0.01</span> and <span class="nw"><i>f</i> = 1.01</span>, with a payment of $300 a month.</p>
+<ol>
+<li>Use the balance rule to find the balance after 1, 2 and 3 months. Write down all three balances.</li>
+<li>Compute 1000 × 1.01<sup>3</sup> − 300 × (1 + 1.01 + 1.01<sup>2</sup>) in one go and compare it with your balance after 3 months.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 2</summary>
+<ol>
+<li>Month 1: 1000 × 1.01 − 300 = 710.00. Month 2: 710 × 1.01 − 300 = 417.10. Month 3: 417.10 × 1.01 − 300 = 121.271, about $121.27.</li>
+<li>1.01<sup>3</sup> = 1.030301 and 1 + 1.01 + 1.0201 = 3.0301. Then 1000 × 1.030301 − 300 × 3.0301 = 1030.301 − 909.03 = 121.271. The two answers agree.</li>
+</ol>
+</details>
+
+<h2 id="s3">3. Summation notation</h2>
+
+<p>Writing 1 + <i>f</i> + <i>f</i><sup>2</sup> + … + <i>f</i><sup>359</sup> takes space, and the “…” asks the reader to guess the pattern. Summation notation states the pattern exactly. The symbol Σ is the capital Greek letter sigma, for “sum”.</p>
+<p class="display">
+<span class="sig"><span class="lim">4</span><span class="big">Σ</span><span class="lim"><i>k</i>=1</span></span> <i>k</i> = 1 + 2 + 3 + 4 = 10
+</p>
+<p>Read it as “the sum of <i>k</i>, for <i>k</i> from 1 to 4”. The letter <i>k</i> is a counter. The number under Σ is where the counter starts, the number above is where it stops, and the expression to the right of Σ is the term you write down for each value of the counter. Two more examples:</p>
+<p class="display">
+<span class="sig"><span class="lim">3</span><span class="big">Σ</span><span class="lim"><i>k</i>=1</span></span> 10<span class="nw"><i>k</i> = 10</span> + 20 + 30 = 60
+</p>
+<p class="display">
+<span class="sig"><span class="lim">3</span><span class="big">Σ</span><span class="lim"><i>k</i>=0</span></span> 2<sup><i>k</i></sup> = 2<sup>0</sup> + 2<sup>1</sup> + 2<sup>2</sup> + 2<sup>3</sup> = 1 + 2 + 4 + 8 = 15
+</p>
+<p>The last one starts at <i>k</i> = 0. Any number to the power 0 is 1, so starting at 0 makes the first term 1. The sum of payments in Section 2 is written this way:</p>
+<p class="display">
+1 + <i>f</i> + <i>f</i><sup>2</sup> + … + <i>f</i><sup>359</sup> = <span class="sig"><span class="lim">359</span><span class="big">Σ</span><span class="lim"><i>k</i>=0</span></span> <i>f</i><sup><i>k</i></sup>
+</p>
+<p>The counter runs from 0 to 359, which is 360 values, one term for each monthly payment.</p>
+
+<div class="task" id="task3">
+<p class="label">Task 3 (about 3 minutes, pencil and calculator)</p>
+<ol>
+<li>Write out and add up <span class="sig"><span class="lim">5</span><span class="big">Σ</span><span class="lim"><i>k</i>=1</span></span> <i>k</i><sup>2</sup>.</li>
+<li>Write out and add up <span class="sig"><span class="lim">4</span><span class="big">Σ</span><span class="lim"><i>k</i>=0</span></span> 3<sup><i>k</i></sup>.</li>
+<li>Write the balance after 3 months from Section 2, <i>L f</i><sup>3</sup> − <i>P</i> (1 + <i>f</i> + <i>f</i><sup>2</sup>), using Σ for the bracket.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 3</summary>
+<ol>
+<li>1 + 4 + 9 + 16 + 25 = 55.</li>
+<li>1 + 3 + 9 + 27 + 81 = 121.</li>
+<li><i>L f</i><sup>3</sup> − <i>P</i> <span class="sig"><span class="lim">2</span><span class="big">Σ</span><span class="lim"><i>k</i>=0</span></span> <i>f</i><sup><i>k</i></sup>. The counter stops at 2 because the highest power in the bracket is <i>f</i><sup>2</sup>.</li>
+</ol>
+</details>
+
+<h2 id="s4">4. Geometric sequences</h2>
+
+<p>The terms 1, <i>f</i>, <i>f</i><sup>2</sup>, <i>f</i><sup>3</sup>, … have a pattern: to get from one term to the next you always multiply by the same number, <i>f</i>. A list of numbers with this property is a <b>geometric sequence</b>, and the number you multiply by is its <b>ratio</b>. You find the ratio by dividing any term by the term before it.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Sequence</th><th>Each term ÷ the one before</th><th>Geometric?</th></tr></thead>
+<tbody>
+<tr><td>1, 2, 4, 8, 16</td><td>2, 2, 2, 2</td><td>yes, ratio 2</td></tr>
+<tr><td>1000, 1010, 1020.10, 1030.301</td><td>1.01, 1.01, 1.01</td><td>yes, ratio 1.01</td></tr>
+<tr><td>2, 4, 6, 8</td><td>2, 1.5, 1.33…</td><td>no; it adds 2 each time</td></tr>
+</tbody>
+</table></div>
+<p>The second row is $1,000 left alone at 1% a month: the balance is multiplied by 1.01 every month. A loan balance with no payments is a geometric sequence with ratio <i>f</i>, and so is the list of factors 1, <i>f</i>, <i>f</i><sup>2</sup>, … in the payment sum. Adding up the terms of a geometric sequence gives a <b>geometric series</b>.</p>
+
+<h2 id="s5">5. The sum of a geometric series</h2>
+
+<h3>A small case: 1 + 2 + 4 + … + 2<sup>9</sup></h3>
+<p>Call the sum <i>S</i>. It has ten terms, from 2<sup>0</sup> to 2<sup>9</sup>. Multiply every term by the ratio 2. Each term turns into the next one:</p>
+<div class="display"><table class="align">
+<tr><td class="lhs"><i>S</i> =</td><td>1</td><td>+</td><td>2</td><td>+</td><td>4</td><td>+</td><td>…</td><td>+</td><td>2<sup>8</sup></td><td>+</td><td>2<sup>9</sup></td><td></td><td></td></tr>
+<tr><td class="lhs">2<i>S</i> =</td><td></td><td></td><td>2</td><td>+</td><td>4</td><td>+</td><td>…</td><td>+</td><td>2<sup>8</sup></td><td>+</td><td>2<sup>9</sup></td><td>+</td><td>2<sup>10</sup></td></tr>
+<tr class="sub"><td class="lhs">2<i>S</i> − <i>S</i> =</td><td>−1</td><td></td><td class="gone">2</td><td></td><td class="gone">4</td><td></td><td class="gone">…</td><td></td><td class="gone">2<sup>8</sup></td><td></td><td class="gone">2<sup>9</sup></td><td>+</td><td>2<sup>10</sup></td></tr>
+</table></div>
+<p>The two lines share every term from 2 to 2<sup>9</sup>, and each shared term sits in the same column. Subtract the first line from the second and those terms cancel (crossed out in the third line). Only the 2<sup>10</sup> at the end of the second line and the 1 at the start of the first are left:</p>
+<p class="display">2<i>S</i> − <i>S</i> = 2<sup>10</sup> − 1, so <span class="nw"><i>S</i> = 1024</span> − 1 = 1023.</p>
+<p>Adding the ten terms 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 + 256 + 512 also gives 1023.</p>
+
+<h3>The general case</h3>
+<p>The same steps work for any ratio <i>f</i> and any number of terms <i>n</i>:</p>
+<div class="display"><table class="align">
+<tr><td class="lhs"><i>S</i> =</td><td>1</td><td>+</td><td><i>f</i></td><td>+</td><td><i>f</i><sup>2</sup></td><td>+</td><td>…</td><td>+</td><td><i>f</i><sup><i>n</i>−1</sup></td><td></td><td></td></tr>
+<tr><td class="lhs"><i>f S</i> =</td><td></td><td></td><td><i>f</i></td><td>+</td><td><i>f</i><sup>2</sup></td><td>+</td><td>…</td><td>+</td><td><i>f</i><sup><i>n</i>−1</sup></td><td>+</td><td><i>f</i><sup><i>n</i></sup></td></tr>
+<tr class="sub"><td class="lhs"><i>f S</i> − <i>S</i> =</td><td>−1</td><td></td><td class="gone"><i>f</i></td><td></td><td class="gone"><i>f</i><sup>2</sup></td><td></td><td class="gone">…</td><td></td><td class="gone"><i>f</i><sup><i>n</i>−1</sup></td><td>+</td><td><i>f</i><sup><i>n</i></sup></td></tr>
+</table></div>
+<p>The shared terms cancel, so <i>f S</i> − <i>S</i> = <i>f</i><sup><i>n</i></sup> − 1. Take out the common factor <i>S</i> on the left:</p>
+<p class="display"><i>S</i> (<i>f</i> − 1) = <i>f</i><sup><i>n</i></sup> − 1</p>
+<p>Divide both sides by <i>f</i> − 1. This needs <i>f</i> ≠ 1, which holds whenever the interest rate is not zero.</p>
+<p class="display box">
+1 + <i>f</i> + <i>f</i><sup>2</sup> + … + <i>f</i><sup><i>n</i>−1</sup> = <span class="sig"><span class="lim"><i>n</i>−1</span><span class="big">Σ</span><span class="lim"><i>k</i>=0</span></span> <i>f</i><sup><i>k</i></sup> = <span class="frac"><span><i>f</i><sup><i>n</i></sup> − 1</span><span><i>f</i> − 1</span></span>
+</p>
+<p>In words: raise the ratio to the number of terms, subtract 1, and divide by the ratio minus 1. With <span class="nw"><i>f</i> = 2</span> and <span class="nw"><i>n</i> = 10</span> it gives (1024 − 1)/(2 − 1) = 1023, as above. With the mortgage factor <span class="nw"><i>f</i> = 1.0060666…</span> and <span class="nw"><i>n</i> = 360</span> it gives (8.82335226 − 1)/0.0060666… = 1289.56.</p>
+
+<div class="task" id="task4">
+<p class="label">Task 4 (about 4 minutes, calculator)</p>
+<ol>
+<li>Let <i>S</i> = 1 + 3 + 9 + 27 + 81 + 243. Write out 3<i>S</i> under <i>S</i> as above, subtract, and find <i>S</i>. Check by adding the six terms.</li>
+<li>Use the boxed formula to find 1 + 1.01 + 1.01<sup>2</sup>, the bracket from Task 2. Say what <i>f</i> and <i>n</i> are.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 4</summary>
+<ol>
+<li>3<i>S</i> = 3 + 9 + 27 + 81 + 243 + 729. Subtracting, 3<i>S</i> − <span class="nw"><i>S</i> = 729</span> − 1, so 2<span class="nw"><i>S</i> = 728</span> and <span class="nw"><i>S</i> = 364</span>. Adding: 1 + 3 + 9 + 27 + 81 + 243 = 364.</li>
+<li><span class="nw"><i>f</i> = 1.01</span> and there are <span class="nw"><i>n</i> = 3</span> terms. (1.01<sup>3</sup> − 1)/(1.01 − 1) = 0.030301/0.01 = 3.0301, the same as 1 + 1.01 + 1.0201.</li>
+</ol>
+</details>
+
+<h2 id="s6">6. A formula for the monthly payment</h2>
+
+<p>Section 2 gave the balance after <i>n</i> months. Replace the sum by the formula from Section 5:</p>
+<p class="display">balance after <i>n</i> months = <i>L f</i><sup><i>n</i></sup> − <i>P</i> · <span class="frac"><span><i>f</i><sup><i>n</i></sup> − 1</span><span><i>f</i> − 1</span></span></p>
+<p>The loan is paid off when this balance is zero. That gives an equation with one unknown, <i>P</i>, which we solve as in week 2.</p>
+<div class="display"><div class="lines">
+<div><span class="nw"><i>L f</i><sup><i>n</i></sup> − <i>P</i> · (<i>f</i><sup><i>n</i></sup> − 1)/(<i>f</i> − 1) = 0</span></div>
+<div><span class="nw"><i>L f</i><sup><i>n</i></sup> = <i>P</i> · (<i>f</i><sup><i>n</i></sup> − 1)/(<i>f</i> − 1)</span> &nbsp;&nbsp;<span class="nw">(add the payment term to both sides)</span></div>
+<div><span class="nw"><i>L f</i><sup><i>n</i></sup> (<i>f</i> − 1) = <i>P</i> (<i>f</i><sup><i>n</i></sup> − 1)</span> &nbsp;&nbsp;<span class="nw">(multiply both sides by <i>f</i> − 1)</span></div>
+<div><span class="nw"><i>L</i> (<i>f</i> − 1) <i>f</i><sup><i>n</i></sup> / (<i>f</i><sup><i>n</i></sup> − 1) = <i>P</i></span> &nbsp;&nbsp;<span class="nw">(divide both sides by <i>f</i><sup><i>n</i></sup> − 1)</span></div>
+</div></div>
+<p>Since <span class="nw"><i>f</i> = 1</span> + <i>r</i>, the factor <i>f</i> − 1 is just <i>r</i>. The monthly payment is</p>
+<p class="display box">
+<i>P</i> = <span class="frac"><span><i>L</i> · <i>r</i> · <i>f</i><sup><i>n</i></sup></span><span><i>f</i><sup><i>n</i></sup> − 1</span></span>
+<span class="cond">with <span class="nw"><i>r</i> = annual rate ÷ 12,</span> <span class="nw"><i>f</i> = 1 + <i>r</i>,</span> <span class="nw"><i>n</i> = number of months.</span></span>
+</p>
+<p>The formula also says how big the answer should be. <i>L</i> · <i>r</i> is the first month’s interest, $4,101.07 for our loan. The fraction <i>f</i><sup><i>n</i></sup>/(<i>f</i><sup><i>n</i></sup> − 1) is a little more than 1 when <i>f</i><sup><i>n</i></sup> is large (here about 1.13). So for a 30-year loan the payment is a bit more than the first month’s interest, which matches what lecture 4.1 found: early payments are mostly interest.</p>
+
+<div class="task" id="task5">
+<p class="label">Task 5 (about 5 minutes, calculator)</p>
+<p>Use the boxed formula for the loan of $676,000 at 7.28% for 30 years. Write down each of these, keeping every digit your calculator shows:</p>
+<ol>
+<li><i>r</i>, <i>f</i> and <i>n</i>;</li>
+<li><i>f</i><sup><i>n</i></sup>;</li>
+<li>the top of the fraction, <i>L</i> · <i>r</i> · <i>f</i><sup><i>n</i></sup>, and the bottom, <i>f</i><sup><i>n</i></sup> − 1;</li>
+<li><i>P</i>, rounded to the cent. Does it match $4,625.28?</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 5</summary>
+<ol>
+<li><span class="nw"><i>r</i> = 0.0728</span> ÷ 12 = 0.006066666…, <span class="nw"><i>f</i> = 1.006066666…</span>, <span class="nw"><i>n</i> = 30</span> × 12 = 360.</li>
+<li><i>f</i><sup>360</sup> = 8.82335226 (to eight decimal places). Without any payments the balance would grow to almost 9 times the loan in 30 years.</li>
+<li>Top: 676,000 × 0.006066666… = 4,101.0666…, and 4,101.0666… × 8.82335226 = 36,185.1558. Bottom: 8.82335226 − 1 = 7.82335226.</li>
+<li><span class="nw"><i>P</i> = 36,185.1558</span> ÷ 7.82335226 = 4,625.2750…, which rounds to <b>$4,625.28</b>. This is the spreadsheet’s answer from lecture 4.1, to the cent.</li>
+</ol>
+<p>On most calculators the whole formula fits in one line. The brackets around the bottom are needed, because without them the calculator divides by <i>f</i><sup>360</sup> first and subtracts 1 afterwards:</p>
+<p class="mono">676000 × (0.0728 ÷ 12) × (1 + 0.0728 ÷ 12)^360 ÷ ((1 + 0.0728 ÷ 12)^360 − 1)</p>
+<p>This line is for a calculator. The spreadsheet version is cell B9 in Section 7.</p>
+<p>Rounding too early changes the answer. The exact payment is $4,625.275…, only a few thousandths of a cent above the point where it would round down. Even rounding <i>f</i><sup>360</sup> to 8.8234 gives $4,625.27, and rounding <i>r</i> to 0.0061 gives $4,643.65, which is $18.37 too much. Keep all the digits until the last step. A bank charges whole cents, so the payment is rounded to $4,625.28, the amount lecture 4.1 found.</p>
+</details>
+
+<h2 id="s7">7. The payment in one spreadsheet cell</h2>
+
+<p>Put the three inputs (loan, rate, years) in their own cells and the formula in one more cell. Then a new loan only means typing new inputs. Each formula refers to other cells in column B, and nothing is copied down, so no fixed references are needed.</p>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th>A</th><th>B</th></tr></thead>
+<tbody>
+<tr><th>1</th><td>Item</td><td>Value</td></tr>
+<tr><th>2</th><td>Loan amount L</td><td><code>676000</code></td></tr>
+<tr><th>3</th><td>Annual rate</td><td><code>0.0728</code></td></tr>
+<tr><th>4</th><td>Years</td><td><code>30</code></td></tr>
+<tr><th>5</th><td>Monthly rate r</td><td><code>=B3/12</code></td></tr>
+<tr><th>6</th><td>Number of months n</td><td><code>=B4*12</code></td></tr>
+<tr><th>7</th><td>f = 1 + r</td><td><code>=1+B5</code></td></tr>
+<tr><th>8</th><td>Monthly payment P</td><td><code>=B2*B5*B7^B6/(B7^B6-1)</code></td></tr>
+<tr><th>9</th><td>Payment, all in one cell</td><td><code>=B2*(B3/12)*(1+B3/12)^(B4*12)/((1+B3/12)^(B4*12)-1)</code></td></tr>
+<tr><th>10</th><td>Total paid</td><td><code>=ROUND(B8,2)*B6</code></td></tr>
+<tr><th>11</th><td>Total interest</td><td><code>=B10-B2</code></td></tr>
+</tbody>
+</table></div>
+<p>The symbol <code>^</code> means “to the power”. Cell B9 does the whole calculation from the three inputs, so B8 and B9 should show the same number. <code>ROUND(B8,2)</code> rounds the payment to the cent, the amount actually paid each month, before multiplying by the number of months. On a phone, scroll the table sideways to see the whole formula in B9.</p>
+<div class="buttons">
+<button type="button" id="dlcsv">Download layout as CSV</button>
+<button type="button" id="copytsv">Copy layout for pasting into cell A1</button>
+<span id="copystatus" aria-live="polite"></span>
+</div>
+<p class="small">These formulas and files were not tested in Excel or Google Sheets. The copied layout is tab-separated, so pasting it into cell A1 should fill columns A and B. If a formula shows as text, retype it in the cell starting with the = sign.</p>
+
+<div class="task" id="task6">
+<p class="label">Task 6 (about 5 minutes, spreadsheet)</p>
+<ol>
+<li>Build the layout above (or paste it in) and check that B8 and B9 both show 4625.275…, which rounds to 4625.28. (To show 2 decimals, use Format → Number, or press the “decrease decimal” button until 2 decimals show.) Write down the total interest in B11.</li>
+<li>Change the inputs to the 15-year fixed rate from the same survey, 6.60% [2]: type 0.066 in B3 and 15 in B4. Write down the new monthly payment and total interest.</li>
+<li>Write one sentence comparing the two loans: how much more a month the 15-year loan costs, and how much less interest it pays in total.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 6</summary>
+<div class="tablewrap"><table>
+<thead><tr><th>Loan of $676,000</th><th class="num">r</th><th class="num">f<sup>n</sup></th><th class="num">Monthly payment</th><th class="num">Total paid</th><th class="num">Total interest</th></tr></thead>
+<tbody>
+<tr><td>30 years at 7.28%</td><td class="num">0.0060667</td><td class="num">8.82335226</td><td class="num">$4,625.28</td><td class="num">$1,665,100.80</td><td class="num">$989,100.80</td></tr>
+<tr><td>15 years at 6.60%</td><td class="num">0.0055</td><td class="num">2.68394423</td><td class="num">$5,925.91</td><td class="num">$1,066,663.80</td><td class="num">$390,663.80</td></tr>
+</tbody>
+</table></div>
+<p>Check of the 15-year payment by calculator: 676,000 × 0.0055 = 3,718; 3,718 × 2.68394423 = 9,978.9047; 9,978.9047 ÷ 1.68394423 = 5,925.91.</p>
+<p>The 15-year loan costs $5,925.91 − $4,625.28 = $1,300.63 more each month and pays $989,100.80 − $390,663.80 = $598,437.00 less interest in total. The payment of $5,925.91 lies inside the bracket from Task 1.</p>
+</details>
+
+<h2 id="s8">8. What-if questions: price and down payment</h2>
+
+<p>The payment is the loan amount times a number that depends only on the rate and the length:</p>
+<p class="display"><i>P</i> = <i>L</i> × <span class="frac"><span><i>r</i> · <i>f</i><sup><i>n</i></sup></span><span><i>f</i><sup><i>n</i></sup> − 1</span></span></p>
+<p>Doubling the loan doubles the payment. At 7.28% for 30 years that number is 0.006842, which means about <b>$6.84 a month for every $1,000 borrowed</b> (4,625.28 ÷ 676 = 6.84). That is a quick way to estimate a payment before computing it exactly.</p>
+<p>The price only enters through <i>L</i>. A smaller down payment raises <i>L</i>, and so raises the payment in the same proportion.</p>
+
+<div class="task" id="task7">
+<p class="label">Task 7 (about 4 minutes, spreadsheet or calculator)</p>
+<p>Keep the 30-year loan at 7.28%. For each case, first estimate the payment with $6.84 per $1,000, then compute it exactly.</p>
+<ol>
+<li>The King County median home, $845,000, bought with 10% down instead of 20%.</li>
+<li>The Snohomish County median home in August 2026, $724,500 [1], bought with 20% down. (The 7.28% is a national average [2], used here for Snohomish as it was for King County.)</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 7</summary>
+<ol>
+<li>Loan = 0.90 × 845,000 = 760,500. Estimate: 760.5 × 6.84 = about $5,202. Exact: <b>$5,203.43</b>, which is $578.15 a month more than with 20% down.</li>
+<li>Loan = 0.80 × 724,500 = 579,600. Estimate: 579.6 × 6.84 = about $3,964. Exact: <b>$3,965.69</b>.</li>
+</ol>
+<p>In the spreadsheet, only B2 changes (and B3, B4 go back to 0.0728 and 30). The estimates are within a few dollars because 6.84 is the per-$1,000 number rounded to the cent.</p>
+</details>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li>Northwest Multiple Listing Service, “Market Snapshot August 2026”, published September 3, 2026. King County median sale price of residential homes and condominiums sold in August 2026: $845,000; Snohomish County: $724,500. <a href="https://www.nwmls.com/market-snapshot-august-2026/">https://www.nwmls.com/market-snapshot-august-2026/</a> (accessed October 4, 2026).</li>
+<li>Freddie Mac, Primary Mortgage Market Survey, news release “Mortgage Rates Average 7.28%”, October 1, 2026. 30-year fixed-rate mortgage average: 7.28%; 15-year fixed-rate mortgage average: 6.60%. <a href="https://freddiemac.gcs-web.com/news-releases/news-release-details/mortgage-rates-average-728">https://freddiemac.gcs-web.com/news-releases/news-release-details/mortgage-rates-average-728</a> (accessed October 4, 2026).</li>
+</ol>
+
+</main>
+<script>
+(function () {
+  var rows = [
+    ["Item", "Value"],
+    ["Loan amount L", "676000"],
+    ["Annual rate", "0.0728"],
+    ["Years", "30"],
+    ["Monthly rate r", "=B3/12"],
+    ["Number of months n", "=B4*12"],
+    ["f = 1 + r", "=1+B5"],
+    ["Monthly payment P", "=B2*B5*B7^B6/(B7^B6-1)"],
+    ["Payment, all in one cell", "=B2*(B3/12)*(1+B3/12)^(B4*12)/((1+B3/12)^(B4*12)-1)"],
+    ["Total paid", "=ROUND(B8,2)*B6"],
+    ["Total interest", "=B10-B2"]
+  ];
+  function csvCell(s) {
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  var csv = rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (r) { return r.join("\t"); }).join("\n");
+  var status = document.getElementById("copystatus");
+
+  document.getElementById("dlcsv").addEventListener("click", function () {
+    var blob = new Blob([csv], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "payment-formula-layout.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+  function fallbackCopy() {
+    var ta = document.createElement("textarea");
+    ta.value = tsv;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    ta.remove();
+    status.textContent = ok ? "Copied." : "Copy failed; use the CSV download.";
+  }
+  document.getElementById("copytsv").addEventListener("click", function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () {
+        status.textContent = "Copied.";
+      }, fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-04/4-1-monthly-mortgage-payment/" style="color:inherit">&larr; 4.1 Monthly mortgage payment</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-04/4-3-saving-for-the-down-payment/" style="color:inherit">4.3 Saving for the down payment &rarr;</a></nav>
+</body>
+</html>

@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading a Shop Drawing</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1d1f23;
+  --muted: #555b66;
+  --rule: #d5d9e0;
+  --task-bg: #f3f6fb;
+  --task-border: #3b6fb6;
+  --sol-bg: #f7f7f4;
+  --accent: #2c5d9e;
+  --fill: #e9eef6;
+  --fill2: #f6ead9;
+  --cab: #d9d3c7;
+  --code-bg: #f1f2f4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16181c;
+    --fg: #e6e8ec;
+    --muted: #a9afba;
+    --rule: #3a3f48;
+    --task-bg: #1d2633;
+    --task-border: #6d9be0;
+    --sol-bg: #1f2125;
+    --accent: #8fb6ee;
+    --fill: #233247;
+    --fill2: #3d3222;
+    --cab: #4a4539;
+    --code-bg: #24272d;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16181c; --fg: #e6e8ec; --muted: #a9afba; --rule: #3a3f48;
+  --task-bg: #1d2633; --task-border: #6d9be0; --sol-bg: #1f2125; --accent: #8fb6ee;
+  --fill: #233247; --fill2: #3d3222; --cab: #4a4539; --code-bg: #24272d;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 18px; line-height: 1.55;
+}
+main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+.course { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
+h1 { font-size: 2rem; margin: 0 0 20px; line-height: 1.2; }
+h2 { font-size: 1.35rem; margin: 40px 0 12px; padding-top: 12px; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+p, li { max-width: 72ch; }
+.calc { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.95rem;
+  background: var(--code-bg); padding: 10px 12px; border-radius: 6px; overflow-x: auto; white-space: pre; margin: 10px 0 14px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em;
+  background: var(--code-bg); padding: 1px 4px; border-radius: 4px; }
+.nw { white-space: nowrap; }
+figure { margin: 18px 0 22px; }
+figure svg { width: 100%; height: auto; max-width: 600px; display: block; }
+figcaption { color: var(--muted); font-size: 0.92rem; margin-top: 6px; max-width: 72ch; }
+.table-wrap { overflow-x: auto; margin: 10px 0 16px; }
+table { border-collapse: collapse; font-size: 0.95rem; }
+th, td { border: 1px solid var(--rule); padding: 5px 9px; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.num { white-space: nowrap; }
+td code { white-space: nowrap; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.task { border: 2px solid var(--task-border); background: var(--task-bg); border-radius: 8px; padding: 12px 16px; margin: 22px 0 8px; }
+.task-label { font-weight: 700; color: var(--accent); margin: 0 0 6px; }
+.task p:last-child, .task ol:last-child { margin-bottom: 0; }
+details.solution { border: 1px solid var(--rule); background: var(--sol-bg); border-radius: 8px; padding: 8px 16px; margin: 0 0 22px; }
+details.solution summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+details.solution[open] summary { margin-bottom: 6px; }
+.buttons { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 12px; }
+button { font: inherit; font-size: 0.95rem; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--task-border);
+  background: var(--bg); color: var(--fg); cursor: pointer; }
+button:hover { background: var(--task-bg); }
+#copy-status { color: var(--muted); font-size: 0.9rem; align-self: center; }
+.sources li { margin-bottom: 10px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+.svg-line { stroke: var(--fg); }
+.svg-text { fill: var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.svg-muted { fill: var(--muted); }
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.6rem; }
+  .calc { font-size: 0.85rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  table { font-size: 0.82rem; }
+  th, td { padding: 4px 4px; }
+  td code { padding: 1px 2px; }
+}
+@media print {
+  button, .buttons { display: none; }
+  figure svg { width: 5.6in; max-width: none; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-04/4-3-saving-for-the-down-payment/" style="color:inherit">&larr; 4.3 Saving for the down payment</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-05/5-2-square-roots-and-the-pythagorean-theorem/" style="color:inherit">5.2 Square roots and the Pythagorean theorem &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Remodeling a kitchen (week 5) · Lecture 1 of 3</p>
+<h1>Reading a shop drawing</h1>
+
+<p>A kitchen remodel starts from a floor plan drawn to scale. Figure 1 is the plan of an L-shaped kitchen at the scale <span class="nw">1/4 inch = 1 foot</span>. The plan is made up for this example. The lengths written on it are what a ruler read on the original printed plan, in inches and fractions of an inch, as on a tape measure.</p>
+
+<p>The new floor will be Lifeproof Trail Oak vinyl plank. On October 4, 2026, homedepot.com listed it at $2.49 per square foot, sold in cases that cover 20.06 square feet for $49.95 a case [1].</p>
+
+<p>The questions: how big is the kitchen floor really, how much flooring do you need to buy, and what will it cost?</p>
+
+<figure id="fig1">
+<svg viewBox="0 0 560 480" role="img" aria-label="Made-up floor plan of an L-shaped kitchen with paper measurements in inches">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="var(--muted)"/>
+    </marker>
+  </defs>
+  <!-- floor outline: 1 paper inch = 100 units (checked by checks/lecture_numbers.py) -->
+  <polygon id="outline1" points="90,80 452.5,80 452.5,267.5 321.25,267.5 321.25,380 90,380" fill="var(--fill)" stroke="var(--fg)" stroke-width="3"/>
+  <!-- base cabinets: 2 7/8 in long, 1/2 in deep -->
+  <rect id="cab1" x="90" y="80" width="287.5" height="50" fill="var(--cab)" stroke="var(--fg)" stroke-width="1.5"/>
+  <text x="233.75" y="112" text-anchor="middle" class="svg-text" font-size="19">base cabinets</text>
+  <text x="100" y="158" class="svg-text" font-size="18">cabinets: 2 7/8 in long, 1/2 in deep</text>
+  <!-- top dimension -->
+  <line x1="90" y1="52" x2="452.5" y2="52" stroke="var(--muted)" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+  <text x="271.25" y="40" text-anchor="middle" class="svg-text" font-size="21" font-weight="600">3 5/8 in</text>
+  <!-- left dimension -->
+  <line x1="60" y1="80" x2="60" y2="380" stroke="var(--muted)" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+  <text x="46" y="230" text-anchor="middle" class="svg-text" font-size="21" font-weight="600" transform="rotate(-90 46 230)">3 in</text>
+  <!-- notch edges -->
+  <text x="386.875" y="294" text-anchor="middle" class="svg-text" font-size="21" font-weight="600">1 5/16 in</text>
+  <text x="331" y="340" class="svg-text" font-size="21" font-weight="600">1 1/8 in</text>
+  <!-- unknown edges -->
+  <text x="205.625" y="408" text-anchor="middle" class="svg-text" font-size="21" font-style="italic">a = ?</text>
+  <text x="462" y="180" class="svg-text" font-size="21" font-style="italic">b = ?</text>
+  <!-- scale bar: 1 in = 100 units, ticks every 1/4 in -->
+  <g transform="translate(90,445)">
+    <line x1="0" y1="0" x2="100" y2="0" stroke="var(--fg)" stroke-width="2"/>
+    <line x1="0" y1="-6" x2="0" y2="6" stroke="var(--fg)" stroke-width="2"/>
+    <line x1="25" y1="-4" x2="25" y2="4" stroke="var(--fg)" stroke-width="1.5"/>
+    <line x1="50" y1="-4" x2="50" y2="4" stroke="var(--fg)" stroke-width="1.5"/>
+    <line x1="75" y1="-4" x2="75" y2="4" stroke="var(--fg)" stroke-width="1.5"/>
+    <line x1="100" y1="-6" x2="100" y2="6" stroke="var(--fg)" stroke-width="2"/>
+    <text x="0" y="26" text-anchor="middle" class="svg-text" font-size="17">0</text>
+    <text x="25" y="26" text-anchor="middle" class="svg-text" font-size="17">1</text>
+    <text x="50" y="26" text-anchor="middle" class="svg-text" font-size="17">2</text>
+    <text x="75" y="26" text-anchor="middle" class="svg-text" font-size="17">3</text>
+    <text x="100" y="26" text-anchor="middle" class="svg-text" font-size="17">4 ft</text>
+    <text x="124" y="0" class="svg-text" font-size="17">scale 1/4 in = 1 ft</text>
+    <text x="124" y="22" class="svg-text" font-size="17">(1 in on paper = 4 ft)</text>
+  </g>
+</svg>
+<figcaption>Figure 1. Made-up floor plan of an L-shaped kitchen, scale 1/4 in = 1 ft. The lengths are as measured with a ruler on the original printed plan. On screen this copy is not at that size; to check a length, compare it with the scale bar. The edges a and b have no length given.</figcaption>
+</figure>
+
+<p>Simplifications used throughout: walls are drawn as lines with no thickness, and the small expansion gap that the flooring leaves at walls and cabinets is ignored.</p>
+
+<!-- ===================================================== -->
+<h2>1. The scale as a rate</h2>
+
+<p>The scale <span class="nw">1/4 in = 1 ft</span> says that every quarter inch on the paper stands for one foot of real floor. Four quarter inches make an inch, so one inch on the paper stands for 4 feet. Written as a rate, as in week 1:</p>
+
+<div class="calc" role="img" aria-label="4 feet per 1 inch on paper"><span aria-hidden="true">   4 ft
+───────────   (4 feet of floor per inch of paper)
+1 in on paper</span></div>
+
+<p>On this page "in on paper" means an inch measured on the drawing, and "in" alone means a real inch of floor. So "1 in on paper = 4 ft = 48 in" does not contradict "1 ft = 12 in".</p>
+
+<p>To change a paper length into a real length, multiply by this rate. The inches on paper cancel and feet are left. For the top wall, 3 5/8 in on paper:</p>
+
+<div class="calc">3 5/8 in on paper = 3 + 5/8 = 3 + 0.625 = 3.625 in on paper
+
+3.625 in on paper × (4 ft / 1 in on paper) = 14.5 ft</div>
+
+<p>A tape measure reads feet and inches, so turn the decimal part of a foot into inches with the rate 12 in per ft:</p>
+
+<div class="calc">14.5 ft = 14 ft + 0.5 ft × (12 in / 1 ft) = 14 ft 6 in</div>
+
+<h3>Fractions of an inch on this plan</h3>
+
+<p>Rulers and tape measures mark inches in halves, quarters, eighths and sixteenths. On this plan each small mark has a fixed real size:</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>On paper</th><th class="num">As a decimal</th><th class="num">Real length (ft)</th><th class="num">Real length (in)</th></tr></thead>
+<tbody>
+<tr><td>1/16 in</td><td class="num">0.0625 in</td><td class="num">0.25 ft</td><td class="num">3 in</td></tr>
+<tr><td>1/8 in = 2/16 in</td><td class="num">0.125 in</td><td class="num">0.5 ft</td><td class="num">6 in</td></tr>
+<tr><td>1/4 in = 4/16 in</td><td class="num">0.25 in</td><td class="num">1 ft</td><td class="num">12 in</td></tr>
+<tr><td>1/2 in = 8/16 in</td><td class="num">0.5 in</td><td class="num">2 ft</td><td class="num">24 in</td></tr>
+<tr><td>1 in = 16/16 in</td><td class="num">1 in</td><td class="num">4 ft</td><td class="num">48 in</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>So a length in sixteenths of an inch converts quickly: count the sixteenths and multiply by 3 real inches. For 1 5/16 in on paper, there are 16 sixteenths in the 1 and 5 more, so 21 sixteenths:</p>
+
+<div class="calc">21 × 3 in = 63 in = 5 × 12 in + 3 in = 5 ft 3 in</div>
+
+<p>The last row of the table gives the scale as a ratio. One foot is 12 inches, so 1/4 inch on paper stands for 12 inches of floor, and 12 ÷ (1/4) = 48. Every real length is 48 times its length on paper. As a ratio, this scale is 1 : 48.</p>
+
+<div class="task">
+<p class="task-label">Task 1 (about 4 minutes, calculator)</p>
+<p>Use Figure 1. The top wall (3 5/8 in on paper) and the notch (1 5/16 in on paper) are worked out above. For each of the other four labeled paper lengths (the left wall 3 in, the notch height 1 1/8 in, and the cabinets' 2 7/8 in and 1/2 in), write the real length in feet as a decimal and in feet and inches.</p>
+<p>Then compare the cabinet depth with the standard base cabinet depth of 24 inches [3]. Write one sentence: does the drawing agree with the standard?</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<p>Multiply each paper length (as a decimal) by 4 ft per inch on paper, then turn the decimal part of a foot into inches by multiplying by 12 in per ft. The first two rows are the worked examples above.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Edge</th><th>On paper (in)</th><th class="num">Decimal</th><th class="num">× 4 ft</th><th class="num">Feet and inches</th></tr></thead>
+<tbody>
+<tr><td>Top wall</td><td class="nw">3 5/8</td><td class="num">3.625</td><td class="num">14.5 ft</td><td class="num">14 ft 6 in</td></tr>
+<tr><td>Left wall</td><td class="nw">3</td><td class="num">3</td><td class="num">12 ft</td><td class="num">12 ft 0 in</td></tr>
+<tr><td>Notch, across</td><td class="nw">1 5/16</td><td class="num">1.3125</td><td class="num">5.25 ft</td><td class="num">5 ft 3 in</td></tr>
+<tr><td>Notch, up and down</td><td class="nw">1 1/8</td><td class="num">1.125</td><td class="num">4.5 ft</td><td class="num">4 ft 6 in</td></tr>
+<tr><td>Cabinet run, length</td><td class="nw">2 7/8</td><td class="num">2.875</td><td class="num">11.5 ft</td><td class="num">11 ft 6 in</td></tr>
+<tr><td>Cabinet, depth</td><td class="nw">1/2</td><td class="num">0.5</td><td class="num">2 ft</td><td class="num">2 ft 0 in</td></tr>
+</tbody>
+</table>
+</div>
+<p>For example, 0.5 ft × 12 in/ft = 6 in, which gives 4 ft 6 in for the notch height. The cabinet depth on the drawing is 2 ft = 24 in, which matches the standard base cabinet depth of 24 inches given by KraftMaid [3]. A check of this kind catches a plan that was drawn or printed at the wrong scale.</p>
+</details>
+
+<!-- ===================================================== -->
+<h2>2. Subtracting fractions of an inch and adding feet and inches</h2>
+
+<p>The bottom edge a and the right edge b in Figure 1 have no length given. Each is the difference of two lengths that are labeled.</p>
+
+<p>The bottom edge a is the top wall minus the notch: 3 5/8 in − 1 5/16 in, both on paper. To subtract fractions, write them with the same denominator. Eighths become sixteenths by multiplying top and bottom by 2: 5/8 = 10/16.</p>
+
+<div class="calc">3 10/16 in − 1 5/16 in = 2 5/16 in
+
+2 5/16 in on paper = 37 sixteenths
+37 × 3 in = 111 in = 9 ft 3 in
+(as a decimal: 2.3125 × 4 ft = 9.25 ft)</div>
+
+<p>Sometimes the fraction you subtract is bigger than the fraction on top. Then borrow 1 inch from the whole number and write it as a fraction: 1 = 16/16, or 1 = 8/8. For example, 4 3/16 in − 1 5/16 in: 5/16 cannot come out of 3/16, so write 4 3/16 as 3 + 16/16 + 3/16 = 3 19/16.</p>
+
+<div class="calc">3 19/16 in − 1 5/16 in = 2 14/16 in = 2 7/8 in</div>
+
+<p>Check by adding in feet and inches. Add the inches, then the feet: 9 ft 3 in + 5 ft 3 in = 14 ft 6 in, which is the top wall.</p>
+
+<p>When the inches add up to 12 or more, carry 12 inches as 1 foot, the way 10 ones become 1 ten in ordinary addition. For example, 5 ft 9 in + 2 ft 8 in = 7 ft 17 in = 7 ft + 12 in + 5 in = 8 ft 5 in.</p>
+
+<div class="task">
+<p class="task-label">Task 2 (about 4 minutes, pencil and paper)</p>
+<ol>
+<li>Find the paper length of the right edge b, which is 3 in − 1 1/8 in. Write it as a mixed number with eighths.</li>
+<li>Convert b to a real length in feet and inches.</li>
+<li>Check: add b and the notch height 4 ft 6 in in feet and inches. You should get the left wall, 12 ft.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<ol>
+<li>Write 3 in as 2 8/8 in. Then 2 8/8 in − 1 1/8 in = 1 7/8 in.</li>
+<li>1 7/8 in on paper = 15 eighths. Each 1/8 in on paper stands for 6 in, so 15 × 6 in = 90 in = 7 × 12 in + 6 in = 7 ft 6 in. As a decimal: 1.875 × 4 ft = 7.5 ft.</li>
+<li>7 ft 6 in + 4 ft 6 in = 11 ft 12 in. Carry 12 in as 1 ft: 12 ft 0 in. This matches the left wall.</li>
+</ol>
+</details>
+
+<!-- ===================================================== -->
+<h2>3. Area of the L-shaped floor</h2>
+
+<p>The area of a rectangle is length × width. If both are in feet, the area is in square feet (sq ft): the number of 1 ft by 1 ft squares that cover it.</p>
+
+<p>The kitchen floor is not a rectangle, so a single length × width does not apply. Draw a line that cuts the L into two rectangles, find each area, and add. Figure 2 uses the real lengths from Tasks 1 and 2 and cuts along the dashed line.</p>
+
+<figure id="fig2">
+<svg viewBox="0 0 560 430" role="img" aria-label="The L-shaped floor with real lengths, cut into rectangle A on top and rectangle B at the lower left">
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="var(--muted)"/>
+    </marker>
+  </defs>
+  <!-- same outline as Figure 1: 100 units = 4 ft -->
+  <rect id="rectA" x="90" y="80" width="362.5" height="187.5" fill="var(--fill)"/>
+  <rect id="rectB" x="90" y="267.5" width="231.25" height="112.5" fill="var(--fill2)"/>
+  <polygon id="outline2" points="90,80 452.5,80 452.5,267.5 321.25,267.5 321.25,380 90,380" fill="none" stroke="var(--fg)" stroke-width="3"/>
+  <line x1="90" y1="267.5" x2="321.25" y2="267.5" stroke="var(--fg)" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="271.25" y="165" text-anchor="middle" class="svg-text" font-size="24" font-weight="700">A</text>
+  <text x="271.25" y="196" text-anchor="middle" class="svg-text" font-size="20">14.5 ft × 7.5 ft</text>
+  <text x="205.625" y="315" text-anchor="middle" class="svg-text" font-size="24" font-weight="700">B</text>
+  <text x="205.625" y="346" text-anchor="middle" class="svg-text" font-size="20">9.25 ft × 4.5 ft</text>
+  <line x1="90" y1="52" x2="452.5" y2="52" stroke="var(--muted)" stroke-width="1.5" marker-start="url(#arr2)" marker-end="url(#arr2)"/>
+  <text x="271.25" y="40" text-anchor="middle" class="svg-text" font-size="20" font-weight="600">14 ft 6 in = 14.5 ft</text>
+  <line x1="60" y1="80" x2="60" y2="380" stroke="var(--muted)" stroke-width="1.5" marker-start="url(#arr2)" marker-end="url(#arr2)"/>
+  <text x="46" y="230" text-anchor="middle" class="svg-text" font-size="20" font-weight="600" transform="rotate(-90 46 230)">12 ft</text>
+  <text x="462" y="166" class="svg-text" font-size="19">7 ft 6 in</text>
+  <text x="462" y="190" class="svg-text" font-size="19">= 7.5 ft</text>
+  <text x="386.875" y="292" text-anchor="middle" class="svg-text" font-size="19">5 ft 3 in</text>
+  <text x="386.875" y="314" text-anchor="middle" class="svg-text" font-size="19">= 5.25 ft</text>
+  <text x="331" y="348" class="svg-text" font-size="19">4 ft 6 in</text>
+  <text x="331" y="370" class="svg-text" font-size="19">= 4.5 ft</text>
+  <text x="205.625" y="406" text-anchor="middle" class="svg-text" font-size="19">9 ft 3 in = 9.25 ft</text>
+</svg>
+<figcaption>Figure 2. The same floor with real lengths, cut by the dashed line into rectangle A (top, full width) and rectangle B (lower left).</figcaption>
+</figure>
+
+<p>Rectangle A runs the full width of the room, 14.5 ft. Its height is the left wall minus the notch height: 12 ft − 4.5 ft = 7.5 ft. Rectangle B is the part below the dashed line: the bottom edge, 9.25 ft, by the notch height, 4.5 ft.</p>
+
+<div class="calc">A = 14.5 ft × 7.5 ft = 108.75 sq ft
+B = 9.25 ft × 4.5 ft =  41.625 sq ft
+
+Floor area = 108.75 + 41.625
+           = 150.375 sq ft</div>
+
+<p>A quick estimate checks the size of the answer. The whole box around the L is 14.5 ft × 12 ft = 174 sq ft, and the notch takes a small corner out of it, so an answer near 150 sq ft is reasonable. An answer like 1,500 or 15 would point to a slipped decimal.</p>
+
+<div class="task">
+<p class="task-label">Task 3 (about 5 minutes, calculator)</p>
+<p>Find the floor area two other ways and show that both give 150.375 sq ft.</p>
+<ol>
+<li>Cut the L with a vertical line instead, straight down from the top wall along the notch's left edge. Give the length, width and area of each rectangle.</li>
+<li>Take the whole 14.5 ft × 12 ft box and subtract the notch, 5.25 ft × 4.5 ft.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<ol>
+<li>The vertical line is 9.25 ft from the left wall. The left rectangle is 9.25 ft wide and the full 12 ft tall: 9.25 × 12 = 111 sq ft. The right rectangle is 5.25 ft wide and 7.5 ft tall: 5.25 × 7.5 = 39.375 sq ft. Total: 111 + 39.375 = 150.375 sq ft.</li>
+<li>Box: 14.5 × 12 = 174 sq ft. Notch: 5.25 × 4.5 = 23.625 sq ft. Floor: 174 − 23.625 = 150.375 sq ft.</li>
+</ol>
+<p>All three ways agree because each counts every square foot of the floor exactly once. When two methods agree, an arithmetic slip in either one is unlikely.</p>
+</details>
+
+<!-- ===================================================== -->
+<h2>4. Square feet, square yards, and area on paper</h2>
+
+<p>One yard is 3 feet. A square yard is a square 1 yd on each side, so it is 3 ft by 3 ft, and it holds 3 × 3 = 9 square feet. The conversion factor for area is the length factor squared.</p>
+
+<div class="calc">150.375 sq ft × (1 sq yd / 9 sq ft) = 16.71 sq yd   (rounded)</div>
+
+<p>Dividing by 3 instead of 9 gives 50.1 "square yards", three times too much. Prices convert with the same factor 9: a price per square yard is 9 times the price per square foot, because one square yard holds 9 square feet.</p>
+
+<p>The same squaring happens between the paper and the room. One inch on paper stands for 4 ft, so one square inch on paper stands for a 4 ft by 4 ft square of floor:</p>
+
+<div class="calc">1 sq in on paper = 4 ft × 4 ft = 16 sq ft of floor</div>
+
+<div class="task">
+<p class="task-label">Task 4 (about 4 minutes, calculator)</p>
+<ol>
+<li>Find the area of the L on paper, in square inches, from the paper lengths in Figure 1: the box 3 5/8 in × 3 in minus the notch 1 5/16 in × 1 1/8 in. Use decimals.</li>
+<li>Convert it to square feet of floor. You should get 150.375 sq ft again.</li>
+<li>What answer would you get by multiplying by 4 instead of 16?</li>
+<li>Write the flooring price, $2.49 per sq ft [1], as a price per square yard. Then check that 16.71 sq yd times that price gives the same cost as 150.375 sq ft × $2.49 per sq ft, to the nearest dollar.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<ol>
+<li>Box: 3.625 × 3 = 10.875 sq in. Notch: 1.3125 × 1.125 = 1.4765625 sq in. Paper area: 10.875 − 1.4765625 = 9.3984375 sq in.</li>
+<li>9.3984375 sq in × (16 sq ft / 1 sq in) = 150.375 sq ft.</li>
+<li>9.3984375 × 4 = 37.59 sq ft (rounded), a quarter of the true area. Rectangle A alone is 108.75 sq ft, so a floor of 38 sq ft is impossible, and an estimate catches this mistake.</li>
+<li>$2.49 per sq ft × (9 sq ft / 1 sq yd) = $22.41 per sq yd. Then 16.71 sq yd × $22.41 per sq yd = $374.47, and 150.375 sq ft × $2.49 per sq ft = $374.43. Both are $374 to the nearest dollar; the 4 cents come from rounding 16.708 to 16.71. With the unrounded 16.708333 sq yd the two costs agree exactly.</li>
+</ol>
+</details>
+
+<!-- ===================================================== -->
+<h2>5. Area to cover, waste allowance and whole cases</h2>
+
+<p>The new floor goes around the base cabinets, not under them. The installation instructions for this flooring say: "Kitchen cabinets must be installed before the floor is installed. Do not install cabinets on top of LifeProof Vinyl Plank." [4] So the area to cover is the floor area minus the cabinet footprint. From Task 1, the cabinet run is 11.5 ft long and 2 ft deep.</p>
+
+<div class="calc">Cabinets      = 11.5 ft × 2 ft = 23 sq ft
+Area to cover = 150.375 − 23
+              = 127.375 sq ft</div>
+
+<p>Planks are cut to fit at walls and corners, and some cut pieces are too short to use. So you buy more flooring than the area to cover. The Home Depot installation guide for this flooring line says: "Allow 10 percent additional flooring for matching and waste." [2]</p>
+
+<p>Adding 10% is multiplying by 1 + 0.10 = 1.10, as with percentages as multipliers in week 4:</p>
+
+<div class="calc">127.375 sq ft × 1.10 = 140.1125 sq ft to buy</div>
+
+<p>The store sells whole cases of 20.06 sq ft [1]. The number of cases is the area to buy divided by the area per case. The answer will not usually be a whole number, and you cannot buy part of a case, so round up to the next whole number. Rounding down would leave part of the floor bare.</p>
+
+<div class="task">
+<p class="task-label">Task 5 (about 4 minutes, calculator)</p>
+<ol>
+<li>How many cases of 20.06 sq ft cover 140.1125 sq ft? Give the exact quotient and the whole number of cases to buy.</li>
+<li>What do those cases cost at $49.95 a case [1], before sales tax?</li>
+<li>Compare with 127.375 sq ft × $2.49 per sq ft. Which is the real bill, and why are they different?</li>
+<li>Suppose you forgot to subtract the cabinets and ordered for the whole 150.375 sq ft, plus 10%. How many cases would you buy, and how much more would you spend?</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<ol>
+<li>140.1125 ÷ 20.06 = 6.985 cases (rounded). Six cases cover 6 × 20.06 = 120.36 sq ft, which is less than 140.1125, so buy 7 cases. They cover 7 × 20.06 = 140.42 sq ft, just enough.</li>
+<li>7 × $49.95 = $349.65 before sales tax.</li>
+<li>127.375 × $2.49 = $317.16 (rounded). That is the price of the bare area to cover, with no waste and no part cases. The real bill is $349.65: 10% more flooring for waste, then rounded up to whole cases. The price per square foot and the price per case agree: $49.95 ÷ 20.06 sq ft = $2.49 per sq ft (rounded).</li>
+<li>150.375 × 1.10 = 165.4125 sq ft, and 165.4125 ÷ 20.06 = 8.246 (rounded), so 9 cases for 9 × $49.95 = $449.55. That is 2 cases and $99.90 more than needed. The cabinet strip is 23 sq ft, about 15% of the floor, and it pushes the order past two case boundaries.</li>
+</ol>
+<p>Estimate check: about 127 sq ft at about $2.50 per sq ft is about $320 for the bare area, and the bill should be roughly 10% above that because of the waste allowance. $349.65 fits.</p>
+</details>
+
+<p>The $349.65 covers the flooring only. Trim, tools, sales tax and labor are not included, and the price is one store's online price on one date [1].</p>
+
+<!-- ===================================================== -->
+<h2>6. A spreadsheet for the flooring order</h2>
+
+<p>Each step so far depends on the one before: the lengths give the areas, the areas give the area to cover, the waste allowance gives the area to buy, and that gives the cases and the cost. A spreadsheet keeps the chain. Change one input, such as the waste percentage, and every later cell updates.</p>
+
+<p>One new function is needed. <code>ROUNDUP(number, 0)</code> rounds a number up to the next whole number; the 0 means "no decimal places". For example <code>ROUNDUP(6.985, 0)</code> gives 7, and <code>ROUNDUP(7, 0)</code> stays 7.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
+<tbody>
+<tr><th>1</th><td>Item</td><td>Length (ft)</td><td>Width (ft)</td><td>Value</td></tr>
+<tr><th>2</th><td>Rectangle A</td><td>14.5</td><td>7.5</td><td><code>=B2*C2</code></td></tr>
+<tr><th>3</th><td>Rectangle B</td><td>9.25</td><td>4.5</td><td><code>=B3*C3</code></td></tr>
+<tr><th>4</th><td>Base cabinets</td><td>11.5</td><td>2</td><td><code>=B4*C4</code></td></tr>
+<tr><th>5</th><td>Area to cover (sq ft)</td><td></td><td></td><td><code>=D2+D3-D4</code></td></tr>
+<tr><th>6</th><td>Waste allowance (%)</td><td></td><td></td><td>10</td></tr>
+<tr><th>7</th><td>Area to buy (sq ft)</td><td></td><td></td><td><code>=D5*(1+D6/100)</code></td></tr>
+<tr><th>8</th><td>Sq ft per case</td><td></td><td></td><td>20.06</td></tr>
+<tr><th>9</th><td>Cases to buy</td><td></td><td></td><td><code>=ROUNDUP(D7/D8,0)</code></td></tr>
+<tr><th>10</th><td>Price per case ($)</td><td></td><td></td><td>49.95</td></tr>
+<tr><th>11</th><td>Flooring cost ($)</td><td></td><td></td><td><code>=D9*D10</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Type the formula in D2 and copy it down to D3 and D4; the relative references change from row to row, as in lecture 1.3. You can also download the layout or copy it and paste it into cell A1. The formulas were checked with a short script but were not tested in Excel or Google Sheets.</p>
+
+<div class="buttons">
+<button type="button" id="dl-csv">Download CSV</button>
+<button type="button" id="copy-tsv">Copy layout to clipboard</button>
+<span id="copy-status" aria-live="polite"></span>
+</div>
+
+<div class="task">
+<p class="task-label">Task 6 (about 6 minutes, spreadsheet)</p>
+<ol>
+<li>Build the layout in Excel or Google Sheets. Check that D5 shows 127.375, D9 shows 7 and D11 shows 349.65.</li>
+<li>Change the waste allowance in D6 to 5, then 15, then 25. Write down the cases and the cost for each.</li>
+<li>Find the smallest whole-number waste percentage that makes you buy an 8th case.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 6</summary>
+<div class="table-wrap">
+<table>
+<thead><tr><th class="num">Waste (%)</th><th class="num">Area to buy (sq ft)</th><th class="num">Area ÷ 20.06</th><th class="num">Cases</th><th class="num">Cost ($)</th></tr></thead>
+<tbody>
+<tr><td class="num">5</td><td class="num">133.74</td><td class="num">6.67</td><td class="num">7</td><td class="num">349.65</td></tr>
+<tr><td class="num">10</td><td class="num">140.11</td><td class="num">6.98</td><td class="num">7</td><td class="num">349.65</td></tr>
+<tr><td class="num">11</td><td class="num">141.39</td><td class="num">7.05</td><td class="num">8</td><td class="num">399.60</td></tr>
+<tr><td class="num">15</td><td class="num">146.48</td><td class="num">7.30</td><td class="num">8</td><td class="num">399.60</td></tr>
+<tr><td class="num">25</td><td class="num">159.22</td><td class="num">7.94</td><td class="num">8</td><td class="num">399.60</td></tr>
+</tbody>
+</table>
+</div>
+<p>The answer is 11%. Seven cases cover 7 × 20.06 = 140.42 sq ft, and 140.42 ÷ 127.375 = 1.102 (rounded), so 7 cases allow up to about 10.2% waste. At 11% the area to buy, 141.39 sq ft, is more than 7 cases hold.</p>
+<p>Because you round up to whole cases, the cost goes up in steps of $49.95. Here the 10% guideline [2] fits inside 7 cases with only 140.42 − 140.1125 = 0.31 sq ft (rounded) to spare.</p>
+</details>
+
+<!-- ===================================================== -->
+<h2>Sources</h2>
+<ol class="sources">
+<li>The Home Depot, Lifeproof product page "Trail Oak 6 MIL x 8.7 in. W x 48 in. L Click Lock Waterproof Luxury Vinyl Plank Flooring (20.1 sqft/case)", model I96713L, homedepot.com. Price as listed on October 4, 2026 (no store location shown): "$2.49 /sq. ft.", "($49.95 /case)", "Covers 20.06 sq. ft." <a href="https://www.homedepot.com/p/Lifeproof-Trail-Oak-6-MIL-x-8-7-in-W-x-48-in-L-Click-Lock-Waterproof-Luxury-Vinyl-Plank-Flooring-20-1-sqft-case-I96713L/300461649">https://www.homedepot.com/p/Lifeproof-Trail-Oak-6-MIL-x-8-7-in-W-x-48-in-L-Click-Lock-Waterproof-Luxury-Vinyl-Plank-Flooring-20-1-sqft-case-I96713L/300461649</a></li>
+<li>The Home Depot, "How to Install LifeProof Flooring", last updated September 7, 2023, read October 4, 2026: "Allow 10 percent additional flooring for matching and waste." <a href="https://www.homedepot.com/c/ah/how-to-install-lifeproof-flooring/9ba683603be9fa5395fab901af0e0782">https://www.homedepot.com/c/ah/how-to-install-lifeproof-flooring/9ba683603be9fa5395fab901af0e0782</a></li>
+<li>KraftMaid, "What Are Standard Kitchen Cabinet Sizes?", posted June 23, 2022, read October 4, 2026: "The industry standard base cabinet depth for kitchen cabinets is 24"". <a href="https://www.kraftmaid.com/kraftmaid/kitchen-cabinet-sizes">https://www.kraftmaid.com/kraftmaid/kitchen-cabinet-sizes</a></li>
+<li>LifeProof, "LifeProof Vinyl Plank Installation Instructions", dated March 25, 2019, PDF on homedepot-static.com, read October 4, 2026: "Kitchen cabinets must be installed before the floor is installed. Do not install cabinets on top of LifeProof Vinyl Plank." <a href="https://images.homedepot-static.com/catalog/pdfImages/a6/a6ba6d27-acbc-4747-a137-fed4775fe701.pdf">https://images.homedepot-static.com/catalog/pdfImages/a6/a6ba6d27-acbc-4747-a137-fed4775fe701.pdf</a></li>
+</ol>
+<p>The floor plan in Figures 1 and 2 is made up for this lecture.</p>
+
+</main>
+<script>
+(function () {
+  var rows = [
+    ["Item", "Length (ft)", "Width (ft)", "Value"],
+    ["Rectangle A", "14.5", "7.5", "=B2*C2"],
+    ["Rectangle B", "9.25", "4.5", "=B3*C3"],
+    ["Base cabinets", "11.5", "2", "=B4*C4"],
+    ["Area to cover (sq ft)", "", "", "=D2+D3-D4"],
+    ["Waste allowance (%)", "", "", "10"],
+    ["Area to buy (sq ft)", "", "", "=D5*(1+D6/100)"],
+    ["Sq ft per case", "", "", "20.06"],
+    ["Cases to buy", "", "", "=ROUNDUP(D7/D8,0)"],
+    ["Price per case ($)", "", "", "49.95"],
+    ["Flooring cost ($)", "", "", "=D9*D10"]
+  ];
+  function csvCell(s) { return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  var csv = rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (r) { return r.join("\t"); }).join("\n");
+  var status = document.getElementById("copy-status");
+
+  document.getElementById("dl-csv").addEventListener("click", function () {
+    var blob = new Blob([csv], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "flooring-order.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+
+  function fallbackCopy() {
+    var ta = document.createElement("textarea");
+    ta.value = tsv; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+    status.textContent = ok ? "Copied. Paste into cell A1." : "Copy failed. Use Download CSV.";
+  }
+  document.getElementById("copy-tsv").addEventListener("click", function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () {
+        status.textContent = "Copied. Paste into cell A1.";
+      }, fallbackCopy);
+    } else { fallbackCopy(); }
+  });
+
+  // Printed copies show the solutions.
+  window.addEventListener("beforeprint", function () {
+    document.querySelectorAll("details.solution").forEach(function (d) { d.open = true; });
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-04/4-3-saving-for-the-down-payment/" style="color:inherit">&larr; 4.3 Saving for the down payment</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-05/5-2-square-roots-and-the-pythagorean-theorem/" style="color:inherit">5.2 Square roots and the Pythagorean theorem &rarr;</a></nav>
+</body>
+</html>

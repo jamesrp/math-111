@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counting Drink Orders</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1d1d1f; --muted:#5a5a60; --line:#d6d6db;
+  --task-bg:#f3f7f4; --task-line:#2f6b45; --sol-bg:#fafafa;
+  --accent:#2f6b45; --code-bg:#f1f1f3; --leaf:#2f6b45; --gone:#b23a3a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171a; --fg:#ececef; --muted:#a6a6ad; --line:#3a3b40;
+    --task-bg:#1d2620; --task-line:#6fbf8b; --sol-bg:#1c1d21;
+    --accent:#6fbf8b; --code-bg:#24252a; --leaf:#6fbf8b; --gone:#e07a7a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171a; --fg:#ececef; --muted:#a6a6ad; --line:#3a3b40;
+  --task-bg:#1d2620; --task-line:#6fbf8b; --sol-bg:#1c1d21;
+  --accent:#6fbf8b; --code-bg:#24252a; --leaf:#6fbf8b; --gone:#e07a7a;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:18px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:1.5rem 16px 4rem}
+.header-line{font-size:.9rem;color:var(--muted);margin:0 0 .3rem}
+h1{font-size:2rem;line-height:1.2;margin:0 0 1.2rem}
+h2{font-size:1.35rem;margin:2.4rem 0 .6rem;padding-top:.6rem;border-top:1px solid var(--line)}
+p,ul,ol{margin:.6rem 0}
+li{margin:.2rem 0}
+.task{background:var(--task-bg);border:2px solid var(--task-line);border-radius:8px;padding:.8rem 1rem;margin:1.2rem 0 .4rem}
+.task h3{margin:0 0 .4rem;font-size:1.05rem;color:var(--accent)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--sol-bg);margin:0 0 1.2rem;padding:.4rem 1rem}
+details summary{cursor:pointer;font-weight:600;padding:.3rem 0}
+details[open] summary{margin-bottom:.4rem}
+.rule{border-left:4px solid var(--accent);padding:.3rem 0 .3rem .9rem;margin:1rem 0}
+.tablewrap{overflow-x:auto;margin:.8rem 0}
+table{border-collapse:collapse;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:.3rem .6rem;text-align:left;vertical-align:top}
+th{background:var(--code-bg)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--code-bg);padding:0 .25em;border-radius:3px}
+.calc{font-variant-numeric:tabular-nums}
+figure{margin:1rem 0}
+figure svg{width:100%;height:auto;display:block;max-width:34rem}
+figcaption{font-size:.9rem;color:var(--muted);margin-top:.3rem}
+svg text{fill:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+svg .edge{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .edge-gone{stroke:var(--gone);stroke-width:1.2;stroke-dasharray:4 3;fill:none}
+svg .dot{fill:var(--fg)}
+svg .leaf{fill:var(--leaf)}
+svg text.gone{fill:var(--gone)}
+button{font:inherit;font-size:.95rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--task-line);
+  background:var(--bg);color:var(--fg);cursor:pointer;margin:.2rem .4rem .2rem 0}
+.status{font-size:.9rem;color:var(--muted)}
+.sources li{margin:.5rem 0;word-break:break-word}
+.nw{white-space:nowrap}
+#sheet td{vertical-align:middle}
+.small{font-size:.9rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-05/5-3-volume-and-surface-area/" style="color:inherit">&larr; 5.3 Volume and surface area</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-06/6-2-sets-and-subsets/" style="color:inherit">6.2 Sets and subsets &rarr;</a></nav>
+
+<main>
+
+<p class="header-line">Math 111 · Module: Ordering at Starbucks (week 6) · Lecture 1 of 3</p>
+<h1>Counting drink orders</h1>
+
+<h2 id="s1">1. The options on the Starbucks menu</h2>
+
+<p>On the Starbucks website, a hot Caffè Latte comes in four sizes [1].</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>Size</th><th class="num">Hot Caffè Latte [1]</th><th class="num">Iced Caffè Latte [2]</th></tr></thead>
+<tbody>
+<tr><td>Short</td><td class="num">8 fl oz</td><td class="num">not offered</td></tr>
+<tr><td>Tall</td><td class="num">12 fl oz</td><td class="num">12 fl oz</td></tr>
+<tr><td>Grande</td><td class="num">16 fl oz</td><td class="num">16 fl oz</td></tr>
+<tr><td>Venti</td><td class="num">20 fl oz</td><td class="num">24 fl oz</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The same page lists 12 milk options [1]:</p>
+<p>2% Milk, Almondmilk, Coconutmilk, Breve (Half &amp; Half), Heavy Cream, Nonfat Milk, Oatmilk, Protein-boosted Milk, Soymilk, Nondairy Vanilla Sweet Cream, Vanilla Sweet Cream, Whole Milk.</p>
+
+<p>It also lists 14 syrups [1]:</p>
+<p>Brown Sugar, Banana, Caramel, Sugar-Free Caramel, Cinnamon Dolce, Hazelnut, Horchata, Mango, Pecan, Peppermint, Raspberry, Toasted Coconut, Sugar-Free Vanilla, Vanilla.</p>
+
+<p>The latte comes with 2% Milk and no syrup unless you ask for something else [1]. The hot coffee section of the menu lists 31 drinks, from brewed coffee to lattes, mochas and espresso shots [3].</p>
+
+<p>The question: how many different drinks can you order, and how do you count them without writing every one down? Sections 2 to 4 count the orders of one drink, the hot Caffè Latte. Section 5 combines the counts for several drinks.</p>
+
+<p class="small">These lists are the online menu on 4 October 2026. The menu changes with the season, and a given store may not carry every milk or syrup. The website also offers choices this lecture leaves out, such as espresso shots, foam, toppings, sweeteners and pumps of syrup. Leaving them out is a simplification; the real number of orders is larger than the counts below.</p>
+
+<h2 id="s2">2. Listing orders systematically</h2>
+
+<p>Start with a smaller menu. Use the four sizes and only three of the milks: 2% Milk, Oatmilk and Whole Milk. An order is one size together with one milk, for example "Tall, Oatmilk".</p>
+
+<div class="task">
+<h3>Task 1 (about 3 minutes, paper)</h3>
+<p>Write down every hot Caffè Latte order you can make from the four sizes (Short, Tall, Grande, Venti) and the three milks (2% Milk, Oatmilk, Whole Milk). Each order is one size and one milk. Produce the complete list and the number of orders in it. Arrange your list so that you can be sure no order is missing or written twice.</p>
+</div>
+<details>
+<summary>Solution to Task 1</summary>
+<p>Fix the size first, then go through the three milks in the same order every time:</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Size</th><th>Orders</th></tr></thead>
+<tbody>
+<tr><td>Short</td><td>Short 2% Milk, Short Oatmilk, Short Whole Milk</td></tr>
+<tr><td>Tall</td><td>Tall 2% Milk, Tall Oatmilk, Tall Whole Milk</td></tr>
+<tr><td>Grande</td><td>Grande 2% Milk, Grande Oatmilk, Grande Whole Milk</td></tr>
+<tr><td>Venti</td><td>Venti 2% Milk, Venti Oatmilk, Venti Whole Milk</td></tr>
+</tbody>
+</table>
+</div>
+<p>There are 12 orders. Each row has 3 orders and there are 4 rows. Because every size gets the same three milks in the same order, a missing or repeated order would break the 2% Milk, Oatmilk, Whole Milk pattern in its row.</p>
+</details>
+
+<p>A list in a fixed pattern is a reliable way to count when there are few orders. With all 12 milks the same list has 48 lines, and adding syrups makes it far too long to write. The pattern in the list is what lets us count without writing it.</p>
+
+<h2 id="s3">3. Tree diagrams</h2>
+
+<p>A tree diagram draws the same list. Start at a single point on the left. Draw one branch for each option of the first choice (size). From the end of each of those branches, draw one branch for each option of the next choice (milk). Each path from the left end to a right end is one order, so counting orders means counting the right ends.</p>
+
+<figure>
+<svg id="tree1" viewBox="0 0 400 312" role="img" aria-label="Tree diagram: 4 size branches, each with 3 milk branches, 12 ends."></svg>
+<figcaption>Figure 1. Hot Caffè Latte with 4 sizes and 3 milks. Follow any path from left to right to read one order; count the 12 ends on the right.</figcaption>
+</figure>
+
+<p>Each of the 4 size branches splits into the same 3 milk branches. So the ends come in 4 groups of 3, and there are 4 × 3 = 12 of them. This matches Task 1.</p>
+
+<h2 id="s4">4. The multiplication principle</h2>
+
+<div class="rule">
+<p><strong>Multiplication principle.</strong> Suppose an order is made by making several choices one after another. If the first choice has <i>a</i> options, and the second choice has <i>b</i> options no matter which option was picked first, then there are <i>a</i> × <i>b</i> orders. With more choices, keep multiplying, as long as each choice has the same number of options whatever was chosen before it.</p>
+</div>
+
+<p>The condition "the same number of options whatever was chosen before" is what makes every branch of the tree split the same way. Section 6 shows what goes wrong without it.</p>
+
+<p><strong>Example.</strong> A hot Caffè Latte with any of the 4 sizes and any of the 12 milks [1]. Every size can be made with every milk, so the condition holds:</p>
+<p class="calc">4 sizes × 12 milks = 48 orders.</p>
+
+<p>Now add syrup, allowing at most one syrup for now. The syrup choice has 15 options: one of the 14 syrups, or no syrup.</p>
+
+<div class="task">
+<h3>Task 2 (about 3 minutes, calculator)</h3>
+<p>Count the hot Caffè Latte orders made of one size (4 options), one milk (12 options) and either one syrup or no syrup (15 options). Produce the multiplication you used, the number of orders, and one sentence saying why the condition of the multiplication principle holds here.</p>
+</div>
+<details>
+<summary>Solution to Task 2</summary>
+<p class="calc">4 × 12 × 15 = 48 × 15 = 720 orders.</p>
+<p>The menu lists one set of 12 milks and 14 syrups for the drink, with no size restrictions [1], so every size has the same options. Each choice has the same number of options whatever was chosen before it.</p>
+<p>A common mistake is to use 14 for the syrup choice. "No syrup" is one of the options: the plain latte is an order too.</p>
+<p>The order of the choices does not matter. Choosing milk first, then syrup, then size gives 12 × 15 × 4, which is also 720.</p>
+</details>
+
+<h2 id="s5">5. Choosing one drink or another: the addition principle</h2>
+
+<p>The multiplication principle counts orders built from several choices made together: a size <em>and</em> a milk <em>and</em> a syrup. A different situation comes up when you pick one drink <em>or</em> another. A latte and a cortado are different drinks, so no order is both. Orders that fall into separate groups like this are counted by adding.</p>
+
+<div class="rule">
+<p><strong>Addition principle.</strong> If every order is in exactly one of the groups, then the total number of orders is the sum of the numbers in the groups.</p>
+</div>
+
+<p>Three drinks from the hot coffee menu [3]:</p>
+<ul>
+<li>Caffè Latte: 4 sizes, 12 milks [1].</li>
+<li>Cortado: one size, Short (8 fl oz), and the same 12 milks [4].</li>
+<li>Espresso: four sizes, Solo (0.75 fl oz), Doppio (1.5 fl oz), Triple (2.25 fl oz) and Quad (3 fl oz), with no "Milk Options" choice; milk can be added only as an optional splash, which this count leaves out [5].</li>
+</ul>
+<p>For this section, count only size and milk. Ignore syrups and the optional splash of milk in an espresso.</p>
+
+<div class="task">
+<h3>Task 3 (about 3 minutes, calculator)</h3>
+<p>Count the orders of a hot Caffè Latte (size and milk), the orders of a Cortado (size and milk), and the orders of an Espresso (size only). Then find how many orders there are in total if a customer orders exactly one of these three drinks. Produce the three counts and the total. Then write which counts you got by multiplying and which step was an addition, with one reason for each.</p>
+</div>
+<details>
+<summary>Solution to Task 3</summary>
+<ul>
+<li>Caffè Latte: 4 × 12 = 48 orders. Multiply: a size and a milk.</li>
+<li>Cortado: 1 × 12 = 12 orders. Multiply: the one size and a milk.</li>
+<li>Espresso: 4 orders, one for each size.</li>
+</ul>
+<p class="calc">Total: 48 + 12 + 4 = 64 orders. Add: the customer picks the latte or the cortado or the espresso, and no order is two of these drinks at once.</p>
+<p>Multiplying the three counts (48 × 12 × 4) would count orders made of a latte <em>and</em> a cortado <em>and</em> an espresso, which is a different question.</p>
+</details>
+
+<p>The whole hot coffee menu is counted the same way. The menu lists 31 hot coffee drinks [3]. Count the orders of each drink with the multiplication principle, then add the 31 counts, because every order is for exactly one drink.</p>
+
+<h2 id="s6">6. Combinations that are not offered: hot and iced lattes</h2>
+
+<p>The Caffè Latte also comes iced [2]. Suppose the order now starts with a choice of hot or iced, then a size. It is tempting to compute 2 temperatures × 4 sizes = 8. The menu table in Section 1 shows why that is wrong: the iced latte comes in Tall, Grande and Venti, and there is no iced Short [2]. The number of size options depends on the earlier choice (4 for hot, 3 for iced), so the condition of the multiplication principle fails.</p>
+
+<figure>
+<svg id="tree2" viewBox="0 0 400 250" role="img" aria-label="Tree diagram: hot has 4 size branches, iced has 3 size branches and a dashed Short branch that is not offered, 7 ends."></svg>
+<figcaption>Figure 2. Temperature, then size. The dashed branch, iced Short, is not on the menu. The 7 ends that remain are numbered.</figcaption>
+</figure>
+
+<p>Two methods give the right count.</p>
+<ol>
+<li><strong>Split into cases and add.</strong> Hot and iced are separate groups. Hot: 4 sizes. Iced: 3 sizes. Total 4 + 3 = 7.</li>
+<li><strong>Count everything, then subtract what is not allowed.</strong> If every pair were offered there would be 2 × 4 = 8. One pair, iced Short, is not offered. Total 8 − 1 = 7.</li>
+</ol>
+<div class="rule">
+<p><strong>Counting by subtracting.</strong> Number of allowed orders = number of orders if everything were allowed − number of orders that are not allowed.</p>
+</div>
+<p>Subtracting is usually quicker when only a few combinations are missing. It needs a correct count of the missing orders, and that count may itself need the multiplication principle, as in the next task.</p>
+
+<div class="task">
+<h3>Task 4 (about 4 minutes, calculator)</h3>
+<p>Count the Caffè Latte orders made of a temperature (hot or iced), a size, and one of the 12 milks (the iced latte has the same 12 milks as the hot one [2]). Do it twice: once by splitting into hot and iced and adding, and once by counting as if every combination were offered and subtracting. Produce both calculations and the answer.</p>
+</div>
+<details>
+<summary>Solution to Task 4</summary>
+<p><strong>Split and add.</strong> Hot: 4 × 12 = 48. Iced: 3 × 12 = 36. Total 48 + 36 = 84.</p>
+<p><strong>Subtract.</strong> If every combination were offered: 2 × 4 × 12 = 96. The orders not offered are iced Short with any milk: 1 × 12 = 12 orders. Total 96 − 12 = 84.</p>
+<p>A common slip is to subtract 1 instead of 12. The missing pair, iced Short, removes one branch of the tree, and the 12 milk branches that would have grown from it go with it.</p>
+</details>
+
+<h2 id="s7">7. Adding several syrups: a running product in a spreadsheet</h2>
+
+<p>So far an order has at most one syrup. The online menu lists each syrup as its own item with two settings, "add" or "no" (for example "Vanilla Syrup" or "No Vanilla Syrup") [1]. The menu data sets no limit on how many syrups one order can have [1]. We assume any combination of the 14 is allowed, including all 14 at once. That is a simplification. Each syrup then becomes a choice with 2 options: in or out. With 14 syrups, the order is a size, a milk, and 14 separate in-or-out choices. Every choice has the same number of options whatever was chosen before, so the multiplication principle applies:</p>
+<p class="calc">4 × 12 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 <span class="nw">= 4 × 12 × 2<sup>14</sup>.</span></p>
+<p>There are fourteen 2s, one for each syrup. The small raised 14 means 2 multiplied by itself 14 times, as in week 4. So 2<sup>14</sup> = 16,384 sets of syrups. The 15 syrup options of Task 2 (no syrup, or exactly one) are 15 of these 16,384 sets. The other 16,369 sets have two or more syrups.</p>
+<p>The menu also lets you pick the number of pumps of each syrup [1]. Treating each syrup as only in or out is a simplification.</p>
+<p>A spreadsheet can do this multiplication one choice at a time, which shows how quickly the count grows. Put one choice per row. Column B holds the number of options for that choice. Column C holds the number of orders using all the choices down to that row: each cell in C is the cell above it times the number of options in its own row.</p>
+
+<div class="tablewrap">
+<table id="sheet">
+<thead><tr><th></th><th>A</th><th>B</th><th>C</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<p>
+<button type="button" id="copyBtn">Copy layout (with formulas)</button>
+<button type="button" id="csvBtn">Download CSV</button>
+<span class="status" id="copyStatus" aria-live="polite"></span>
+</p>
+<p class="small">The copied layout is tab-separated, so it pastes into separate cells. These formulas have not been tested in Excel or Google Sheets.</p>
+
+<div class="task">
+<h3>Task 5 (about 8 minutes, spreadsheet)</h3>
+<p>Build the layout above in Excel or Google Sheets. Use the Copy button and paste into cell A1; typing it takes too long. If the paste does not work, enter <code>=B2</code> in C2 and <code>=C2*B3</code> in C3, then copy C3 down to C17. Produce:</p>
+<ol type="a">
+<li>the number in C17;</li>
+<li>the first row where the count passes 1,000, and the first row where it passes 100,000;</li>
+<li>one sentence explaining what happens to column C each time you go down one syrup row.</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 5</summary>
+<p>(a) C17 shows 786,432. This is 4 × 12 × 2<sup>14</sup> = 48 × 16,384.</p>
+<p>(b) The count first passes 1,000 in row 8 (Cinnamon Dolce Syrup, 1,536). It first passes 100,000 in row 15 (Toasted Coconut Syrup, 196,608).</p>
+<p>(c) Each syrup row doubles the count, because every order counted so far splits into two orders: one with that syrup and one without. This is the same doubling as exponential growth in week 4.</p>
+<p>The formula copied down works because of relative references: when <code>=C2*B3</code> in C3 is copied to C4, it becomes <code>=C3*B4</code>, the cell above times the number of options in the new row.</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Row</th><th>Choice</th><th class="num">C (running count)</th></tr></thead>
+<tbody id="runTable"></tbody>
+</table>
+</div>
+</details>
+
+<p><strong>Example: subtracting a group counted by multiplying.</strong> Suppose, as a rule made up for this example, a customer will not order both sugar-free syrups (Sugar-Free Caramel and Sugar-Free Vanilla) in the same drink. The orders not allowed have both of them in. Count those with the multiplication principle: 4 sizes, 12 milks, the two sugar-free syrups fixed as "in" (1 option each), and the other 12 syrups in or out (2 options each):</p>
+<p class="calc">4 × 12 × 1 × 1 × 2<sup>12</sup> = 48 × 4,096 = 196,608 orders not allowed.</p>
+<p class="calc">786,432 − 196,608 = 589,824 allowed orders.</p>
+<p>Subtracting 1 here would be far off: the one forbidden pair of syrups appears in 196,608 orders.</p>
+
+<h2 id="s8">8. Orders of magnitude for large counts</h2>
+
+<p>To judge a large count, round it to one non-zero digit and write it as that digit times a power of 10. For example, 786,432 rounds to 800,000 = 8 × 10<sup>5</sup>. The power of 10 in this form is the <strong>order of magnitude</strong> of the number. The order of magnitude of 786,432 is 10<sup>5</sup>.</p>
+<p>The number of digits gives the same answer: a number with 6 digits lies between 10<sup>5</sup> = 100,000 and 10<sup>6</sup> = 1,000,000, and its order of magnitude is 10<sup>5</sup>. In general, a number with <i>n</i> digits has order of magnitude 10<sup><i>n</i>−1</sup>.</p>
+
+<p>An estimate without a calculator: 2<sup>10</sup> = 1,024, which is about 1,000. So 2<sup>14</sup> = 2<sup>10</sup> × 2<sup>4</sup> is about 1,000 × 16 = 16,000, and 48 × 16,000 = 768,000. That is close to the exact 786,432. Both have 6 digits, so both have order of magnitude 10<sup>5</sup>. Getting the order of magnitude right is what a quick estimate is for.</p>
+
+<p>Converting a large count into a time span makes it easier to judge. Suppose someone orders one latte a day, a rate of 1 order per day. It takes 786,432 days to order every latte once. Convert days to years as in week 1, by multiplying by a fraction equal to 1:</p>
+<p class="calc">786,432 days × (1 year / 365 days) ≈ 2,154.6 years.</p>
+<p>The fraction (1 year / 365 days) equals 1 because its top and bottom are the same length of time. A year has 365 days except in leap years; ignoring leap days is a simplification.</p>
+
+<div class="task">
+<h3>Task 6 (about 4 minutes, spreadsheet or calculator)</h3>
+<p>This task uses a made-up rule, chosen for the exercise and not taken from the menu: each of the 14 syrups can be 0, 1, 2, 3 or 4 pumps.</p>
+<p>The answers have more digits than many phone calculators show. Use the spreadsheet from Task 5: type <code>=5^14</code> into an empty cell. If a calculator shows a number like 2.9296875E11 or 2.9296875e11, it means 2.9296875 × 10<sup>11</sup>.</p>
+<ol type="a">
+<li>How many options does one syrup now have? How many ways are there to set all 14 syrups? Give the exact number.</li>
+<li>Multiply by the 48 size and milk choices. Give the exact result, then round it to one non-zero digit times a power of 10 and give its order of magnitude.</li>
+<li>At one drink a day, how many days would it take to order every one of these drinks? Convert the days to years.</li>
+</ol>
+</div>
+<details>
+<summary>Solution to Task 6</summary>
+<p>(a) Each syrup has 5 options (0, 1, 2, 3 or 4 pumps). The 14 syrups give 5<sup>14</sup> = 6,103,515,625 settings, about 6 billion. (Under this rule 0 pumps means no syrup, so the 2 options "in or out" from Section 7 are replaced by 5 options.)</p>
+<p>(b) 48 × 6,103,515,625 = 292,968,750,000. In a spreadsheet, <code>=48*5^14</code> gives this; a phone may show 2.9296875E11. Rounded to one non-zero digit this is 300,000,000,000 = 3 × 10<sup>11</sup> (300 billion). The order of magnitude is 10<sup>11</sup>. The exact number has 12 digits, and 12 − 1 = 11 agrees.</p>
+<p>(c) One drink a day takes 292,968,750,000 days. 292,968,750,000 days × (1 year / 365 days) ≈ 802,654,110 years, about 800 million years.</p>
+<p>Going from 2 options to 5 options for each of the 14 syrups multiplied the count by (5/2)<sup>14</sup>, which is about 372,529.</p>
+</details>
+
+<h2 id="s9">Sources</h2>
+<p class="small">The product pages at starbucks.com/menu/product/… need JavaScript to display. The menu data they display is served by starbucks.com at the "data" address given for each source; those addresses were read on the access date. Saved extracts are in the folder <code>src/</code> that accompanies this page. They are extracts returned by a web-reading tool, not raw copies of the data.</p>
+<ol class="sources">
+<li>Starbucks, "Caffè Latte" (hot), online menu. https://www.starbucks.com/menu/product/407/hot; data https://www.starbucks.com/apiproxy/v1/ordering/407/hot. Accessed 4 October 2026. Figures used: sizes "Short" 8 fl oz, "Tall" 12 fl oz, "Grande" 16 fl oz, "Venti" 20 fl oz; "Milk Options", 12 items: "2% Milk", "Almondmilk", "Coconutmilk", "Breve (Half &amp; Half)", "Heavy Cream", "Nonfat Milk", "Oatmilk", "Protein-boosted Milk", "Soymilk", "Nondairy Vanilla Sweet Cream", "Vanilla Sweet Cream", "Whole Milk" (2% Milk is the default); "Syrups" (measured in "pump(s)"), 14 items: "Brown Sugar Syrup", "Banana Syrup", "Caramel Syrup", "Sugar-Free Caramel Syrup", "Cinnamon Dolce Syrup", "Hazelnut Syrup", "Horchata Syrup", "Mango Syrup", "Pecan Syrup", "Peppermint Syrup", "Raspberry Syrup", "Toasted Coconut Syrup", "Sugar-Free Vanilla Syrup", "Vanilla Syrup"; each syrup has the settings "add" and "no", e.g. "Vanilla Syrup" / "No Vanilla Syrup"; no limit on the number of syrups is given; no syrup by default. "Honey Blend Syrup" is listed in a separate group, "Liquid Sweeteners", and is not counted with the syrups.</li>
+<li>Starbucks, "Iced Caffè Latte", online menu. https://www.starbucks.com/menu/product/407/iced; data https://www.starbucks.com/apiproxy/v1/ordering/407/iced. Accessed 4 October 2026. Figures used: sizes "Tall" 12 fl oz, "Grande" 16 fl oz, "Venti" 24 fl oz, no "Short"; the same 12 "Milk Options" as [1].</li>
+<li>Starbucks, online menu, hot coffee drinks. https://www.starbucks.com/menu; data https://www.starbucks.com/apiproxy/v1/ordering/menu. Accessed 4 October 2026. Figures used: 31 hot coffee drinks in the groups Brewed Coffee (6), Americano (1), Latte (12), Cappuccino (1), Mocha (2), Macchiato (2), Flat White (1), Cortado (4), Espresso Shot (2), not counting the 2 "Coffee Traveler" items; including "Caffè Latte", "Cortado" and "Espresso".</li>
+<li>Starbucks, "Cortado", online menu. https://www.starbucks.com/menu/product/2124649/hot; data https://www.starbucks.com/apiproxy/v1/ordering/2124649/hot. Accessed 4 October 2026. Figures used: one size, "Short", 8 fl oz; the same 12 "Milk Options" as [1].</li>
+<li>Starbucks, "Espresso", online menu. https://www.starbucks.com/menu/product/410/hot; data https://www.starbucks.com/apiproxy/v1/ordering/410/hot. Accessed 4 October 2026. Figures used: sizes "Solo" 0.75 fl oz, "Doppio" 1.5 fl oz, "Triple" 2.25 fl oz, "Quad" 3 fl oz; no "Milk Options" group; a "Creamer" group of 10 optional splashes, from "Splash of 2% Milk" to "Splash of Whole Milk".</li>
+</ol>
+
+</main>
+
+<script>
+(function(){
+  var NS = "http://www.w3.org/2000/svg";
+  function el(svg, name, attrs, text){
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    svg.appendChild(e);
+    return e;
+  }
+
+  // Figure 1: 4 sizes x 3 milks
+  (function(){
+    var svg = document.getElementById("tree1");
+    var sizes = ["Short","Tall","Grande","Venti"];
+    var milks = ["2% Milk","Oatmilk","Whole Milk"];
+    var rootX = 12, sizeX = 140, milkX = 250, top = 36, rowH = 22.5;
+    var rootY = top + rowH * 5.5;
+    var n = 0;
+    el(svg,"text",{x:sizeX-20,y:12,"font-size":16,"font-weight":600},"Size");
+    el(svg,"text",{x:milkX+8,y:12,"font-size":16,"font-weight":600},"Milk");
+    sizes.forEach(function(s, i){
+      var y0 = top + rowH * (3*i + 1);
+      el(svg,"path",{"class":"edge",d:"M"+rootX+" "+rootY+" L"+sizeX+" "+y0});
+      milks.forEach(function(m, j){
+        var y = top + rowH * (3*i + j);
+        n++;
+        el(svg,"path",{"class":"edge",d:"M"+sizeX+" "+y0+" L"+milkX+" "+y});
+        el(svg,"circle",{"class":"leaf",cx:milkX,cy:y,r:3.5});
+        el(svg,"text",{x:milkX+8,y:y+4.5,"font-size":16},m);
+        el(svg,"text",{x:392,y:y+4.5,"font-size":15,"text-anchor":"end"},String(n));
+      });
+      el(svg,"circle",{"class":"dot",cx:sizeX,cy:y0,r:3.5});
+      el(svg,"rect",{x:sizeX-66,y:y0-20,width:60,height:18,fill:"var(--bg)"});
+      el(svg,"text",{x:sizeX-8,y:y0-5,"font-size":16,"text-anchor":"end"},s);
+    });
+    el(svg,"circle",{"class":"dot",cx:rootX,cy:rootY,r:4});
+  })();
+
+  // Figure 2: hot (4 sizes) and iced (3 sizes, Short not offered)
+  (function(){
+    var svg = document.getElementById("tree2");
+    var rootX = 12, tX = 130, sX = 250, top = 30, rowH = 25;
+    var groups = [
+      {t:"Hot", sizes:[["Short",1],["Tall",1],["Grande",1],["Venti",1]]},
+      {t:"Iced", sizes:[["Short",0],["Tall",1],["Grande",1],["Venti",1]]}
+    ];
+    var rootY = top + rowH * 3.5 + 6;
+    el(svg,"text",{x:tX-60,y:14,"font-size":16,"font-weight":600},"Temperature");
+    el(svg,"text",{x:sX+8,y:14,"font-size":16,"font-weight":600},"Size");
+    var n = 0;
+    groups.forEach(function(g, gi){
+      var base = top + gi * (rowH*4 + 12);
+      var ty = base + rowH * 1.5;
+      el(svg,"path",{"class":"edge",d:"M"+rootX+" "+rootY+" L"+tX+" "+ty});
+      g.sizes.forEach(function(s, i){
+        var y = base + rowH * i;
+        if (s[1]) {
+          n++;
+          el(svg,"path",{"class":"edge",d:"M"+tX+" "+ty+" L"+sX+" "+y});
+          el(svg,"circle",{"class":"leaf",cx:sX,cy:y,r:3.5});
+          el(svg,"text",{x:sX+8,y:y+4.5,"font-size":16},s[0]);
+          el(svg,"text",{x:392,y:y+4.5,"font-size":15,"text-anchor":"end"},String(n));
+        } else {
+          el(svg,"path",{"class":"edge-gone",d:"M"+tX+" "+ty+" L"+sX+" "+y});
+          el(svg,"text",{x:sX+8,y:y+4.5,"font-size":14,"class":"gone"},"Short: not offered");
+        }
+      });
+      el(svg,"circle",{"class":"dot",cx:tX,cy:ty,r:3.5});
+      el(svg,"rect",{x:tX-48,y:ty-21,width:42,height:18,fill:"var(--bg)"});
+      el(svg,"text",{x:tX-8,y:ty-6,"font-size":16,"text-anchor":"end"},g.t);
+    });
+    el(svg,"circle",{"class":"dot",cx:rootX,cy:rootY,r:4});
+  })();
+
+  // Spreadsheet layout
+  var syrups = ["Brown Sugar","Banana","Caramel","Sugar-Free Caramel","Cinnamon Dolce","Hazelnut","Horchata","Mango","Pecan","Peppermint","Raspberry","Toasted Coconut","Sugar-Free Vanilla","Vanilla"];
+  var rows = [["Choice","Number of options","Running count"],["Size","4","=B2"],["Milk","12","=C2*B3"]];
+  syrups.forEach(function(s, i){
+    var r = i + 4;
+    rows.push([s + " Syrup (in or out)", "2", "=C" + (r-1) + "*B" + r]);
+  });
+  var tb = document.querySelector("#sheet tbody");
+  rows.forEach(function(r, i){
+    var tr = document.createElement("tr");
+    var th = document.createElement("th"); th.textContent = i + 1; tr.appendChild(th);
+    r.forEach(function(c, j){
+      var td = document.createElement("td");
+      td.textContent = c;
+      if (j > 0 && i > 0) td.className = "num";
+      if (j === 2 && i > 0) td.className = "num mono";
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+  var tsv = rows.map(function(r){ return r.join("\t"); }).join("\n");
+  var csv = rows.map(function(r){
+    return r.map(function(c){ return /[",\n]/.test(c) ? '"' + c.replace(/"/g,'""') + '"' : c; }).join(",");
+  }).join("\r\n");
+
+  // Running-count table in the solution
+  var rt = document.getElementById("runTable");
+  var p = 1;
+  rows.slice(1).forEach(function(r, i){
+    p = p * Number(r[1]);
+    var tr = document.createElement("tr");
+    [String(i + 2), r[0], p.toLocaleString("en-US")].forEach(function(c, j){
+      var td = document.createElement("td"); td.textContent = c;
+      if (j !== 1) td.className = "num";
+      tr.appendChild(td);
+    });
+    rt.appendChild(tr);
+  });
+
+  var status = document.getElementById("copyStatus");
+  document.getElementById("copyBtn").addEventListener("click", function(){
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = tsv; ta.setAttribute("readonly",""); ta.style.position = "fixed"; ta.style.left = "-9999px";
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      status.textContent = ok ? "Copied. Click cell A1 and paste." : "Copy failed. Select the table and copy it by hand.";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function(){
+        status.textContent = "Copied. Click cell A1 and paste.";
+      }, fallback);
+    } else { fallback(); }
+  });
+  document.getElementById("csvBtn").addEventListener("click", function(){
+    var blob = new Blob([csv], {type: "text/csv"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "latte-running-count.csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-05/5-3-volume-and-surface-area/" style="color:inherit">&larr; 5.3 Volume and surface area</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-06/6-2-sets-and-subsets/" style="color:inherit">6.2 Sets and subsets &rarr;</a></nav>
+</body>
+</html>

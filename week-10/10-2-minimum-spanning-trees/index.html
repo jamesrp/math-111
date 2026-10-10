@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minimum Spanning Trees</title>
+<style>
+:root{
+  --bg:#fbfaf7; --fg:#1d1d1f; --muted:#5a5a60; --rule:#d9d6cf;
+  --box:#f1efe9; --task:#eef3fa; --task-edge:#3b6aa8; --sol:#f6f6f6;
+  --edge:#2b2b30; --edge-off:#b9b6ae; --vertex:#1f4f8a; --vfill:#ffffff; --label-bg:#fbfaf7;
+  --accent:#a3461f; --tree:#1f4f8a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17181b; --fg:#e9e8e4; --muted:#a6a5a0; --rule:#3a3b40;
+    --box:#222327; --task:#1d2635; --task-edge:#7aa5e0; --sol:#202124;
+    --edge:#e2e1dc; --edge-off:#5b5c61; --vertex:#8ab6f0; --vfill:#17181b; --label-bg:#17181b;
+    --accent:#f09a6c; --tree:#8ab6f0;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17181b; --fg:#e9e8e4; --muted:#a6a5a0; --rule:#3a3b40;
+  --box:#222327; --task:#1d2635; --task-edge:#7aa5e0; --sol:#202124;
+  --edge:#e2e1dc; --edge-off:#5b5c61; --vertex:#8ab6f0; --vfill:#17181b; --label-bg:#17181b;
+  --accent:#f09a6c; --tree:#8ab6f0;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:46rem;margin:0 auto;padding:1.5rem 16px 4rem}
+.course{font:600 0.85rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--muted);letter-spacing:.02em;margin:0 0 .3rem}
+h1{font:700 2.1rem/1.15 system-ui,-apple-system,"Segoe UI",sans-serif;margin:.2rem 0 1.5rem}
+h2{font:700 1.35rem/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;margin:2.6rem 0 .7rem;padding-top:.9rem;border-top:1px solid var(--rule)}
+h3{font:700 1.02rem/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;margin:0 0 .5rem}
+p{margin:.65rem 0}
+.def{background:var(--box);border-left:4px solid var(--muted);padding:.6rem .9rem;margin:1rem 0}
+.def p{margin:.35rem 0}
+.task{background:var(--task);border:2px solid var(--task-edge);border-radius:6px;padding:.9rem 1rem;margin:1.4rem 0 .5rem}
+.task ol,.task ul{margin:.4rem 0;padding-left:1.4rem}
+details.solution{background:var(--sol);border:1px solid var(--rule);border-radius:6px;padding:.5rem 1rem;margin:0 0 1.4rem}
+details.solution summary{cursor:pointer;font:600 .95rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding:.2rem 0}
+details.solution[open] summary{margin-bottom:.4rem}
+ol.steps li{margin:.35rem 0}
+table{border-collapse:collapse;margin:.8rem 0;font-size:.95rem;width:100%}
+th,td{border-bottom:1px solid var(--rule);padding:.35rem .5rem;text-align:left;vertical-align:top}
+th{font:600 .88rem/1.3 system-ui,-apple-system,"Segoe UI",sans-serif}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+table.kr td:nth-child(2){white-space:nowrap}
+figure{margin:1.2rem 0}
+figure svg{width:100%;height:auto;display:block;max-width:600px;margin:0 auto}
+figcaption{font:0.88rem/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--muted);margin-top:.4rem}
+.small{font-size:.9rem;color:var(--muted)}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--fg)}
+svg .town{font-size:21px;font-weight:600}
+svg .w{font-size:20px;font-weight:600}
+svg .wbg{fill:var(--label-bg)}
+svg .v{fill:var(--vfill);stroke:var(--vertex);stroke-width:4}
+svg .e{stroke:var(--edge);stroke-width:3.5;fill:none;stroke-linecap:round}
+svg .e.off{stroke:var(--edge-off);stroke-dasharray:6 7;stroke-width:2.5}
+svg .e.tree{stroke:var(--tree);stroke-width:7}
+svg .e.cyc{stroke:var(--accent);stroke-width:7}
+svg .w.off{fill:var(--edge-off)}
+svg .w.cyc{fill:var(--accent)}
+svg .hit{stroke:transparent;stroke-width:28;cursor:pointer;fill:none}
+svg .hit:focus{outline:none}
+svg .hit:focus-visible{stroke:var(--accent);stroke-opacity:.35}
+.planner{border:1px solid var(--rule);border-radius:6px;padding:.6rem .6rem .8rem;margin:1.2rem 0}
+.status{font:0.98rem/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;margin:.5rem .3rem}
+.buttons{display:flex;flex-wrap:wrap;gap:.5rem;margin:.3rem .3rem 0}
+button{font:600 .92rem system-ui,-apple-system,"Segoe UI",sans-serif;padding:.45rem .8rem;border-radius:5px;border:1px solid var(--task-edge);background:var(--bg);color:var(--fg);cursor:pointer}
+ol.sources li{margin:.5rem 0;font-size:.93rem;overflow-wrap:anywhere}
+@media (max-width:520px){
+  body{font-size:17px}
+  h1{font-size:1.75rem}
+  th,td{padding:.3rem .3rem}
+  svg .w{font-size:25px}
+  svg .town{font-size:25px}
+  table.kr{font-size:.85rem}
+  table.kr td:nth-child(2){white-space:normal}
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-10/10-1-weighted-graphs/" style="color:inherit">&larr; 10.1 Weighted graphs</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-10/10-3-when-greedy-algorithms-work/" style="color:inherit">10.3 When greedy algorithms work &rarr;</a></nav>
+
+<main>
+<p class="course">Math 111 · Module: Building mountain roads (week 10) · Lecture 2 of 3</p>
+<h1>Minimum spanning trees</h1>
+
+<!-- ============================================================ -->
+<h2>1. The six towns, the eight candidate roads and the question from Lecture 10.1</h2>
+
+<p>The map is the one from Lecture 10.1: six towns in Okanogan County, Washington [1]–[6], and eight candidate road segments, one for each pair of towns less than 25 miles apart in a straight line. Each cost is the straight-line distance times $10.948 million per mile, the FHWA typical cost for a two-lane rural road on a new alignment in mountainous terrain [7], rounded to the nearest million. All costs are in millions of 2014 dollars. Lecture 10.1 named the simplifications: straight-line distances, one cost per mile for every segment, no existing roads, and a made-up 25-mile cutoff.</p>
+
+<div class="tablewrap">
+<table id="roads">
+<thead><tr><th>Road segment</th><th class="num">Distance (miles)</th><th class="num">Cost ($ million, 2014)</th></tr></thead>
+<tbody>
+<tr><td>Mazama–Winthrop</td><td class="num">13.2</td><td class="num">145</td></tr>
+<tr><td>Mazama–Twisp</td><td class="num">20.4</td><td class="num">223</td></tr>
+<tr><td>Winthrop–Twisp</td><td class="num">7.9</td><td class="num">86</td></tr>
+<tr><td>Winthrop–Conconully</td><td class="num">20.5</td><td class="num">224</td></tr>
+<tr><td>Twisp–Conconully</td><td class="num">21.8</td><td class="num">239</td></tr>
+<tr><td>Twisp–Pateros</td><td class="num">23.8</td><td class="num">261</td></tr>
+<tr><td>Twisp–Brewster</td><td class="num">24.7</td><td class="num">270</td></tr>
+<tr><td>Pateros–Brewster</td><td class="num">7.5</td><td class="num">82</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Tap or click an edge in Figure 1 to add it to the road plan; tap it again to take it out. The plan starts empty. The line under the figure reports the number of roads, their total cost, whether the plan is connected, and whether it has a cycle. When the plan has a cycle, the cycle is drawn in orange. You use Figure 1 in Tasks 1 and 4. Both can also be done on paper.</p>
+
+<div class="planner">
+<figure style="margin:.2rem 0">
+<svg id="fig1" viewBox="0 -12 600 542" role="img" aria-label="Interactive map of the six towns and eight candidate roads with their costs. Each road can be added to or removed from the plan."></svg>
+<figcaption>Figure 1. The town graph from Lecture 10.1, with costs in $ million (2014 dollars) as weights. Roads in the plan are solid; roads not in the plan are dashed.</figcaption>
+</figure>
+<div class="status" id="status" aria-live="polite"></div>
+<div class="buttons">
+<button type="button" id="allOff">Remove all roads</button>
+<button type="button" id="allOn">Add all 8 roads</button>
+</div>
+</div>
+
+<p>Lecture 10.1 established three facts that this lecture uses. When every road has a positive cost, the cheapest connected plan has no cycle, so it is a tree. A tree with n vertices has n − 1 edges, so a tree on the six towns has 5 roads. This graph has 24 trees, and Cayley's formula showed that the number of trees grows far too fast to check them one by one on a larger map. Lecture 10.1 ended with a problem: find the cheapest tree without checking every tree. A second question comes with it. Once a method gives an answer, the county needs a way to be sure that no cheaper plan exists.</p>
+
+<div class="def">
+<p>A <b>spanning tree</b> of a graph is a tree that contains every vertex of the graph and uses only edges of the graph. For the towns, a spanning tree is a connected road plan with no cycle that reaches all six towns. It has 6 − 1 = 5 roads.</p>
+<p>A <b>minimum spanning tree</b> is a spanning tree whose total weight is as small as possible. When two edges have the same weight there can be more than one minimum spanning tree. On this map no two costs are equal.</p>
+</div>
+
+<section class="task">
+<h3>Task 1 (about 3 minutes, calculator or Figure 1)</h3>
+<p>Twisp is the only town with a candidate road to every other town. The <b>Twisp plan</b> builds those five roads.</p>
+<ol type="a">
+<li>Write one sentence saying why the Twisp plan is a spanning tree. Write its total cost.</li>
+<li>Replace Mazama–Twisp with Mazama–Winthrop. Write the new total, and check that every town can still reach Twisp.</li>
+</ol>
+</section>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<p>(a) Every town has a road to Twisp, so any two towns are joined by a path through Twisp, and the plan is connected. A cycle would need a road between two towns other than Twisp, and the plan has none. So it is a spanning tree, with 5 roads. Total: 223 + 86 + 239 + 261 + 270 = <b>$1,079 million</b>.</p>
+<p>(b) 1,079 − 223 + 145 = <b>$1,001 million</b>, a saving of $78 million. Mazama now reaches Twisp by the path Mazama → Winthrop → Twisp. The other four towns still have their own road to Twisp.</p>
+</details>
+
+<p>One exchange lowered the cost by $78 million. Exchanging roads by hand gives no sign of when to stop. Kruskal's algorithm builds the cheapest tree directly.</p>
+
+<!-- ============================================================ -->
+<h2>2. Kruskal's algorithm</h2>
+
+<p>Joseph Kruskal published this method in 1956 [8]. It builds the tree one road at a time and always takes the cheapest road that does not make a cycle. To spot cycles it keeps the towns in <b>groups</b>, as in Lecture 10.1 Task 3(c): two towns are in the same group when the roads built so far already join them by a path.</p>
+
+<h3>Kruskal's algorithm, for a connected graph with n vertices</h3>
+<ol class="steps">
+<li>List all edges in order from cheapest to most expensive.</li>
+<li>Start with no edges built. Each vertex is a group by itself.</li>
+<li>Take the next edge on the list.
+  <ul>
+  <li>If its two vertices are in different groups, build it, and merge the two groups into one.</li>
+  <li>If its two vertices are already in the same group, skip it.</li>
+  </ul></li>
+<li>If you have built n − 1 edges, stop. Otherwise go back to step 3.</li>
+</ol>
+<p>The reason for each step:</p>
+<ul>
+<li>Step 3 skips an edge when its two vertices are in the same group. A path of built edges already joins them, and that path together with the new edge would form a cycle. When the two vertices are in different groups, no path joins them yet, so the new edge cannot close a cycle.</li>
+<li>Step 4 stops at n − 1 edges because a tree on n vertices has exactly n − 1 edges. At that point every vertex is in one group.</li>
+<li>Step 1 is what makes the result the cheapest tree. Section 4 gives the reason.</li>
+</ul>
+
+<p>Step 1 for the town graph puts the eight roads in this order:</p>
+
+<div class="tablewrap">
+<table class="kr">
+<thead><tr><th class="num">Row</th><th>Road</th><th class="num">Cost</th><th>Build or skip</th><th>Groups</th><th class="num">Total so far</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Pateros–Brewster</td><td class="num">82</td><td></td><td></td><td></td></tr>
+<tr><td class="num">2</td><td>Winthrop–Twisp</td><td class="num">86</td><td></td><td></td><td></td></tr>
+<tr><td class="num">3</td><td>Mazama–Winthrop</td><td class="num">145</td><td></td><td></td><td></td></tr>
+<tr><td class="num">4</td><td>Mazama–Twisp</td><td class="num">223</td><td></td><td></td><td></td></tr>
+<tr><td class="num">5</td><td>Winthrop–Conconully</td><td class="num">224</td><td></td><td></td><td></td></tr>
+<tr><td class="num">6</td><td>Twisp–Conconully</td><td class="num">239</td><td></td><td></td><td></td></tr>
+<tr><td class="num">7</td><td>Twisp–Pateros</td><td class="num">261</td><td></td><td></td><td></td></tr>
+<tr><td class="num">8</td><td>Twisp–Brewster</td><td class="num">270</td><td></td><td></td><td></td></tr>
+</tbody>
+</table>
+</div>
+
+<section class="task">
+<h3>Task 2 (about 7 minutes, paper)</h3>
+<p>Run Kruskal's algorithm on the sorted list. Copy the Road and Cost columns. Starting at row 1, fill in the last three columns for each row until you stop: write "build" or "skip", under "Groups" list the groups with more than one town, using initials (for example {M, W, T}), and keep a running total of the cost built. Then write down:</p>
+<ol type="a">
+<li>the roads you built and their total cost;</li>
+<li>the row at which you stopped, and why;</li>
+<li>the saving compared with the Twisp plan of Task 1(a).</li>
+</ol>
+</section>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<div class="tablewrap">
+<table class="kr">
+<thead><tr><th class="num">Row</th><th>Road</th><th class="num">Cost</th><th>Build or skip</th><th>Groups</th><th class="num">Total so far</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Pateros–Brewster</td><td class="num">82</td><td>build</td><td>{P, B}</td><td class="num">82</td></tr>
+<tr><td class="num">2</td><td>Winthrop–Twisp</td><td class="num">86</td><td>build</td><td>{P, B} {W, T}</td><td class="num">168</td></tr>
+<tr><td class="num">3</td><td>Mazama–Winthrop</td><td class="num">145</td><td>build</td><td>{P, B} {M, W, T}</td><td class="num">313</td></tr>
+<tr><td class="num">4</td><td>Mazama–Twisp</td><td class="num">223</td><td>skip</td><td>{P, B} {M, W, T}</td><td class="num">313</td></tr>
+<tr><td class="num">5</td><td>Winthrop–Conconully</td><td class="num">224</td><td>build</td><td>{P, B} {M, W, T, C}</td><td class="num">537</td></tr>
+<tr><td class="num">6</td><td>Twisp–Conconully</td><td class="num">239</td><td>skip</td><td>{P, B} {M, W, T, C}</td><td class="num">537</td></tr>
+<tr><td class="num">7</td><td>Twisp–Pateros</td><td class="num">261</td><td>build</td><td>{M, W, T, C, P, B}</td><td class="num">798</td></tr>
+<tr><td class="num">8</td><td>Twisp–Brewster</td><td class="num">270</td><td>not checked</td><td></td><td></td></tr>
+</tbody>
+</table>
+</div>
+<p>(a) Pateros–Brewster, Winthrop–Twisp, Mazama–Winthrop, Winthrop–Conconully and Twisp–Pateros. Total: 82 + 86 + 145 + 224 + 261 = <b>$798 million</b>.</p>
+<p>(b) Row 7. That row built the fifth road, and n − 1 = 6 − 1 = 5, so row 8 was never checked.</p>
+<p>(c) 1,079 − 798 = <b>$281 million</b> less than the Twisp plan.</p>
+<p>After row 2 there are two separate groups, {P, B} and {W, T}. Kruskal's algorithm can hold several groups at once; row 7 joins the last two. At row 4, Mazama and Twisp were already joined through Winthrop (rows 2 and 3), so Mazama–Twisp would have made the cycle Mazama → Winthrop → Twisp → Mazama. At row 6, Twisp and Conconully were already joined through Winthrop, so Twisp–Conconully would have made the cycle Twisp → Winthrop → Conconully → Twisp.</p>
+<figure>
+<svg id="fig2" viewBox="0 -12 600 542" role="img" aria-label="Map showing the five roads built by Kruskal's algorithm, total 798 million dollars"></svg>
+<figcaption>Figure 2. The five roads built by Kruskal's algorithm (thick), total $798 million. The dashed roads are not built.</figcaption>
+</figure>
+</details>
+
+<!-- ============================================================ -->
+<h2>3. Checking that the result connects every town</h2>
+
+<p>Kruskal's tree has 5 roads, which is n − 1 for n = 6 towns. It has no cycle, because the algorithm skips every road that would close one. It is connected, because after row 7 all six towns are in one group. Task 3 checks the last point directly on the map.</p>
+
+<section class="task">
+<h3>Task 3 (about 2 minutes, paper or Figure 2)</h3>
+<p>Using only the five roads of Kruskal's tree, write a path from Brewster to each of the other five towns.</p>
+</section>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<ul>
+<li>Brewster → Pateros</li>
+<li>Brewster → Pateros → Twisp</li>
+<li>Brewster → Pateros → Twisp → Winthrop</li>
+<li>Brewster → Pateros → Twisp → Winthrop → Mazama</li>
+<li>Brewster → Pateros → Twisp → Winthrop → Conconully</li>
+</ul>
+<p>Every town can reach Brewster, so any two towns can reach each other by going through Brewster, and the plan is connected. In a tree there is exactly one path between two towns, since a second path would close a cycle.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2>4. Why no cheaper tree exists: the swap test</h2>
+
+<p>A <b>swap</b> changes a spanning tree by one road:</p>
+<ol class="steps">
+<li>Add a road that is not in the tree. Its two towns were already joined by a path in the tree, so the new road closes exactly one cycle.</li>
+<li>Remove a different road on that cycle. The plan stays connected, because a trip that used the removed road can go the other way around the cycle (Lecture 10.1, Section 5). It has 5 roads again and no cycle, so it is again a spanning tree.</li>
+<li>The new total is the old total, plus the cost of the added road, minus the cost of the removed road. It is lower only if the removed road costs more than the added one.</li>
+</ol>
+
+<section class="task">
+<h3>Task 4 (about 6 minutes, Figure 1 or paper)</h3>
+<p>In Figure 1, click "Remove all roads" and then click the five roads of Kruskal's tree. The total should read $798 million.</p>
+<ol type="a">
+<li>Add Twisp–Conconully (239). Name the towns on the cycle that forms and the two tree roads on it. Remove the more expensive of the two tree roads. Write the new total and the change from 798.</li>
+<li>Do the same for the other two roads that are not in the tree: Mazama–Twisp (223) and Twisp–Brewster (270). Start from Kruskal's tree each time.</li>
+<li>Write whether any swap lowered the total.</li>
+</ol>
+</section>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<p>(a) Adding Twisp–Conconully (239) closes the cycle Twisp → Winthrop → Conconully → Twisp. Its tree roads are Winthrop–Twisp (86) and Winthrop–Conconully (224). Removing Winthrop–Conconully gives 798 − 224 + 239 = <b>$813 million</b>, up $15 million.</p>
+<p>(b) Adding Mazama–Twisp (223) closes the cycle Mazama → Winthrop → Twisp → Mazama, with tree roads Mazama–Winthrop (145) and Winthrop–Twisp (86). Removing Mazama–Winthrop gives 798 − 145 + 223 = <b>$876 million</b>, up $78 million.</p>
+<p>Adding Twisp–Brewster (270) closes the cycle Twisp → Pateros → Brewster → Twisp, with tree roads Twisp–Pateros (261) and Pateros–Brewster (82). Removing Twisp–Pateros gives 798 − 261 + 270 = <b>$807 million</b>, up $9 million.</p>
+<p>Removing the cheaper tree road instead raises the total more: 798 − 86 + 239 = 951, 798 − 86 + 223 = 935, and 798 − 82 + 270 = 986.</p>
+<p>(c) No swap lowered the total. Each added road costs more than both tree roads on its cycle, so removing either one raises the cost. Removing the dearer of the two gives the smaller rise.</p>
+</details>
+
+<p>Task 4 covers all six swaps from Kruskal's tree: three unused roads, each with two tree roads on its cycle. None lowered the cost. Trees that differ from Kruskal's tree in two or more roads were not tried. A standard fact about spanning trees covers them as well [10]:</p>
+
+<div class="def">
+<p><b>Swap test.</b> If no single swap lowers the total weight of a spanning tree, that tree is a minimum spanning tree.</p>
+</div>
+
+<p>No swap lowers $798 million, so by the swap test no spanning tree of the town graph costs less. The county's cheapest plan is Kruskal's tree, at $798 million in 2014 dollars. As a cross-check, a computer added up all 24 spanning trees of this graph; $798 million is the lowest total, and only Kruskal's tree has it.</p>
+
+<p>Kruskal's tree passes the swap test on every map, and step 1 is the reason. Each road the algorithm did not build was skipped, or never checked, at a moment when its two towns were already joined by built roads. Those built roads came earlier in the sorted list, so none of them costs more than the unused road, and they form the tree path between its two towns. Adding the unused road and removing one of them cannot lower the total. Kruskal proved that, when no two edges have the same weight, the tree his algorithm builds is the minimum spanning tree [8]. Lecture 10.3 explains why each choice Kruskal's algorithm makes is safe.</p>
+
+<!-- ============================================================ -->
+<h2>5. Prim's algorithm</h2>
+
+<p>A second method grows one group outward from a starting town. It is called Prim's algorithm, after Robert Prim, who published it in 1957; Vojtěch Jarník had described it in 1930 [9].</p>
+
+<h3>Prim's algorithm, for a connected graph with n vertices</h3>
+<ol class="steps">
+<li>Pick any vertex to start. The group contains only that vertex.</li>
+<li>Look at every edge with one vertex inside the group and one outside. Build the cheapest of these edges, and put its outside vertex into the group.</li>
+<li>If the group contains all n vertices, stop. You have built n − 1 edges. Otherwise go back to step 2.</li>
+</ol>
+<p>Prim's algorithm never makes a cycle, because each edge it builds brings in a vertex that had no built edges yet.</p>
+
+<section class="task">
+<h3>Task 5 (about 4 minutes, paper)</h3>
+<p>Run Prim's algorithm on the town graph, starting at Pateros. At each step, list the roads with one town inside the group and one outside, with their costs, and circle the cheapest. Write the roads in the order you build them, with a running total. Compare the roads and the total with Kruskal's tree.</p>
+</section>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<p>Roads are written with initials, for example P–B for Pateros–Brewster.</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th class="num">Step</th><th>Group</th><th>Roads leaving the group</th><th>Built</th><th class="num">Total so far</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>P</td><td>P–B 82, T–P 261</td><td>P–B</td><td class="num">82</td></tr>
+<tr><td class="num">2</td><td>P, B</td><td>T–P 261, T–B 270</td><td>T–P</td><td class="num">343</td></tr>
+<tr><td class="num">3</td><td>P, B, T</td><td>W–T 86, M–T 223, T–C 239</td><td>W–T</td><td class="num">429</td></tr>
+<tr><td class="num">4</td><td>P, B, T, W</td><td>M–W 145, M–T 223, W–C 224, T–C 239</td><td>M–W</td><td class="num">574</td></tr>
+<tr><td class="num">5</td><td>P, B, T, W, M</td><td>W–C 224, T–C 239</td><td>W–C</td><td class="num">798</td></tr>
+</tbody>
+</table>
+</div>
+<p>Prim's algorithm builds the same five roads as Kruskal's algorithm, in a different order, with the same total of $798 million. At step 2 it builds the expensive Twisp–Pateros road (261) before the cheap Winthrop–Twisp road (86), because the group {P, B} can reach the other towns only through Twisp. Kruskal's algorithm works through the whole list in cost order and can hold several groups at once. Prim's algorithm always has one connected group.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2>6. Running the algorithm again when a cost changes</h2>
+
+<p>FHWA states that real projects vary a lot around its typical cost [7], so a county reruns the algorithm whenever an estimate changes. The number in Task 6 is made up for the example.</p>
+
+<section class="task">
+<h3>Task 6 (about 3 minutes, paper)</h3>
+<p>Suppose a survey finds unstable slopes along the Twisp–Pateros route and the estimate rises from $261 million to $300 million (a made-up number). All other costs stay the same. Sort the roads again and run Kruskal's algorithm. Write the five roads built and the total cost.</p>
+</section>
+<details class="solution">
+<summary>Solution to Task 6</summary>
+<p>Twisp–Pateros moves to the end of the list. Rows 1 to 6 are unchanged: build Pateros–Brewster, Winthrop–Twisp and Mazama–Winthrop, skip Mazama–Twisp, build Winthrop–Conconully, skip Twisp–Conconully. Row 7 is now Twisp–Brewster (270). Twisp is in {M, W, T, C} and Brewster is in {P, B}, so it is built as the fifth road, and the algorithm stops.</p>
+<p>Roads: Pateros–Brewster, Winthrop–Twisp, Mazama–Winthrop, Winthrop–Conconully, Twisp–Brewster. Total: 82 + 86 + 145 + 224 + 270 = <b>$807 million</b>. This is the tree from the Twisp–Brewster swap in Task 4. With the original estimate it cost $9 million more than Kruskal's tree; after the change it is the cheapest.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2>Data used in this module</h2>
+
+<p class="small">This lecture uses exactly the towns, the eight candidate roads and the costs listed under "Data used in this module" in Lecture 10.1: six towns in Okanogan County [1]–[6], with costs in millions of 2014 dollars from FHWA's <i>Conditions and Performance</i> report, 23rd edition, Exhibit A-1 [7]. New in this lecture, for Lecture 10.3:</p>
+<ul class="small">
+<li><b>Minimum spanning tree:</b> Pateros–Brewster 82, Winthrop–Twisp 86, Mazama–Winthrop 145, Winthrop–Conconully 224, Twisp–Pateros 261; total $798 million. Roads not in it: Mazama–Twisp 223, Twisp–Conconully 239, Twisp–Brewster 270.</li>
+<li><b>Twisp plan</b> (Task 1): the five roads from Twisp, $1,079 million.</li>
+<li><b>Swaps from the minimum spanning tree</b> (Task 4): totals 813, 876 and 807 with the dearer tree road removed; 951, 935 and 986 with the other removed.</li>
+<li><b>Prim's algorithm</b> (Task 5) starts at Pateros; build order 82, 261, 86, 145, 224.</li>
+<li><b>Made-up number</b> (Task 6 only): Twisp–Pateros at $300 million, which makes the cheapest tree $807 million.</li>
+<li><b>New sources:</b> Kruskal 1956 [8], Prim 1957 [9], and the swap test [10].</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>Sources</h2>
+<!-- For instructors: every number on this page is computed by checks/compute.py (output in checks/compute-output.txt). -->
+<p class="small">All sources accessed 4 October 2026. Sources [1]–[7] are the ones cited in Lecture 10.1. Each Wikipedia infobox cites the U.S. Geological Survey Geographic Names Information System (GNIS). Distances use the haversine formula with Earth radius 3,958.8 miles; costs are distance × $10.948 million, rounded to the nearest million.</p>
+<ol class="sources">
+<li>Wikipedia, "Mazama, Washington." Coordinates 48.59222°N 120.40389°W; county: Okanogan. https://en.wikipedia.org/wiki/Mazama,_Washington</li>
+<li>Wikipedia, "Winthrop, Washington." Coordinates 48.47167°N 120.17917°W; county: Okanogan. https://en.wikipedia.org/wiki/Winthrop,_Washington</li>
+<li>Wikipedia, "Twisp, Washington." Coordinates 48.36333°N 120.12306°W; county: Okanogan. https://en.wikipedia.org/wiki/Twisp,_Washington</li>
+<li>Wikipedia, "Conconully, Washington." Coordinates 48.55889°N 119.75056°W; county: Okanogan. https://en.wikipedia.org/wiki/Conconully,_Washington</li>
+<li>Wikipedia, "Pateros, Washington." Coordinates 48.05333°N 119.89944°W; county: Okanogan. https://en.wikipedia.org/wiki/Pateros,_Washington</li>
+<li>Wikipedia, "Brewster, Washington." Coordinates 48.10278°N 119.75528°W; county: Okanogan. https://en.wikipedia.org/wiki/Brewster,_Washington</li>
+<li>Federal Highway Administration, <i>Status of the Nation's Highways, Bridges, and Transit: Conditions and Performance, 23rd Edition</i>, report to Congress, November 22, 2019. Appendix A, Exhibit A-1 "Typical Costs per Lane Mile Assumed in HERS by Type of Improvement," page A-3: rural major collector, mountainous terrain, new alignment, normal cost, $5,474 thousand per lane mile in 2014 dollars. Page A-3 also states that these typical costs "do not reflect the large variation in cost among projects of the same type." https://www.fhwa.dot.gov/policy/23cpr/pdfs/pdf/AppendixA.pdf</li>
+<li>Joseph B. Kruskal, Jr., "On the shortest spanning subtree of a graph and the traveling salesman problem," <i>Proceedings of the American Mathematical Society</i> 7(1), 1956, pages 48–50, doi:10.1090/S0002-9939-1956-0078686-7. Used: Construction A, "Among the edges of G not yet chosen, choose the shortest edge which does not form any loops with those edges already chosen" (page 48), and the result that, when all edge lengths are distinct, it gives the shortest spanning tree.</li>
+<li>Robert C. Prim, "Shortest connection networks and some generalizations," <i>Bell System Technical Journal</i> 36(6), November 1957, pages 1389–1401, doi:10.1002/j.1538-7305.1957.tb01515.x. The paper itself was not read; the reference and the dates (Jarník 1930, Prim 1957) are taken from Wikipedia, "Prim's algorithm," https://en.wikipedia.org/wiki/Prim%27s_algorithm.</li>
+<li>Ravindra K. Ahuja, Thomas L. Magnanti and James B. Orlin, <i>Network Flows: Theory, Algorithms, and Applications</i>, Prentice Hall, 1993, Chapter 13, Theorem 13.3 (path optimality conditions), as quoted in T. Ralphs, ISE 411 Lecture 7, Lehigh University, https://coral.ise.lehigh.edu/~ted/files/ie411/lectures-python/Lecture7.pdf : "A spanning tree T* is a MST if and only if for every non-tree arc (k, l) of G, c<sub>ij</sub> ≤ c<sub>kl</sub> for every arc (i, j) contained in the path in T* connecting nodes k and l." The same theorem is Theorem 1 in N. Isoart and J.-C. Régin, "Imposing edges in Minimum Spanning Tree," arXiv:1912.09360. The condition says that no swap lowers the total, which is the swap test in Section 4. The book itself was not read.</li>
+</ol>
+</main>
+
+<script>
+(function(){
+  var NS = "http://www.w3.org/2000/svg";
+  // Same map positions and town-label placements as Lecture 10.1, Figures 1 and 3.
+  var MAP = {
+    Mazama:[120,40,"middle",0,-30], Winthrop:[243.6,139.6,"end",-54,0], Twisp:[274.8,229.6,"end"],
+    Conconully:[481.2,67.6,"middle",0,-26], Pateros:[398.4,486.4,"end"], Brewster:[477.6,445.6,"middle",26,36]
+  };
+  var EDGES = [
+    ["Mazama","Winthrop",145], ["Mazama","Twisp",223], ["Winthrop","Twisp",86],
+    ["Winthrop","Conconully",224], ["Twisp","Conconully",239], ["Twisp","Pateros",261],
+    ["Twisp","Brewster",270], ["Pateros","Brewster",82]
+  ];
+  var TREE = ["Pateros-Brewster","Winthrop-Twisp","Mazama-Winthrop","Winthrop-Conconully","Twisp-Pateros"];
+  var TOWNS = ["Mazama","Winthrop","Twisp","Conconully","Pateros","Brewster"];
+  var WOFF = {"Mazama-Winthrop":[14,-10,0.5], "Mazama-Twisp":[-16,0,0.35], "Winthrop-Twisp":[6,4], "Winthrop-Conconully":[0,-6], "Twisp-Conconully":[8,14], "Twisp-Brewster":[16,-4], "Twisp-Pateros":[-14,6], "Pateros-Brewster":[-4,-26]};
+
+  function el(name, attrs, parent){
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function text(parent, x, y, str, cls, anchor){
+    var t = el("text", {x:x, y:y, "class":cls, "text-anchor":anchor||"middle"}, parent);
+    t.textContent = str; return t;
+  }
+  function townLabel(parent, name){
+    var p = MAP[name], anchor = p[2], ox = p[3], oy = p[4];
+    var dx = ox !== undefined ? ox : (anchor === "end" ? -16 : 0);
+    text(parent, p[0] + dx, p[1] + 7 + (oy || 0), name, "town", anchor);
+  }
+  var LABELS = [];
+  window.addEventListener("resize", function(){ LABELS.forEach(function(f){ f(); }); });
+  function weightLabel(parent, e, cls){
+    var p = MAP[e[0]], q = MAP[e[1]], o = WOFF[e[0] + "-" + e[1]] || [0,0];
+    var t0 = o[2] || 0.5, x = p[0] + t0 * (q[0] - p[0]) + o[0], y = p[1] + t0 * (q[1] - p[1]) + o[1];
+    var g = el("g", {}, parent);
+    var r = el("rect", {rx:4, "class":"wbg"}, g);
+    var t = text(g, x, y, String(e[2]), "w" + (cls ? " " + cls : ""));
+    t.setAttribute("dominant-baseline", "central");
+    function size(){ var b = t.getBBox(); r.setAttribute("x", b.x - 5); r.setAttribute("y", b.y - 1); r.setAttribute("width", b.width + 10); r.setAttribute("height", b.height + 2); }
+    size(); LABELS.push(size);
+    return {g:g, t:t};
+  }
+  function vertices(parent){
+    TOWNS.forEach(function(n){ var p = MAP[n]; el("circle", {cx:p[0], cy:p[1], r:9, "class":"v"}, parent); townLabel(parent, n); });
+  }
+
+  // Figure 2: Kruskal's tree (static)
+  (function(){
+    var s = document.getElementById("fig2");
+    var lines = el("g", {}, s), labs = el("g", {}, s), vs = el("g", {}, s);
+    EDGES.forEach(function(e){
+      var p = MAP[e[0]], q = MAP[e[1]], inTree = TREE.indexOf(e[0] + "-" + e[1]) >= 0;
+      el("line", {x1:p[0], y1:p[1], x2:q[0], y2:q[1], "class":"e " + (inTree ? "tree" : "off")}, lines);
+      weightLabel(labs, e, inTree ? "" : "off");
+    });
+    vertices(vs);
+  })();
+
+  // Figure 1: interactive plan builder
+  (function(){
+    var s = document.getElementById("fig1"), on = EDGES.map(function(){ return false; }), parts = [];
+    // Layers, bottom to top: visible lines, weight labels, towns, then the transparent hit lines above everything,
+    // so no drawn road, label or town can cover another road's hit area.
+    var lineLayer = el("g", {}, s), labelLayer = el("g", {}, s), vLayer = el("g", {}, s), hitLayer = el("g", {}, s);
+    EDGES.forEach(function(e, i){
+      var p = MAP[e[0]], q = MAP[e[1]];
+      var line = el("line", {x1:p[0], y1:p[1], x2:q[0], y2:q[1], "class":"e off"}, lineLayer);
+      var lab = weightLabel(labelLayer, e, "off");
+      parts.push({line:line, lab:lab});
+    });
+    vertices(vLayer);
+    // Hit lines are added longest first, so shorter roads lie on top where hit areas overlap.
+    function len(k){ var p = MAP[EDGES[k][0]], q = MAP[EDGES[k][1]]; return Math.hypot(p[0] - q[0], p[1] - q[1]); }
+    EDGES.map(function(e, i){ return i; }).sort(function(a, b){ return len(b) - len(a); }).forEach(function(i){
+      var e = EDGES[i], p = MAP[e[0]], q = MAP[e[1]];
+      var hit = el("line", {x1:p[0], y1:p[1], x2:q[0], y2:q[1], "class":"hit", tabindex:0, role:"button", "data-edge":i,
+        "aria-label":e[0] + " to " + e[1] + ", cost " + e[2] + " million"}, hitLayer);
+      hit.addEventListener("keydown", function(ev){ if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); on[i] = !on[i]; update(); } });
+      parts[i].hit = hit;
+    });
+
+    // A click anywhere on the map toggles the road nearest to the pointer (within 26 units), so overlapping hit
+    // areas near a shared town never pick the wrong road. A click on a cost label toggles that label's road unless
+    // the click is right on another road. Clicks on a town dot are ignored.
+    function svgPoint(ev){
+      var pt = s.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+      return pt.matrixTransform(s.getScreenCTM().inverse());
+    }
+    function segDist(x, y, p, q){
+      var dx = q[0] - p[0], dy = q[1] - p[1], t = ((x - p[0]) * dx + (y - p[1]) * dy) / (dx * dx + dy * dy);
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(x - (p[0] + t * dx), y - (p[1] + t * dy));
+    }
+    function onLabel(x, y){
+      for (var i = 0; i < parts.length; i++){
+        var b = parts[i].lab.t.getBBox();
+        if (x >= b.x - 5 && x <= b.x + b.width + 5 && y >= b.y - 1 && y <= b.y + b.height + 1) return i;
+      }
+      return -1;
+    }
+    s.addEventListener("click", function(ev){
+      var pt = svgPoint(ev), pick = -1, best = 26;
+      for (var t = 0; t < TOWNS.length; t++){ var v = MAP[TOWNS[t]]; if (Math.hypot(pt.x - v[0], pt.y - v[1]) < 14) return; }
+      EDGES.forEach(function(e, i){ var d = segDist(pt.x, pt.y, MAP[e[0]], MAP[e[1]]); if (d < best){ best = d; pick = i; } });
+      var lab = onLabel(pt.x, pt.y);
+      if (lab >= 0 && !(pick >= 0 && best < 7)) pick = lab;
+      if (pick >= 0){ on[pick] = !on[pick]; update(); }
+    });
+
+    function groups(){
+      var parent = {}; TOWNS.forEach(function(n){ parent[n] = n; });
+      function find(x){ while (parent[x] !== x) x = parent[x]; return x; }
+      EDGES.forEach(function(e, i){ if (on[i]){ var a = find(e[0]), b = find(e[1]); if (a !== b) parent[a] = b; } });
+      var g = {}; TOWNS.forEach(function(n){ var r = find(n); (g[r] = g[r] || []).push(n); });
+      return Object.keys(g).map(function(k){ return g[k]; });
+    }
+    function findCycle(){
+      // depth-first search; returns the towns and edges of one cycle among the roads in the plan
+      var adj = {}; TOWNS.forEach(function(n){ adj[n] = []; });
+      EDGES.forEach(function(e, i){ if (on[i]){ adj[e[0]].push([e[1], i]); adj[e[1]].push([e[0], i]); } });
+      var seen = {}, stack = [], estack = [];
+      function dfs(v, viaEdge){
+        seen[v] = true; stack.push(v);
+        for (var k = 0; k < adj[v].length; k++){
+          var w = adj[v][k][0], ei = adj[v][k][1];
+          if (ei === viaEdge) continue;
+          if (seen[w]){
+            var idx = stack.indexOf(w);
+            if (idx >= 0) return {towns:stack.slice(idx).concat([w]), edges:estack.slice(idx).concat([ei])};
+            continue;
+          }
+          estack.push(ei);
+          var c = dfs(w, ei); if (c) return c;
+          estack.pop();
+        }
+        stack.pop(); return null;
+      }
+      for (var t = 0; t < TOWNS.length; t++){ if (!seen[TOWNS[t]]){ stack = []; estack = []; var c = dfs(TOWNS[t], -1); if (c) return c; } }
+      return null;
+    }
+    function update(){
+      var count = 0, cost = 0, cyc = findCycle(), ce = cyc ? cyc.edges : [];
+      EDGES.forEach(function(e, i){
+        var c = !on[i] ? " off" : (ce.indexOf(i) >= 0 ? " cyc" : "");
+        parts[i].line.setAttribute("class", "e" + c);
+        parts[i].lab.t.setAttribute("class", "w" + c);
+        parts[i].hit.setAttribute("aria-pressed", on[i] ? "true" : "false");
+        if (on[i]){ count++; cost += e[2]; }
+      });
+      var g = groups();
+      var html = "Roads in plan: <b>" + count + "</b> · Total cost: <b>$" + cost.toLocaleString("en-US") + " million</b><br>";
+      html += "Connected: <b>" + (g.length === 1 ? "yes" : "no") + "</b>";
+      if (g.length > 1) html += " (groups: " + g.map(function(x){ return "{" + x.join(", ") + "}"; }).join(" ") + ")";
+      html += "<br>Has a cycle: <b>" + (cyc ? "yes" : "no") + "</b>";
+      if (cyc) html += " (" + cyc.towns.join(" → ") + ")";
+      document.getElementById("status").innerHTML = html;
+    }
+    document.getElementById("allOn").addEventListener("click", function(){ on = on.map(function(){ return true; }); update(); });
+    document.getElementById("allOff").addEventListener("click", function(){ on = on.map(function(){ return false; }); update(); });
+    update();
+  })();
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-10/10-1-weighted-graphs/" style="color:inherit">&larr; 10.1 Weighted graphs</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-10/10-3-when-greedy-algorithms-work/" style="color:inherit">10.3 When greedy algorithms work &rarr;</a></nav>
+</body>
+</html>

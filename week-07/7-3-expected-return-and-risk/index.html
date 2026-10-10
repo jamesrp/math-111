@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expected return and risk</title>
+<style>
+:root {
+  --bg: #ffffff; --text: #1c1c1c; --muted: #555; --line: #c9c9c9;
+  --task-bg: #f3f6fb; --task-border: #3a5f9e; --sol-bg: #ffffff;
+  --accent: #3a5f9e; --code-bg: #f1f1f1; --def-bg: #faf6ef; --def-border: #c0762a;
+  --gain: #3a5f9e; --loss: #b3462f; --band: #f3e3b5; --grid: #e2e2e2; --axis: #888;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181a; --text: #e8e8e8; --muted: #b0b0b0; --line: #4a4a4a;
+    --task-bg: #1f2633; --task-border: #7fa2e0; --sol-bg: #17181a;
+    --accent: #7fa2e0; --code-bg: #26282b; --def-bg: #2a241c; --def-border: #e0a060;
+    --gain: #7fa2e0; --loss: #e58a73; --band: #3d3524; --grid: #333; --axis: #888;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181a; --text: #e8e8e8; --muted: #b0b0b0; --line: #4a4a4a;
+  --task-bg: #1f2633; --task-border: #7fa2e0; --sol-bg: #17181a;
+  --accent: #7fa2e0; --code-bg: #26282b; --def-bg: #2a241c; --def-border: #e0a060;
+  --gain: #7fa2e0; --loss: #e58a73; --band: #3d3524; --grid: #333; --axis: #888;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 18px/1.55 Georgia, "Times New Roman", serif; }
+main { max-width: 820px; margin: 0 auto; padding: 20px 16px 60px; }
+.course { font: 15px/1.4 system-ui, sans-serif; color: var(--muted); margin: 0 0 6px; }
+h1 { font: 700 32px/1.2 system-ui, sans-serif; margin: 0 0 24px; }
+h2 { font: 700 23px/1.3 system-ui, sans-serif; margin: 40px 0 12px;
+  padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font: 700 18px/1.3 system-ui, sans-serif; margin: 0 0 8px; }
+p, li { max-width: 72ch; }
+table { border-collapse: collapse; margin: 12px 0; font-size: 16px; font-variant-numeric: tabular-nums; }
+th, td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; }
+td.n, th.n { text-align: right; }
+th { background: var(--code-bg); }
+.sheet td, .sheet th { white-space: nowrap; font-size: 15px; }
+.scroll { overflow-x: auto; max-width: 100%; }
+.task { background: var(--task-bg); border: 2px solid var(--task-border);
+  border-radius: 6px; padding: 14px 16px; margin: 22px 0 10px; }
+.task h3 { color: var(--accent); }
+.def { background: var(--def-bg); border-left: 4px solid var(--def-border); padding: 8px 14px; margin: 16px 0; }
+details { border: 1px solid var(--line); border-radius: 6px; margin: 0 0 22px;
+  background: var(--sol-bg); }
+summary { cursor: pointer; padding: 10px 14px; font: 600 16px system-ui, sans-serif; }
+details > div { padding: 0 16px 10px; }
+.formula { display: block; margin: 12px 0; padding: 10px 14px; background: var(--code-bg);
+  border-radius: 4px; font-family: system-ui, sans-serif; overflow-x: auto; }
+code, .mono { font-family: Consolas, Menlo, monospace; font-size: 15px;
+  background: var(--code-bg); padding: 1px 4px; border-radius: 3px; }
+button { font: 600 15px system-ui, sans-serif; padding: 8px 14px; margin: 4px 6px 4px 0;
+  border: 1px solid var(--accent); background: var(--bg); color: var(--accent);
+  border-radius: 4px; cursor: pointer; }
+button:hover { background: var(--task-bg); }
+button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+figure { margin: 16px 0 20px; }
+figcaption { font: 15px/1.45 system-ui, sans-serif; color: var(--muted); margin-top: 6px; }
+svg { width: 100%; height: auto; display: block; }
+svg text { font-family: system-ui, sans-serif; fill: var(--muted); }
+.controls { font: 15px/1.4 system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0; }
+.controls .lbl { font-weight: 700; min-width: 7.5em; }
+input[type=range] { width: 100%; max-width: 520px; }
+.readout { font: 15px/1.4 system-ui, sans-serif; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 6px; margin: 8px 0 14px; }
+.readout div { background: var(--code-bg); border-radius: 4px; padding: 6px 10px; }
+.readout b { display: block; font-size: 17px; font-variant-numeric: tabular-nums; }
+.key { font: 14px system-ui, sans-serif; color: var(--muted); }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin: 0 4px 0 10px; }
+.small { font-size: 15px; color: var(--muted); }
+.sources li { margin-bottom: 8px; overflow-wrap: anywhere; }
+.cpmsg { font: 14px system-ui, sans-serif; color: var(--muted); }
+a { color: var(--accent); }
+@media (max-width: 480px) { table { font-size: 14px; } th, td { padding: 3px 5px; } }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-07/7-2-independence-and-simulation/" style="color:inherit">&larr; 7.2 Independence and simulation</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-08/8-1-mean-median-and-standard-deviation/" style="color:inherit">8.1 Mean, median and standard deviation &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Probability and the stock market (week 7) · Lecture 3 of 3</p>
+<h1>Expected return and risk</h1>
+
+<h2 id="s1">1. The claim that the stock market averages about 10% a year</h2>
+
+<p>People who invest often hear that the stock market averages about 10% a year. One published version: the S&amp;P 500, with dividends, has grown at “approximately 9.8%” a year since 1926 [3]. Lecture 7.2 followed the S&amp;P 500 day by day for five years, from September 30, 2021 to October 2, 2026 [2]. Five years are too few to check a claim about the long run, so this lecture uses the same index over a much longer time: its total return for every year from 1928 to 2025 [1]. A total return adds the dividends the companies paid to the change in price. The daily closes of lecture 7.2 are prices only, without dividends.</p>
+
+<p>The index got its present form of 500 companies on March 4, 1957. From 1926 until then it was a smaller index of 90 companies [3], and the returns in [1] for 1928 to 1956 come from that smaller index. This lecture calls the whole series the S&amp;P 500.</p>
+
+<p class="small" style="margin-bottom:0">Table 1. Total return of the S&amp;P 500 in the ten most recent years [1]</p>
+<div class="scroll">
+<table>
+<tr><th>Year</th><th class="n">2016</th><th class="n">2017</th><th class="n">2018</th><th class="n">2019</th><th class="n">2020</th></tr>
+<tr><td>Return</td><td class="n">11.77%</td><td class="n">21.61%</td><td class="n">−4.23%</td><td class="n">31.21%</td><td class="n">18.02%</td></tr>
+<tr><th>Year</th><th class="n">2021</th><th class="n">2022</th><th class="n">2023</th><th class="n">2024</th><th class="n">2025</th></tr>
+<tr><td>Return</td><td class="n">28.47%</td><td class="n">−18.04%</td><td class="n">26.06%</td><td class="n">24.88%</td><td class="n">17.78%</td></tr>
+</table>
+</div>
+
+<p>A loss is written as a negative return. In 2022 the index lost 18.04%, so its return was −18.04%.</p>
+
+<p>Two questions follow from the claim:</p>
+<ul>
+<li>What does an average yearly return say about one person's money over a few years?</li>
+<li>Why does a 50% gain followed by a 50% loss leave you 25% below where you started?</li>
+</ul>
+<p class="small">Simplification: the returns ignore taxes and fund fees, and they are not adjusted for inflation.</p>
+
+<h2 id="s2">2. Expected value of a simple game</h2>
+
+<p>Start with a game made up for this example. You roll a fair die once.</p>
+<ul>
+<li>A roll of 1 or 2: you pay $3.</li>
+<li>A roll of 3, 4 or 5: you win $1.</li>
+<li>A roll of 6: you win $6.</li>
+</ul>
+<p>Write a payment as a negative amount: paying $3 is an amount of −$3.</p>
+
+<div class="task" id="task1">
+<h3>Task 1 (about 3 minutes, calculator)</h3>
+<p>Suppose you play the game 600 times.</p>
+<ol type="a">
+<li>About how many times do you pay $3, win $1 and win $6?</li>
+<li>What is your total over the 600 games?</li>
+<li>What is your total per game? Produce one dollar amount.</li>
+</ol>
+</div>
+<details><summary>Solution to Task 1</summary><div>
+<p>(a) The sample space is U = {1, 2, 3, 4, 5, 6}, as in lecture 7.1. By the long-run meaning of probability, each number comes up in about 1/6 of the games, so about 600 ÷ 6 = 100 times. You pay $3 about 200 times (rolls 1 and 2), win $1 about 300 times (rolls 3, 4 and 5) and win $6 about 100 times.</p>
+<span class="formula">(b) 200 × (−$3) + 300 × $1 + 100 × $6 = −$600 + $300 + $600 = $300</span>
+<p>(c) $300 ÷ 600 = $0.50 per game.</p>
+</div></details>
+
+<p>Dividing by 600 can be done term by term. 200/600 = 2/6 is the probability of paying $3, 300/600 = 3/6 the probability of winning $1, and 100/600 = 1/6 the probability of winning $6. In the notation of lecture 7.1, the event A = {1, 2} has P(A) = |A|/|U| = 2/6. So the total per game is</p>
+<span class="formula">(−$3) × 2/6 + $1 × 3/6 + $6 × 1/6 = −$1.00 + $0.50 + $1.00 = $0.50</span>
+<p>The number 600 dropped out. Any large number of games gives about the same $0.50 per game.</p>
+
+<div class="def">
+<p><b>Expected value.</b> The expected value of an uncertain amount is the probability-weighted average of its possible values: multiply each possible value by its probability, then add.</p>
+<span class="formula">expected value = (value 1) × (probability 1) + (value 2) × (probability 2) + … + (last value) × (last probability)</span>
+<p>Example: the expected value of the game is $0.50.</p>
+</div>
+
+<p>No single game pays $0.50. You pay $3, win $1 or win $6. The expected value is the average per game over many games, in the long-run sense of lecture 7.1.</p>
+
+<h2 id="s3">3. Expected change of one trading day in the lecture 7.2 model</h2>
+
+<p>Lecture 7.2 built a model of the market from the 1003 trading days of October 1, 2021 to September 30, 2025 [2]. Each day is an up day with probability P(up) = 533/1003 = 0.531 and a down day with probability P(down) = 1 − 0.531 = 0.469, by the complement rule. An up day raises the index by 0.80% and a down day lowers it by 0.80%, the average sizes of the real up and down days.</p>
+
+<div class="task" id="task2">
+<h3>Task 2 (about 2 minutes, calculator)</h3>
+<p>Compute the expected change of one trading day in the lecture 7.2 model, as a percentage rounded to 4 decimal places.</p>
+</div>
+<details><summary>Solution to Task 2</summary><div>
+<span class="formula">0.80% × 0.531 + (−0.80%) × 0.469 = 0.4248% − 0.3752% = 0.0496%</span>
+<p>The expected change is 0.0496%, about 0.05% a day. Over the 1003 real days, the average of the daily changes was 0.0502% [2], close to the model's value.</p>
+</div></details>
+
+<p>An expected change of 0.05% a day is small next to the size of a single day's move, 0.80% up or down: about one sixteenth of it (0.80 ÷ 0.0496 = 16.1). No day in the model moves by 0.05%. As in the game, the expected value describes the average over many days.</p>
+
+<h2 id="s4">4. Expected return of one year of the S&amp;P 500</h2>
+
+<p>The same idea works for whole years. The table in [1] has 98 yearly returns, from 1928 to 2025. Pick one of the 98 years at random, each with probability 1/98. The sample space U is the set of 98 years, and |U| = 98. The expected return of the picked year is the sum of (return × 1/98) over all 98 years. That is the same as adding the 98 returns and dividing by 98, the ordinary average.</p>
+
+<p>Ninety-eight terms are a lot to add by hand. Grouping the years gives a shorter calculation. The groups below are three events, and each of the 98 years is in exactly one of them. The group averages were computed from the data in [1].</p>
+
+<p class="small" style="margin-bottom:0">Table 2. The 98 yearly returns, 1928 to 2025, in three groups [1]</p>
+<div class="scroll"><table>
+<tr><th>Event</th><th class="n">Number of years</th><th class="n">Average return in the group</th></tr>
+<tr><td>L: a loss (return below 0%)</td><td class="n">26</td><td class="n">−13.5%</td></tr>
+<tr><td>M: a gain from 0% up to 20%</td><td class="n">36</td><td class="n">11.2%</td></tr>
+<tr><td>G: a gain of 20% or more</td><td class="n">36</td><td class="n">30.8%</td></tr>
+<tr><th>All years</th><th class="n">98</th><th></th></tr>
+</table></div>
+
+<div class="task" id="task3">
+<h3>Task 3 (about 3 minutes, calculator)</h3>
+<p>A year is picked at random from the 98.</p>
+<ol type="a">
+<li>Find P(L), P(M) and P(G), each as a decimal rounded to 3 places.</li>
+<li>Treat the group average as the return of every year in the group. Compute the expected return: (group average) × (probability) for each group, then add. Produce one percentage.</li>
+<li>Find P(L ∪ G), the probability that the year is a loss or a gain of 20% or more.</li>
+</ol>
+</div>
+<details><summary>Solution to Task 3</summary><div>
+<p>(a) P(L) = 26/98 = 0.265, P(M) = 36/98 = 0.367, P(G) = 36/98 = 0.367. Rounded, they add to 0.999 instead of 1.</p>
+<span class="formula">(b) (−13.5%) × 0.265 + 11.2% × 0.367 + 30.8% × 0.367 = −3.578% + 4.110% + 11.304% = 11.836%, about 11.84%</span>
+<p>(c) L and G have no years in common, L ∩ G = ∅, so P(L ∪ G) = 26/98 + 36/98 = 62/98 = 0.633. The complement rule gives the same: L ∪ G is the complement M′, and 1 − 36/98 = 0.633.</p>
+</div></details>
+
+<p>The exact average of all 98 returns is <b>11.86%</b> [1]. Task 3 gave 11.84% because of rounding. With unrounded probabilities and group averages the grouped calculation gives exactly 11.86%, since a group average times the number of years in the group is the sum of the returns in that group. This ordinary average is called the <b>arithmetic mean</b> of the returns.</p>
+
+<p>For a year picked at random from 1928 to 2025, the expected return is 11.86%. Using 11.86% as the expected return of next year is a simplification, like the coin-flip model of lecture 7.2: it treats next year as one more random pick from these 98 years. Nothing guarantees that the future behaves like the past.</p>
+
+<p>Few single years come close to 11.86%. Only 7 of the 98 years had a return within 2 percentage points of it (between 9.86% and 13.86%), and only 15 were within 5 percentage points. In 26 years the index lost money. The figure 11.86% is also larger than the “about 10%” of Section 1. Section 7 explains the difference.</p>
+
+<h2 id="s5">5. Returns as multipliers</h2>
+
+<p>From week 4: increasing an amount by a percentage is the same as multiplying it by 1 plus the rate. Write the return r as a decimal. One year changes a value like this:</p>
+<span class="formula">value at end of year = value at start of year × (1 + r)</span>
+<p>The number 1 + r is the <b>multiplier</b> for the year, as the daily multiplier was for a day in lecture 7.2. A return of 12% has multiplier 1 + 0.12 = 1.12. A return of −20% has multiplier 1 + (−0.20) = 0.80. A loss always has a multiplier below 1.</p>
+
+<div class="task" id="task4">
+<h3>Task 4 (about 3 minutes, calculator)</h3>
+<p>Start with $1,000 each time. For each part write the two multipliers and the value after two years.</p>
+<ol type="a">
+<li>A 50% gain, then a 50% loss.</li>
+<li>A 50% loss, then a 50% gain.</li>
+<li>A 10% gain, then a 10% loss.</li>
+</ol>
+</div>
+<details><summary>Solution to Task 4</summary><div>
+<p>(a) Multipliers 1.5 and 0.5: $1,000 × 1.5 × 0.5 = $750.</p>
+<p>(b) Multipliers 0.5 and 1.5: $1,000 × 0.5 × 1.5 = $750.</p>
+<p>(c) Multipliers 1.1 and 0.9: $1,000 × 1.1 × 0.9 = $990.</p>
+</div></details>
+
+<p>Adding the returns would predict no change: 50% + (−50%) = 0%. That is wrong because each return applies to a different starting amount. The 50% gain applies to $1,000 and adds $500. The 50% loss applies to $1,500 and removes $750. Consecutive returns combine by multiplying their multipliers: 1.5 × 0.5 = 0.75, a 25% loss over the two years. The order does not matter, since 0.5 × 1.5 is also 0.75. This answers the second question of Section 1.</p>
+
+<p>Lecture 7.2 met the same effect with days. In its model, one up day and one down day give 1.008 × 0.992 = 0.999936, a small loss, and a drop of 10% followed by a rise of 10% gives 0.90 × 1.10 = 0.99.</p>
+
+<p>A loss needs a larger gain to recover. After a 50% loss the multiplier needed to get back to the start is 1 ÷ 0.5 = 2, a gain of 100%. A real case: in 1931 the S&amp;P 500 returned −43.84% [1]. $1,000 became $1,000 × 0.5616 = $561.60, and getting back to $1,000 needed a gain of 1 ÷ 0.5616 − 1 = 0.7806, or 78.06%.</p>
+
+<h2 id="s6">6. Ten real years in a spreadsheet: 2000 to 2009</h2>
+
+<p>Multiplying year after year is a job for a spreadsheet, as the simulated index was in column D of the lecture 7.2 sheet. The years 2000 to 2009 [1] go into the layout below. Returns are entered as decimals, so −9.03% is −0.0903. Cell D2 holds the starting $1,000, the value at the end of 1999. Cells C3 to D12 and G2 to G4 are left empty for you to fill in.</p>
+<div class="scroll"><table class="sheet" id="layout0"></table></div>
+<p>
+<button type="button" data-dl="0">Download this layout as CSV</button>
+<button type="button" data-cp="0">Copy this layout</button>
+<span class="cpmsg" role="status"></span>
+</p>
+<p class="small">In Excel, open the downloaded file with File &gt; Open. In Google Sheets, choose File &gt; Import &gt; Upload, select the file, and choose “Insert new sheet(s)”. To use the copy instead, click cell A1 of an empty sheet and paste. The finished layout with formulas is in the solution to Task 5. These files and formulas have not been tested in Excel or Google Sheets.</p>
+
+<div class="task" id="task5">
+<h3>Task 5 (about 8 minutes, spreadsheet)</h3>
+<p>Open the layout above in a spreadsheet, with “Year” in cell A1.</p>
+<ol type="a">
+<li>In C3 enter a formula for the multiplier of 2000. In D3 enter a formula for the value at the end of 2000. Copy C3 and D3 down to row 12.</li>
+<li>Produce the value at the end of 2009 (cell D12), the average of the ten returns (cell G2, using AVERAGE) and the total multiplier for the ten years (cell G3: the end value divided by the starting value).</li>
+<li>Over the ten years, did $1,000 grow or shrink? Did the average return say it would?</li>
+</ol>
+</div>
+<details><summary>Solution to Task 5</summary><div>
+<p>(a) <code>=1+B3</code> in C3 and <code>=D2*C3</code> in D3. When copied down, the references shift one row each time, so D4 becomes <code>=D3*C4</code>: each year starts from the previous year's end value, as in lecture 1.3.</p>
+<div class="scroll"><table>
+<tr><th>Year</th><th class="n">Return</th><th class="n">Multiplier</th><th class="n">Value at end of year</th></tr>
+<tr><td>Start</td><td></td><td></td><td class="n">$1,000.00</td></tr>
+<tr><td>2000</td><td class="n">−9.03%</td><td class="n">0.9097</td><td class="n">$909.70</td></tr>
+<tr><td>2001</td><td class="n">−11.85%</td><td class="n">0.8815</td><td class="n">$801.90</td></tr>
+<tr><td>2002</td><td class="n">−21.97%</td><td class="n">0.7803</td><td class="n">$625.72</td></tr>
+<tr><td>2003</td><td class="n">28.36%</td><td class="n">1.2836</td><td class="n">$803.18</td></tr>
+<tr><td>2004</td><td class="n">10.74%</td><td class="n">1.1074</td><td class="n">$889.44</td></tr>
+<tr><td>2005</td><td class="n">4.83%</td><td class="n">1.0483</td><td class="n">$932.40</td></tr>
+<tr><td>2006</td><td class="n">15.61%</td><td class="n">1.1561</td><td class="n">$1,077.95</td></tr>
+<tr><td>2007</td><td class="n">5.48%</td><td class="n">1.0548</td><td class="n">$1,137.02</td></tr>
+<tr><td>2008</td><td class="n">−36.55%</td><td class="n">0.6345</td><td class="n">$721.44</td></tr>
+<tr><td>2009</td><td class="n">25.94%</td><td class="n">1.2594</td><td class="n">$908.58</td></tr>
+</table></div>
+<p>(b) D12 shows about 908.58 (908.5792 or similar until the cell is formatted as currency). G2, <code>=AVERAGE(B3:B12)</code>, shows 0.01156, an average return of 1.16%. G3, <code>=D12/D2</code>, shows about 0.9086, the total multiplier for the ten years.</p>
+<p>(c) The $1,000 shrank to $908.58, a loss of about 9%, while the average return of 1.16% is positive. A positive average return did not mean the money grew.</p>
+<p>The finished layout, with every formula. Cell G4 is explained in Section 7.</p>
+<div class="scroll"><table class="sheet" id="layout1"></table></div>
+<p>
+<button type="button" data-dl="1">Download the finished layout as CSV</button>
+<button type="button" data-cp="1">Copy the finished layout</button>
+<span class="cpmsg" role="status"></span>
+</p>
+<p class="small">To read column B and cells G2 and G4 as percents, format them as percentages.</p>
+</div></details>
+
+<h2 id="s7">7. The growth rate actually achieved</h2>
+
+<p>The arithmetic mean adds the returns, but money grows by multiplying the multipliers. The number that describes what happened to the money is the <b>growth rate</b>: the single return that, repeated every year, gives the same final value. It is also called the <b>geometric mean</b> return.</p>
+
+<p>If the total multiplier over n years is M, the growth rate g satisfies</p>
+<span class="formula">(1 + g) × (1 + g) × … × (1 + g) = (1 + g)<sup>n</sup> = M</span>
+<p>with n factors on the left. So 1 + g is the number that, multiplied by itself n times, gives M. That number is the <b>n-th root</b> of M, written M<sup>1/n</sup>. Example: 8<sup>1/3</sup> = 2, because 2 × 2 × 2 = 8. The square root of week 5 is the case n = 2: 9<sup>1/2</sup> = √9 = 3.</p>
+<span class="formula">1 + g = M<sup>1/n</sup>, &nbsp; so &nbsp; g = M<sup>1/n</sup> − 1</span>
+<p>On a calculator, type M, then the power key (<span class="mono">x<sup>y</sup></span> or <span class="mono">^</span>, as in lecture 7.2), then (1 ÷ n) in parentheses. Without the parentheses the calculator computes M<sup>1</sup> and then divides by n. On many phones the power key appears only when the phone is turned sideways. To check an answer, raise 1 + g to the power n: the result should be M.</p>
+<p>For 2000 to 2009, M = 0.9086 and n = 10: 0.9086<sup>1/10</sup> = 0.9905, so g = −0.0095, a growth rate of −0.95% a year, while the arithmetic mean was 1.16%. In the spreadsheet, enter <code>=G3^(1/10)-1</code> in G4; it shows about −0.0095.</p>
+
+<div class="task" id="task6">
+<h3>Task 6 (about 4 minutes, calculator)</h3>
+<p>Give each growth rate as a percentage rounded to 2 decimal places.</p>
+<ol type="a">
+<li>Two years with returns +50% and −50% have total multiplier 0.75 (Task 4). Compute the growth rate per year and check it.</li>
+<li>In lecture 7.2, the index closed at 4307.54 on September 30, 2021 and at 6688.46 on September 30, 2025 [2]: a total multiplier of 1.5527 over 4 years. The four yearly changes were −16.76%, +19.59%, +34.38% and +16.07%. Compute their arithmetic mean and the growth rate per year.</li>
+<li>From the start of 1928 to the end of 2025, $1 in the S&amp;P 500 grew to $11,575.91 (computed from [1]). That is 98 years. Compute the growth rate per year, then check it by raising 1 + g to the power 98.</li>
+</ol>
+</div>
+<details><summary>Solution to Task 6</summary><div>
+<p>(a) 0.75<sup>1/2</sup> = 0.8660, so g = 0.8660 − 1 = −0.1340, a growth rate of −13.40% a year. The arithmetic mean of +50% and −50% is 0%. Check: 0.8660 × 0.8660 = 0.75.</p>
+<p>(b) Arithmetic mean: (−16.76 + 19.59 + 34.38 + 16.07) ÷ 4 = 53.28 ÷ 4 = 13.32%. Growth rate: 1.5527<sup>1/4</sup> = 1.1163, so g = 11.63% a year. Check: 1.1163<sup>4</sup> = 1.5528, which is 1.5527 up to rounding. These are price changes without dividends, for years that run from October to September, so they differ from the calendar-year total returns in [1].</p>
+<p>(c) 11,575.91<sup>1/98</sup> = 1.1002, so g = 0.1002, a growth rate of 10.02% a year. Check: 1.1002<sup>98</sup> ≈ 11,594, close to 11,575.91; the difference comes from rounding 1.1002 to four decimal places.</p>
+</div></details>
+
+<p>Task 6(c) checks the “about 10%” claim for 1928 to 2025. Money in the index grew at 10.02% a year. The arithmetic mean of the yearly returns, 11.86%, is almost 2 percentage points higher. The most recent 30 years, 1996 to 2025, show the same pattern: an arithmetic mean of 11.80% and a growth rate of 10.26% (both computed from [1]). The “about 10%” is a growth rate.</p>
+
+<p>The same gap shows up day by day in the data of lecture 7.2 [2]. Over the 1003 trading days of the first four years, the average daily change was 0.0502%, while the growth rate per day was 1.5527<sup>1/1003</sup> − 1 = 0.0439%.</p>
+
+<p>The growth rate is never above the arithmetic mean, and the two are equal only when every year has the same return. For returns of similar size, the gap tends to be wider when the yearly returns are more spread out. The +50% / −50% example has very spread-out returns, and its gap is large: an arithmetic mean of 0% and a growth rate of −13.40%.</p>
+
+<h2 id="s8">8. Spread of returns as risk</h2>
+
+<div class="def">
+<p><b>Risk.</b> In investing, risk means how widely the possible outcomes are spread around the expected value.</p>
+</div>
+
+<p>Two investments can have the same expected value and very different spreads. A second game, also made up: roll a fair die, pay $6 on a roll of 1 to 5, and win $33 on a roll of 6. Its expected value is (−$6) × 5/6 + $33 × 1/6 = −$5.00 + $5.50 = $0.50, the same as the game of Section 2. The outcomes of the first game lie between <span style="white-space:nowrap">−$3</span> and $6. The outcomes of the second lie between <span style="white-space:nowrap">−$6</span> and $33, and you lose on 5 rolls out of 6. The second game is riskier.</p>
+
+<p>For the S&amp;P 500, the worst year was 1931 (−43.84%) and the best was 1954 (52.56%) [1]. The graphs below let you choose a holding period: how many years an investor holds the index, and the first of those years. The “−1” and “+1” buttons move the first year by one.</p>
+
+<figure>
+<div class="controls"><span class="lbl">Years held:</span><span id="lens" role="group" aria-label="Years held"></span></div>
+<div class="controls"><label class="lbl" for="start">First year: <span id="startlbl"></span></label>
+<button type="button" id="minus1" aria-label="First year minus 1">−1</button>
+<button type="button" id="plus1" aria-label="First year plus 1">+1</button></div>
+<input type="range" id="start" min="1928" max="2021" step="1" value="2000" aria-label="First year">
+<div class="readout" id="readout"></div>
+<svg id="bars" viewBox="0 0 800 300" role="img" aria-label="Bar graph of yearly S&amp;P 500 total returns, 1928 to 2025, with the chosen holding period shaded"></svg>
+<p class="key"><span class="swatch" style="background:var(--gain)"></span>gain <span class="swatch" style="background:var(--loss)"></span>loss <span class="swatch" style="background:var(--band);outline:1px solid var(--axis)"></span>chosen period</p>
+<svg id="dots" viewBox="0 0 800 300" role="img" aria-label="Dot graph of the growth rate of every holding period of the chosen length"></svg>
+<div class="readout" id="summary"></div>
+<figcaption>Figure 1. Upper graph: the total return of each year, 1928 to 2025 [1]. Lower graph: one dot for every holding period of the chosen length, placed at its first year, at the height of its growth rate per year. The large dot is the chosen period.</figcaption>
+</figure>
+
+<div class="task" id="task7">
+<h3>Task 7 (about 3 minutes, interactive graph on the projector or your phone)</h3>
+<ol type="a">
+<li>Set Years held to 5. For first years 1928, 1995, 2000 and 2008, write down what $1,000 became and the growth rate.</li>
+<li>For Years held 1, 5 and 20, write down how many periods lost money (in the boxes under the lower graph). Then write one sentence on how the spread of the dots changes as the holding period gets longer.</li>
+</ol>
+</div>
+<details><summary>Solution to Task 7</summary><div>
+<p>(a)</p>
+<div class="scroll"><table>
+<tr><th>5 years starting</th><th class="n">$1,000 became</th><th class="n">Growth rate</th><th class="n">Arithmetic mean</th></tr>
+<tr><td>1928 (1928 to 1932)</td><td class="n">$506.65</td><td class="n">−12.71%</td><td class="n">−8.42%</td></tr>
+<tr><td>1995 (1995 to 1999)</td><td class="n">$3,475.83</td><td class="n">28.30%</td><td class="n">28.44%</td></tr>
+<tr><td>2000 (2000 to 2004)</td><td class="n">$889.44</td><td class="n">−2.32%</td><td class="n">−0.75%</td></tr>
+<tr><td>2008 (2008 to 2012)</td><td class="n">$1,085.64</td><td class="n">1.66%</td><td class="n">4.44%</td></tr>
+</table></div>
+<p>(b)</p>
+<div class="scroll"><table>
+<tr><th>Years held</th><th class="n">Periods</th><th class="n">Periods that lost money</th><th class="n">Lowest growth rate</th><th class="n">Highest growth rate</th></tr>
+<tr><td>1</td><td class="n">98</td><td class="n">26</td><td class="n">−43.84% (1931)</td><td class="n">52.56% (1954)</td></tr>
+<tr><td>5</td><td class="n">94</td><td class="n">11</td><td class="n">−12.71% (1928 to 1932)</td><td class="n">28.30% (1995 to 1999)</td></tr>
+<tr><td>20</td><td class="n">79</td><td class="n">0</td><td class="n">2.37% (1929 to 1948)</td><td class="n">17.70% (1980 to 1999)</td></tr>
+</table></div>
+<p>As the holding period gets longer, the dots crowd closer together and fewer of them fall below 0%. The growth rate per year over a long period varies less than the return of a single year.</p>
+</div></details>
+
+<p>The spread of growth rates shrinks, but the spread of dollar amounts grows. After 1 year, $1,000 became anything from $561.60 to $1,525.60. After 20 years it became anything from $1,597.55 to $26,017.15. In this history, holding longer made a loss less likely and widened the range of final amounts.</p>
+
+<p class="small">Simplification: the holding periods overlap (1928 to 1932 and 1929 to 1933 share four years), so they are not separate pieces of evidence. All the 20-year periods come from one 98-year history.</p>
+
+<h2 id="s9">9. What an average return means for one person's money</h2>
+
+<p>If money grew at exactly 10% every year, $1,000 would become $1,000 × 1.10<sup>5</sup> = $1,610.51 after five years. Read literally, the claim “about 10% a year” says this.</p>
+
+<p>The real five-year periods give a different picture. There are 94 five-year periods from 1928 to 2025 in [1]: 1928 to 1932, 1929 to 1933, and so on up to 2021 to 2025.</p>
+<p class="small" style="margin-bottom:0">Table 3. What $1,000 became in five years, 1928 to 2025 (computed from [1])</p>
+<div class="scroll"><table>
+<tr><th></th><th class="n">$1,000 became</th></tr>
+<tr><td>Steady 10% a year, for comparison</td><td class="n">$1,610.51</td></tr>
+<tr><td>Average of the 94 periods</td><td class="n">$1,725.52</td></tr>
+<tr><td>Middle value (median) of the 94 periods</td><td class="n">about $1,808</td></tr>
+<tr><td>Lowest (1928 to 1932)</td><td class="n">$506.65</td></tr>
+<tr><td>Highest (1995 to 1999)</td><td class="n">$3,475.83</td></tr>
+</table></div>
+<p>In 11 of the 94 periods the money ended below $1,000. In 55 periods it ended at or above $1,610.51.</p>
+
+<div class="task" id="task8">
+<h3>Task 8 (about 2 minutes, calculator)</h3>
+<p>A five-year period is picked at random from the 94.</p>
+<ol type="a">
+<li>Find P(the money ended below $1,000), as a fraction and as a decimal rounded to 3 places.</li>
+<li>Find P(the money ended at or above $1,610.51). Then use the complement rule to find P(the money ended below $1,610.51).</li>
+</ol>
+</div>
+<details><summary>Solution to Task 8</summary><div>
+<p>(a) 11/94 = 0.117, about 1 period in 9.</p>
+<p>(b) 55/94 = 0.585. By the complement rule, 1 − 55/94 = 39/94 = 0.415, about 2 periods in 5.</p>
+</div></details>
+
+<p>For one person's money over five years in this history, the typical outcome was a little better than a steady 10% a year: the median of $1,808 is a growth rate of about 12.6% a year. The outcomes were also spread widely in both directions. About 1 period in 9 lost money, and about 2 in 5 ended below the steady-10% amount. The average describes the center of many outcomes pooled together. It does not say which outcome one person gets. An investor with five years gets one draw from this spread, and the expected return gives no guarantee about that draw. Lecture 7.2 found the same for a single simulated year: starting from 6688.46, 96% of simulated years ended anywhere from 5884 to 9663.</p>
+
+<p>These numbers describe 1928 to 2025. Future returns can differ.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li>Aswath Damodaran, “Historical Returns on Stocks, Bonds and Bills: 1928-2024” (title as shown on the page), NYU Stern School of Business. <a href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html">https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html</a>. Page updated January 5, 2026, data through 2025; accessed October 4, 2026. Figures used: the column “S&amp;P 500 (includes dividends)”, annual returns 1928 to 2025, for example 1931: −43.84%, 1954: 52.56%, 2008: −36.55%, 2022: −18.04%, 2025: 17.78%. All averages, growth rates, multipliers, counts and dollar values for 1928 to 2025 in this lecture were computed from this column. A saved copy is in the folder src/ that accompanies this page.</li>
+<li>Yahoo Finance, “S&amp;P 500 (^GSPC) Historical Data”. <a href="https://finance.yahoo.com/quote/%5EGSPC/history/">https://finance.yahoo.com/quote/%5EGSPC/history/</a>. Read October 4, 2026; the same daily closes as source [2] of lecture 7.2, September 30, 2021 (4307.54) to October 2, 2026 (7722.72). Figures used: closes of 3585.62 (September 30, 2022), 4288.05 (September 29, 2023), 5762.48 (September 30, 2024) and 6688.46 (September 30, 2025); yearly changes −16.76%, +19.59%, +34.38%, +16.07%; for the 1003 trading days from October 1, 2021 to September 30, 2025, 533 up days, average up and down day 0.80%, average daily change 0.0502% (computed from the closes). The model numbers 0.531, 1.0080 and 0.9920 and the simulated range 5884 to 9663 are from lecture 7.2.</li>
+<li>Wikipedia, “S&amp;P 500”. <a href="https://en.wikipedia.org/wiki/S%26P_500">https://en.wikipedia.org/wiki/S%26P_500</a>. Read October 4, 2026. Quoted: “Three years later, it developed a 90-stock index, computed daily” (three years after 1923, so 1926); “On Monday, March 4, 1957, the index was expanded to its current extent of 500 companies and was renamed the S&amp;P 500 Stock Composite Index”; “Since its inception in 1926, the index's compound annual growth rate—including dividends—has been approximately 9.8% (6% after inflation).”</li>
+</ol>
+
+</main>
+
+<script>
+const DATA = {"1928":43.81,"1929":-8.3,"1930":-25.12,"1931":-43.84,"1932":-8.64,"1933":49.98,"1934":-1.19,"1935":46.74,"1936":31.94,"1937":-35.34,"1938":29.28,"1939":-1.1,"1940":-10.67,"1941":-12.77,"1942":19.17,"1943":25.06,"1944":19.03,"1945":35.82,"1946":-8.43,"1947":5.2,"1948":5.7,"1949":18.3,"1950":30.81,"1951":23.68,"1952":18.15,"1953":-1.21,"1954":52.56,"1955":32.6,"1956":7.44,"1957":-10.46,"1958":43.72,"1959":12.06,"1960":0.34,"1961":26.64,"1962":-8.81,"1963":22.61,"1964":16.42,"1965":12.4,"1966":-9.97,"1967":23.8,"1968":10.81,"1969":-8.24,"1970":3.56,"1971":14.22,"1972":18.76,"1973":-14.31,"1974":-25.9,"1975":37,"1976":23.83,"1977":-6.98,"1978":6.51,"1979":18.52,"1980":31.74,"1981":-4.7,"1982":20.42,"1983":22.34,"1984":6.15,"1985":31.24,"1986":18.49,"1987":5.81,"1988":16.54,"1989":31.48,"1990":-3.06,"1991":30.23,"1992":7.49,"1993":9.97,"1994":1.33,"1995":37.2,"1996":22.68,"1997":33.1,"1998":28.34,"1999":20.89,"2000":-9.03,"2001":-11.85,"2002":-21.97,"2003":28.36,"2004":10.74,"2005":4.83,"2006":15.61,"2007":5.48,"2008":-36.55,"2009":25.94,"2010":14.82,"2011":2.1,"2012":15.89,"2013":32.15,"2014":13.52,"2015":1.38,"2016":11.77,"2017":21.61,"2018":-4.23,"2019":31.21,"2020":18.02,"2021":28.47,"2022":-18.04,"2023":26.06,"2024":24.88,"2025":17.78};
+const YEARS = Object.keys(DATA).map(Number);
+const R = YEARS.map(y => DATA[y] / 100);
+const MINUS = "−";
+function pct(x, d = 2) { const s = (Math.abs(x) * 100).toFixed(d) + "%"; return x < -0.000001 ? MINUS + s : s; }
+function money(x) { return "$" + x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+/* Spreadsheet layouts for Task 5: 0 = data only, 1 = finished with formulas */
+function makeLayout(withFormulas) {
+  const f = x => withFormulas ? x : "";
+  const rows = [["Year", "Return", "Multiplier", "Value at end of year", "", "Summary", ""],
+    ["Start", "", "", "1000", "", "Average of returns", f("=AVERAGE(B3:B12)")]];
+  for (let i = 0; i < 10; i++) {
+    const y = 2000 + i, row = i + 3;
+    const extra = i === 0 ? ["Total multiplier", f("=D12/D2")] : i === 1 ? ["Growth rate per year", f("=G3^(1/10)-1")] : ["", ""];
+    rows.push([String(y), (DATA[y] / 100).toFixed(4).replace(/0+$/, "").replace(/\.$/, ""), f("=1+B" + row), f("=D" + (row - 1) + "*C" + row), "", ...extra]);
+  }
+  return rows;
+}
+const LAYOUTS = [makeLayout(false), makeLayout(true)];
+LAYOUTS.forEach((rows, k) => {
+  const t = document.getElementById("layout" + k);
+  const head = document.createElement("tr");
+  ["", "A", "B", "C", "D", "E", "F", "G"].forEach(c => { const th = document.createElement("th"); th.textContent = c; head.appendChild(th); });
+  t.appendChild(head);
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th"); th.textContent = i + 1; tr.appendChild(th);
+    r.forEach(c => { const td = document.createElement("td"); td.textContent = c; tr.appendChild(td); });
+    t.appendChild(tr);
+  });
+});
+const toCSV = rows => rows.map(r => r.map(c => /[",]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c).join(",")).join("\r\n") + "\r\n";
+const toTSV = rows => rows.map(r => r.join("\t")).join("\n");
+document.querySelectorAll("[data-dl]").forEach(btn => btn.onclick = () => {
+  const k = +btn.dataset.dl, a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([toCSV(LAYOUTS[k])], { type: "text/csv" }));
+  a.download = k ? "sp500-2000-2009-finished.csv" : "sp500-2000-2009-layout.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+});
+document.querySelectorAll("[data-cp]").forEach(btn => btn.onclick = async () => {
+  const text = toTSV(LAYOUTS[+btn.dataset.cp]), msg = btn.parentNode.querySelector(".cpmsg");
+  const done = () => { msg.textContent = "Copied. Paste into cell A1."; };
+  try { await navigator.clipboard.writeText(text); done(); }
+  catch (e) {
+    const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch (e2) { msg.textContent = "Copy failed; type the layout from the table."; }
+    ta.remove();
+  }
+});
+
+/* Interactive graphs for Task 7 */
+const NS = "http://www.w3.org/2000/svg";
+let W = 800, H = 300, FS = 15, STEP = 10;
+const L = 52, RT = 10, T = 12, B = 34;
+const YMIN = -0.5, YMAX = 0.6;
+const xOf = i => L + (i + 0.5) * (W - L - RT) / YEARS.length;
+const yOf = v => T + (YMAX - v) / (YMAX - YMIN) * (H - T - B);
+function el(tag, attrs, parent, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; parent.appendChild(e); return e; }
+function axes(svg, title, i0, nShade) {
+  svg.innerHTML = "";
+  const cw = (W - L - RT) / YEARS.length;
+  el("rect", { x: L + i0 * cw, y: T, width: cw * nShade, height: H - T - B, fill: "var(--band)", stroke: "var(--axis)", "stroke-width": 1 }, svg);
+  for (let v = -0.4; v <= 0.6001; v += 0.2) {
+    const y = yOf(v);
+    el("line", { x1: L, x2: W - RT, y1: y, y2: y, stroke: Math.abs(v) < 1e-9 ? "var(--axis)" : "var(--grid)", "stroke-width": Math.abs(v) < 1e-9 ? 1.5 : 1 }, svg);
+    el("text", { x: L - 6, y: y + 5, "text-anchor": "end", "font-size": FS }, svg, pct(v, 0));
+  }
+  for (let yr = 1930; yr <= 2020; yr += STEP) {
+    el("text", { x: xOf(yr - 1928), y: H - 12, "text-anchor": "middle", "font-size": FS }, svg, yr);
+  }
+  el("text", { x: L + 4, y: T + 14, "font-size": FS }, svg, title);
+}
+let len = 5;
+const lensEl = document.getElementById("lens"), start = document.getElementById("start");
+function setStart(v) { start.value = Math.max(+start.min, Math.min(+start.max, v)); draw(); }
+[1, 5, 10, 20].forEach(n => {
+  const b = document.createElement("button"); b.type = "button"; b.textContent = n; b.dataset.n = n;
+  b.onclick = () => { len = n; start.max = 2025 - n + 1; setStart(+start.value); };
+  lensEl.appendChild(b);
+});
+document.getElementById("minus1").onclick = () => setStart(+start.value - 1);
+document.getElementById("plus1").onclick = () => setStart(+start.value + 1);
+function windowStats(i, n) {
+  const s = R.slice(i, i + n); const M = s.reduce((p, r) => p * (1 + r), 1);
+  return { mean: s.reduce((a, r) => a + r, 0) / n, g: Math.pow(M, 1 / n) - 1, val: 1000 * M };
+}
+function draw() {
+  const cw = document.getElementById("bars").parentNode.clientWidth || 800;
+  W = Math.min(800, Math.max(320, Math.round(cw))); H = W < 600 ? 260 : 300; FS = W < 600 ? 12 : 15; STEP = W < 600 ? 20 : 10;
+  ["bars", "dots"].forEach(id => document.getElementById(id).setAttribute("viewBox", "0 0 " + W + " " + H));
+  [...lensEl.children].forEach(b => b.setAttribute("aria-pressed", +b.dataset.n === len));
+  const s0 = +start.value, i0 = s0 - 1928, e0 = s0 + len - 1;
+  document.getElementById("startlbl").textContent = s0;
+  const bars = document.getElementById("bars");
+  axes(bars, "Yearly return", i0, len);
+  const bw = (W - L - RT) / YEARS.length * 0.8;
+  R.forEach((r, i) => {
+    const y = yOf(Math.max(r, 0)), h = Math.abs(yOf(r) - yOf(0));
+    el("rect", { x: xOf(i) - bw / 2, y: y, width: bw, height: Math.max(h, 1), fill: r < 0 ? "var(--loss)" : "var(--gain)" }, bars)
+      .appendChild(document.createElementNS(NS, "title")).textContent = YEARS[i] + ": " + pct(r);
+  });
+  const st = windowStats(i0, len);
+  document.getElementById("readout").innerHTML =
+    "<div>Period<b>" + (len === 1 ? s0 : s0 + " to " + e0) + "</b></div>" +
+    "<div>$1,000 became<b>" + money(st.val) + "</b></div>" +
+    "<div>Growth rate per year<b>" + pct(st.g) + "</b></div>" +
+    "<div>Arithmetic mean of returns<b>" + pct(st.mean) + "</b></div>";
+  const dots = document.getElementById("dots");
+  axes(dots, "Growth rate per year of each " + len + "-year period", i0, 1);
+  let lost = 0, lo = null, hi = null;
+  for (let i = 0; i + len <= R.length; i++) {
+    const w = windowStats(i, len);
+    if (w.val < 1000) lost++;
+    if (!lo || w.g < lo.g) lo = { g: w.g, i };
+    if (!hi || w.g > hi.g) hi = { g: w.g, i };
+    const cur = i === i0;
+    el("circle", { cx: xOf(i), cy: yOf(w.g), r: cur ? 7 : 3.5, fill: w.g < 0 ? "var(--loss)" : "var(--gain)", stroke: cur ? "var(--text)" : "none", "stroke-width": 2 }, dots)
+      .appendChild(document.createElementNS(NS, "title")).textContent = YEARS[i] + " to " + YEARS[i + len - 1] + ": " + pct(w.g);
+  }
+  const n = R.length - len + 1;
+  const span = i => len === 1 ? YEARS[i] : YEARS[i] + " to " + YEARS[i + len - 1];
+  document.getElementById("summary").innerHTML =
+    "<div>Periods of " + len + (len === 1 ? " year" : " years") + "<b>" + n + "</b></div>" +
+    "<div>Periods that lost money<b>" + lost + " of " + n + "</b></div>" +
+    "<div>Lowest growth rate<b>" + pct(lo.g) + " (" + span(lo.i) + ")</b></div>" +
+    "<div>Highest growth rate<b>" + pct(hi.g) + " (" + span(hi.i) + ")</b></div>";
+}
+start.addEventListener("input", draw);
+window.addEventListener("resize", draw);
+draw();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-07/7-2-independence-and-simulation/" style="color:inherit">&larr; 7.2 Independence and simulation</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-08/8-1-mean-median-and-standard-deviation/" style="color:inherit">8.1 Mean, median and standard deviation &rarr;</a></nav>
+</body>
+</html>

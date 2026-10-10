@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why the Algorithm Works</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --text: #1d1d1f;
+  --muted: #5a5a60;
+  --rule: #d4d4d8;
+  --task-bg: #f3f6fb;
+  --task-border: #3a66a8;
+  --sol-bg: #f7f7f5;
+  --head-bg: #eef0f3;
+  --hl: #fff2c2;
+  --accent: #2b5797;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b;
+    --text: #e8e8ea;
+    --muted: #a3a3ab;
+    --rule: #3a3b40;
+    --task-bg: #1d2533;
+    --task-border: #6f9be0;
+    --sol-bg: #202124;
+    --head-bg: #24262b;
+    --hl: #4a4020;
+    --accent: #8fb4ee;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b;
+  --text: #e8e8ea;
+  --muted: #a3a3ab;
+  --rule: #3a3b40;
+  --task-bg: #1d2533;
+  --task-border: #6f9be0;
+  --sol-bg: #202124;
+  --head-bg: #24262b;
+  --hl: #4a4020;
+  --accent: #8fb4ee;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.55;
+}
+main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+.course { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 24px; }
+h2 { font-size: 1.4rem; margin: 40px 0 12px; padding-top: 12px; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.1rem; margin: 24px 0 8px; }
+p, ul, ol { margin: 0 0 14px; }
+li { margin-bottom: 6px; }
+a { color: var(--accent); }
+.table-wrap { overflow-x: auto; margin: 0 0 16px; }
+table { border-collapse: collapse; font-size: 0.95rem; }
+th, td { border: 1px solid var(--rule); padding: 5px 10px; text-align: center; }
+th { background: var(--head-bg); font-weight: 600; }
+td.l, th.l { text-align: left; }
+.hl { background: var(--hl); font-weight: 600; }
+.caption { font-size: 0.9rem; color: var(--muted); margin: -8px 0 16px; }
+.task {
+  background: var(--task-bg);
+  border: 2px solid var(--task-border);
+  border-radius: 6px;
+  padding: 12px 16px 4px;
+  margin: 20px 0 8px;
+}
+.task-label { font-weight: 700; margin-bottom: 8px; }
+details.solution {
+  background: var(--sol-bg);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin: 0 0 24px;
+}
+details.solution > summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+details.solution[open] > summary { margin-bottom: 8px; }
+.statement {
+  border-left: 4px solid var(--task-border);
+  padding: 6px 14px;
+  margin: 0 0 16px;
+}
+.small { font-size: 0.9rem; color: var(--muted); }
+ol.sources li { margin-bottom: 10px; }
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  th, td { padding: 4px 6px; }
+}
+</style>
+<style>
+td.new { background: var(--hl); font-weight: 600; }
+td.props { text-align: left; min-width: 7.5em; }
+table.rt th, table.rt td { padding: 4px 7px; }
+.pair { border: 1px solid var(--rule); border-radius: 6px; padding: 8px 12px; margin: 0 0 10px; }
+.pair p { margin: 0 0 4px; }
+.lists { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.lists > .table-wrap { max-width: 100%; }
+ol.sources li { overflow-wrap: anywhere; }
+@media (max-width: 520px) {
+  table.rt { font-size: 0.85rem; }
+  table.rt th, table.rt td { padding: 3px 4px; }
+  td.props { min-width: 6.5em; }
+}
+@media print {
+  details.solution { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-09/9-2-the-deferred-acceptance-algorithm/" style="color:inherit">&larr; 9.2 The deferred acceptance algorithm</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-10/10-1-weighted-graphs/" style="color:inherit">10.1 Weighted graphs &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Stable matching (week 9) · Lecture 3 of 3</p>
+<h1>Why the algorithm works</h1>
+
+<h2>1. Who proposes: New York City high schools and the residency match</h2>
+
+<p>In the early 2000s, New York City placed over 90,000 students entering high school each year [1]. Under the old process, used for the last time in 2002–2003, a student could rank at most five programs out of more than 500. Applications went through three rounds of processing, and only about 50,000 students received offers at first [1]. When the process ended, “approximately 30,000 students had been assigned to a school that was nowhere on their choice list” [1].</p>
+
+<p>The city then switched to a new process designed by Atila Abdulkadiroğlu, Parag Pathak and Alvin Roth. It was first run in 2003–2004, for students entering high school in fall 2004 [1]. It is based on the deferred acceptance algorithm of Lecture 9.2, with the students proposing [3]. Students could list up to 12 schools [1]. In its first year:</p>
+<ul>
+  <li>over 70,000 students were matched to a school on their first list;</li>
+  <li>7,600 more, who were unmatched at first, were placed in a second round using new lists of schools that still had seats;</li>
+  <li>about 8,000 students left the city’s public schools and more than 2,000 stayed in their current school;</li>
+  <li>that left “approximately 3,000 students who did not receive any school they chose” [1].</li>
+</ul>
+
+<div class="task">
+  <div class="task-label">Task 1 (about 4 minutes, calculator)</div>
+  <p>(a) The old process left about 30,000 students at a school they had not listed. After the new match and its second round, about 3,000 students received no school they chose. Compute the decrease and the percent decrease. The Royal Swedish Academy of Sciences describes the change as “a 90 percent reduction” [3]. Does your percent agree?</p>
+  <p>(b) In the new match, over 70,000 of the over 90,000 students who sent lists were matched to a school on their first list. Compute 70,000 ÷ 90,000 as a percent, to one decimal place. Compare it with the 79.8% of active applicants in the 2026 residency match who matched to a PGY-1 position (Lecture 9.1, Task 1).</p>
+  <p>Produce: a decrease and a percent for (a), with yes or no; a percent for (b).</p>
+</div>
+<details class="solution">
+  <summary>Solution to Task 1</summary>
+  <p>(a) 30,000 − 3,000 = 27,000 students. 27,000 ÷ 30,000 = 0.9 = 90%. Yes, it agrees. The comparison is rough. Both numbers are rounded, they are from two different years, and they do not count quite the same group: the 3,000 is what is left after a second round and after setting aside about 10,000 students who left or stayed in their current school [1].</p>
+  <p>(b) 70,000 ÷ 90,000 = 0.7777…, about 77.8%. Both numbers are “over”, so this is only a rough share. It is close to the 79.8% of the 2026 residency match.</p>
+</details>
+
+<p>Lecture 9.2, Section 8, ended with the residency match. Its old algorithm was “functionally equivalent to the program-proposing deferred-acceptance algorithm”. The NRMP decided in May 1997 to switch to an applicant-proposing algorithm, and the first match with it was completed in March 1998 [2]. New York City also chose to let the students propose: “A student-proposing algorithm was selected because this has the best welfare properties for students” [1]. Two questions follow.</p>
+<ol>
+  <li>A city or the NRMP needs a stable matching every year, for every possible set of ranked lists. How can anyone be sure the algorithm gives one, without checking each year by hand?</li>
+  <li>The algorithm treats the two sides differently: one side proposes, the other side holds or rejects. Which side gets the better deal?</li>
+</ol>
+
+<p><b>Simplification, the same as in Lectures 9.1 and 9.2.</b> There are as many applicants as programs, each program has one position, and everyone ranks everyone on the other side. In the school match the applicants are students and the programs are schools. The real New York match has many seats per school and lists of at most 12 schools [1].</p>
+
+<h3>Terms from Lectures 9.1 and 9.2</h3>
+<ul>
+  <li>A <b>matching</b> pairs every applicant with exactly one program. A pair is written (applicant, program), for example (A, X).</li>
+  <li>A <b>blocking pair</b> is an applicant and a program, not paired with each other, where the applicant prefers the program to their own partner and the program prefers the applicant to its own partner. A matching is <b>stable</b> when it has no blocking pair (Lecture 9.1, Sections 3 and 4).</li>
+  <li>In the <b>deferred acceptance algorithm</b> (Lecture 9.2, Section 2), applicants <b>propose</b>, written A→X. Each program <b>holds</b> the applicant it ranks highest among its new proposals and the applicant it already holds, and <b>rejects</b> all the others. So a program rejects an applicant either when it turns down the applicant’s proposal or when it lets go of an applicant it was holding. A rejected applicant proposes to the next program on their list. The algorithm stops when a round has no rejection.</li>
+</ul>
+
+<h2>2. Statements, if-then statements and converses</h2>
+
+<p>A <b>statement</b> is a sentence that is either true or false. “20! is larger than one billion” is a true statement. “Every matching is stable” is a false statement: M1 of Example 1 has the blocking pair (C, Y) (Lecture 9.1, Section 3). “Rank the programs” is not a statement, because it is neither true nor false.</p>
+
+<p>Many statements in mathematics have the form <b>“If P, then Q”</b>. P is called the <b>hypothesis</b> and Q the <b>conclusion</b>. The statement is true when Q is true in every case where P is true. A case where P is true and Q is false is a <b>counterexample</b>. One counterexample is enough to make an if-then statement false.</p>
+
+<p>The <b>converse</b> of “If P, then Q” is “If Q, then P”: the hypothesis and the conclusion trade places. A true statement can have a false converse.</p>
+
+<div class="pair">
+  <p><b>Statement:</b> If you live in Seattle, then you live in Washington State. <b>True.</b></p>
+  <p><b>Converse:</b> If you live in Washington State, then you live in Seattle. <b>False.</b> A person living in Spokane is a counterexample.</p>
+</div>
+<div class="pair">
+  <p><b>Statement:</b> If a whole number ends in 0, then it is even. <b>True.</b></p>
+  <p><b>Converse:</b> If a whole number is even, then it ends in 0. <b>False.</b> 4 is a counterexample.</p>
+</div>
+<div class="pair">
+  <p><b>Statement:</b> If a whole number ends in 0 or 5, then it is divisible by 5. <b>True.</b></p>
+  <p><b>Converse:</b> If a whole number is divisible by 5, then it ends in 0 or 5. <b>True.</b></p>
+</div>
+
+<p>A common mistake is to assume the converse. Knowing that “ends in 0” guarantees “even” says nothing about whether “even” guarantees “ends in 0”. The third pair shows that sometimes both directions are true. Each direction has to be checked on its own.</p>
+
+<div class="task">
+  <div class="task-label">Task 2 (about 6 minutes, paper)</div>
+  <p>Each statement below is true. For (a), (b) and (d), write the converse, decide whether it is true, and give a counterexample if it is false. In (b), n stands for a whole number 1, 2, 3, …</p>
+  <ol type="a">
+    <li>If a whole number is divisible by 4, then it is even.</li>
+    <li>If n is at least 2, then n! is even.</li>
+    <li>If a matching is the result of the deferred acceptance algorithm with applicants proposing, then it is stable. (Lecture 9.2, Section 6; Section 3 below.)</li>
+    <li>If a matching has a blocking pair, then it is not stable.</li>
+  </ol>
+  <p>For (c), write the converse. Then use the table of results in “Data used in this module” of Lecture 9.2 (Examples 1 to 4, each with its only stable matching). Do Examples 1 to 4 give a counterexample to the converse? Do they show that the converse is true?</p>
+  <p>Produce: four converses; for (a), (b) and (d), true or false, with a counterexample for each false one; two yes-or-no answers for (c).</p>
+</div>
+<details class="solution">
+  <summary>Solution to Task 2</summary>
+  <ol type="a">
+    <li>Converse: “If a whole number is even, then it is divisible by 4.” False. Counterexample: 6 is even, and 6 ÷ 4 = 1.5 is not a whole number.</li>
+    <li>Converse: “If n! is even, then n is at least 2.” True. The only whole number below 2 is n = 1, and 1! = 1 is odd. So when n! is even, n is not 1, and n is at least 2.</li>
+    <li>Converse: “If a matching is stable, then it is the result of the deferred acceptance algorithm with applicants proposing.” Examples 1 to 4 give no counterexample: each has exactly one stable matching, and it is the result of the algorithm. They also do not show that the converse is true. Four examples say nothing about the lists that were not tried. Section 4 gives a new example, Example 5, with a counterexample, so the converse is false.</li>
+    <li>Converse: “If a matching is not stable, then it has a blocking pair.” True, because “stable” means “has no blocking pair”. The statement and its converse together say that “has a blocking pair” and “is not stable” mean the same thing.</li>
+  </ol>
+</details>
+
+<p>Part (c) shows the limit of checking examples. To be sure that a statement holds for every possible set of ranked lists, mathematicians write a <b>proof</b>: an argument that starts from the rules and shows step by step that the conclusion must hold.</p>
+
+<h2>3. Proof by contradiction: the algorithm always gives a stable matching</h2>
+
+<h3>The method</h3>
+<p>A <b>proof by contradiction</b> shows that a statement is true by supposing it is false and following that supposition until it leads to something impossible. A supposition that leads to something impossible cannot hold, so the statement is true.</p>
+
+<p>A small example. Claim: in any group of 13 people, at least two were born in the same month. Proof by contradiction: suppose the claim is false, so all 13 people were born in different months. Then each of the 12 months has at most one of them, and the group has at most 12 people. But the group has 13 people. That is a contradiction, so the supposition is false and the claim is true.</p>
+
+<h3>Two facts from Lecture 9.2</h3>
+<p>Lecture 9.2, Section 6, used two facts about the rounds. Both can be seen in the round table of Example 2, repeated here from Lecture 9.2, Section 3. A shaded cell marks a program that holds a new applicant in that round, and a dash (–) means the program holds nobody yet.</p>
+
+<div class="lists">
+<div class="table-wrap">
+<table>
+  <tr><th class="l">Applicant</th><th class="l">List</th></tr>
+  <tr><td class="l">A</td><td class="l">X, Y, Z, W</td></tr>
+  <tr><td class="l">B</td><td class="l">W, X, Z, Y</td></tr>
+  <tr><td class="l">C</td><td class="l">W, Z, X, Y</td></tr>
+  <tr><td class="l">D</td><td class="l">Z, W, X, Y</td></tr>
+</table>
+</div>
+<div class="table-wrap">
+<table>
+  <tr><th class="l">Program</th><th class="l">List</th></tr>
+  <tr><td class="l">W</td><td class="l">D, A, B, C</td></tr>
+  <tr><td class="l">X</td><td class="l">C, A, D, B</td></tr>
+  <tr><td class="l">Y</td><td class="l">C, D, A, B</td></tr>
+  <tr><td class="l">Z</td><td class="l">D, A, B, C</td></tr>
+</table>
+</div>
+</div>
+<p class="caption">Example 2 from Lecture 9.1 (made up). Lists are best first.</p>
+
+<div class="table-wrap">
+<table class="rt">
+  <tr><th>Round</th><th class="l">Proposals</th><th>W</th><th>X</th><th>Y</th><th>Z</th><th>Rejected</th></tr>
+  <tr><td>1</td><td class="props">A→X, B→W, C→W, D→Z</td><td class="new">B</td><td class="new">A</td><td>–</td><td class="new">D</td><td>C</td></tr>
+  <tr><td>2</td><td class="props">C→Z</td><td>B</td><td>A</td><td>–</td><td>D</td><td>C</td></tr>
+  <tr><td>3</td><td class="props">C→X</td><td>B</td><td class="new">C</td><td>–</td><td>D</td><td>A</td></tr>
+  <tr><td>4</td><td class="props">A→Y</td><td>B</td><td>C</td><td class="new">A</td><td>D</td><td>nobody</td></tr>
+</table>
+</div>
+<p class="caption">Example 2, applicants propose (Lecture 9.2, Section 3). Result: M6 = {(A, Y), (B, W), (C, X), (D, Z)}.</p>
+
+<p><b>Fact 1. Applicants go down their lists.</b> An applicant proposes in the order of their list and moves on only when rejected. So every program that an applicant ranks above their final program has received a proposal from that applicant and rejected it. In Example 2, C ends at X, C’s 3rd choice. C ranks W and Z higher, and W rejected C in round 1 and Z rejected C in round 2.</p>
+
+<p><b>Fact 2. Programs only trade up.</b> Once a program holds an applicant, it holds someone until the end, and it lets go of an applicant only for one it ranks higher. So a program ends with an applicant it ranks at least as high as every applicant it ever held or rejected. In Example 2, X held A, then rejected A in round 3 for C, and X ranks C 1st and A 2nd.</p>
+
+<h3>The proof</h3>
+<div class="statement">
+  <p><b>Claim.</b> If a matching is the result of the deferred acceptance algorithm with applicants proposing, then it is stable.</p>
+</div>
+<p><b>Proof.</b> Let M be the matching the algorithm gives. Suppose, for contradiction, that M is not stable. Then M has a blocking pair: an applicant a and a program P such that</p>
+<ol>
+  <li>a prefers P to a’s own partner in M, and</li>
+  <li>P prefers a to P’s own partner in M.</li>
+</ol>
+<p>By (1) and Fact 1, a proposed to P in some round and P rejected a. A program rejects an applicant only when it holds an applicant it ranks higher. By Fact 2, P ends with an applicant it ranks at least that high, so P prefers its partner in M to a. This contradicts (2). So the supposition is false: M has no blocking pair, and M is stable. ∎</p>
+
+<p>This is the argument of Lecture 9.2, Section 6, written as a proof by contradiction. It never uses the lists of a particular example, only the rules of the algorithm. So it holds for every set of lists of this kind, with 4 applicants or 90,000.</p>
+
+<div class="task">
+  <div class="task-label">Task 3 (about 5 minutes, paper)</div>
+  <p>Use Example 2 and its round table above. In M6, A is with Y and C is with X.</p>
+  <p>Write the proof above for the pair (A, X) and again for the pair (C, W). Each time, start with “Suppose (…, …) is a blocking pair of M6”, write the two conditions with the actual letters, use Fact 1 and Fact 2 by name with the round numbers from the table, and say which condition is contradicted.</p>
+  <p>Produce: two short proofs by contradiction, of three or four sentences each.</p>
+</div>
+<details class="solution">
+  <summary>Solution to Task 3</summary>
+  <p><b>(A, X).</b> Suppose (A, X) is a blocking pair of M6. Then (1) A prefers X to Y, and (2) X prefers A to C. By (1) and Fact 1, A proposed to X and X rejected A: X held A from round 1 and rejected A in round 3, when C proposed and X preferred C (1st) to A (2nd). By Fact 2, X ends with an applicant it ranks at least as high as C; it ends with C. So X prefers C to A, which contradicts (2). So (A, X) is not a blocking pair.</p>
+  <p><b>(C, W).</b> Suppose (C, W) is a blocking pair of M6. Then (1) C prefers W to X, and (2) W prefers C to B. By (1) and Fact 1, C proposed to W and W rejected C: in round 1, B and C both proposed to W, and W ranks B 3rd and C 4th. By Fact 2, W ends with an applicant it ranks at least as high as B; it ends with B. So W prefers B to C, which contradicts (2). So (C, W) is not a blocking pair.</p>
+</details>
+
+<h2>4. The proposing side gets its best stable partner</h2>
+
+<p>The proof in Section 3 works the same way with the roles swapped: programs propose, and applicants hold or reject. That version also stops with a stable matching. For each of Examples 1 to 4, a computer check of all matchings found exactly one stable matching (Lecture 9.2, “Data used in this module”). In those examples both versions must end at that one matching.</p>
+
+<div class="task">
+  <div class="task-label">Task 4 (about 3 minutes, paper)</div>
+  <p>Run the algorithm on Example 1 of Lecture 9.1 with <em>programs</em> proposing. Each program proposes to the first applicant on its list. Each applicant holds the program they rank highest and rejects the others. A rejected program proposes to the next applicant on its list. Make a round table with one column for each applicant.</p>
+  <p>Example 1 lists (best first). Applicants: A: X, Y, Z. B: Z, X, Y. C: Y, Z, X. Programs: X: A, C, B. Y: C, B, A. Z: C, A, B.</p>
+  <p>Produce: the round table and the final matching.</p>
+</div>
+<details class="solution">
+  <summary>Solution to Task 4</summary>
+  <div class="table-wrap">
+  <table class="rt">
+    <tr><th>Round</th><th class="l">Proposals</th><th>A</th><th>B</th><th>C</th><th>Rejected</th></tr>
+    <tr><td>1</td><td class="props">X→A, Y→C, Z→C</td><td class="new">X</td><td>–</td><td class="new">Y</td><td>Z</td></tr>
+    <tr><td>2</td><td class="props">Z→A</td><td>X</td><td>–</td><td>Y</td><td>Z</td></tr>
+    <tr><td>3</td><td class="props">Z→B</td><td>X</td><td class="new">Z</td><td>Y</td><td>nobody</td></tr>
+  </table>
+  </div>
+  <p>Round 1: C receives Y and Z. C’s list is Y, Z, X, so C holds Y and rejects Z. Round 2: Z proposes to A, the 2nd applicant on its list. A holds X, A’s 1st choice, so A rejects Z. Round 3: Z proposes to B, who holds nobody. Nobody is rejected.</p>
+  <p>Result: (A, X), (B, Z), (C, Y). This is M4, the same matching as with applicants proposing (Lecture 9.2, Section 3), as it must be, because M4 is the only stable matching of Example 1.</p>
+</details>
+
+<h3>A new example with two stable matchings</h3>
+<p>To compare the two sides we need lists with more than one stable matching. Example 5 is new and made up for this lecture. It uses the same letters as Example 2, with different lists. A computer check of all 4! = 24 matchings finds exactly two stable ones.</p>
+
+<div class="lists">
+<div class="table-wrap">
+<table>
+  <tr><th class="l">Applicant</th><th class="l">List</th></tr>
+  <tr><td class="l">A</td><td class="l">Z, X, Y, W</td></tr>
+  <tr><td class="l">B</td><td class="l">Y, W, Z, X</td></tr>
+  <tr><td class="l">C</td><td class="l">Y, X, W, Z</td></tr>
+  <tr><td class="l">D</td><td class="l">W, Y, X, Z</td></tr>
+</table>
+</div>
+<div class="table-wrap">
+<table>
+  <tr><th class="l">Program</th><th class="l">List</th></tr>
+  <tr><td class="l">W</td><td class="l">A, C, D, B</td></tr>
+  <tr><td class="l">X</td><td class="l">B, A, C, D</td></tr>
+  <tr><td class="l">Y</td><td class="l">A, C, B, D</td></tr>
+  <tr><td class="l">Z</td><td class="l">D, B, A, C</td></tr>
+</table>
+</div>
+</div>
+<p class="caption">Example 5 (new, made up). Lists are best first.</p>
+
+<p><b>Applicants propose.</b></p>
+<div class="table-wrap">
+<table class="rt">
+  <tr><th>Round</th><th class="l">Proposals</th><th>W</th><th>X</th><th>Y</th><th>Z</th><th>Rejected</th></tr>
+  <tr><td>1</td><td class="props">A→Z, B→Y, C→Y, D→W</td><td class="new">D</td><td>–</td><td class="new">C</td><td class="new">A</td><td>B</td></tr>
+  <tr><td>2</td><td class="props">B→W</td><td>D</td><td>–</td><td>C</td><td>A</td><td>B</td></tr>
+  <tr><td>3</td><td class="props">B→Z</td><td>D</td><td>–</td><td>C</td><td class="new">B</td><td>A</td></tr>
+  <tr><td>4</td><td class="props">A→X</td><td>D</td><td class="new">A</td><td>C</td><td>B</td><td>nobody</td></tr>
+</table>
+</div>
+<p>Round 1: B and C both propose to Y. Y’s list is A, C, B, D, so Y holds C and rejects B. Round 2: W holds D and ranks D 3rd and B 4th, so W rejects B. Round 3: Z holds A and ranks B 2nd and A 3rd, so Z holds B and rejects A. Round 4: A proposes to X, the 2nd program on A’s list, and X holds nobody. The result is</p>
+<p>M9 = {(A, X), (B, Z), (C, Y), (D, W)}.</p>
+
+<div class="task">
+  <div class="task-label">Task 5 (about 7 minutes, paper and calculator)</div>
+  <p>(a) Run the algorithm on Example 5 with <em>programs</em> proposing, as in Task 4. Make a round table with one column for each applicant. Call the result M10.</p>
+  <p>(b) Copy and fill in this table. In each cell write the rank the applicant gives their partner (1 for 1st choice), then add each column and divide by 4.</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th class="l">Applicant</th><th>M9 (applicants propose)</th><th>M10 (programs propose)</th></tr>
+    <tr><td class="l">A</td><td></td><td></td></tr>
+    <tr><td class="l">B</td><td></td><td></td></tr>
+    <tr><td class="l">C</td><td></td><td></td></tr>
+    <tr><td class="l">D</td><td></td><td></td></tr>
+    <tr><td class="l">Average rank</td><td></td><td></td></tr>
+  </table>
+  </div>
+  <p>Produce: the round table and M10 for (a), and the filled table for (b).</p>
+</div>
+<details class="solution">
+  <summary>Solution to Task 5</summary>
+  <p>(a)</p>
+  <div class="table-wrap">
+  <table class="rt">
+    <tr><th>Round</th><th class="l">Proposals</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Rejected</th></tr>
+    <tr><td>1</td><td class="props">W→A, X→B, Y→A, Z→D</td><td class="new">Y</td><td class="new">X</td><td>–</td><td class="new">Z</td><td>W</td></tr>
+    <tr><td>2</td><td class="props">W→C</td><td>Y</td><td>X</td><td class="new">W</td><td>Z</td><td>nobody</td></tr>
+  </table>
+  </div>
+  <p>Round 1: A receives W and Y. A’s list is Z, X, Y, W, so A holds Y (3rd) and rejects W (4th). Round 2: W proposes to C, the 2nd applicant on its list, and C holds nobody.</p>
+  <p>M10 = {(A, Y), (B, X), (C, W), (D, Z)}.</p>
+  <p>(b)</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th class="l">Applicant</th><th>M9 (applicants propose)</th><th>M10 (programs propose)</th></tr>
+    <tr><td class="l">A</td><td>2 (X)</td><td>3 (Y)</td></tr>
+    <tr><td class="l">B</td><td>3 (Z)</td><td>4 (X)</td></tr>
+    <tr><td class="l">C</td><td>1 (Y)</td><td>3 (W)</td></tr>
+    <tr><td class="l">D</td><td>1 (W)</td><td>4 (Z)</td></tr>
+    <tr><td class="l">Average rank</td><td>7 ÷ 4 = 1.75</td><td>14 ÷ 4 = 3.5</td></tr>
+  </table>
+  </div>
+  <p>Every applicant does better in M9 than in M10. The programs see the reverse. The ranks programs give their partners are W 3, X 2, Y 2, Z 2 in M9 (average 9 ÷ 4 = 2.25) and W 2, X 1, Y 1, Z 1 in M10 (average 5 ÷ 4 = 1.25).</p>
+</details>
+
+<p>M9 and M10 are the two stable matchings of Example 5. Each side does better when it proposes. This is a general rule.</p>
+
+<div class="statement">
+  <p><b>Result.</b> With applicants proposing, every applicant ends with the best program they can have in <em>any</em> stable matching, and every program ends with the worst applicant it can have in any stable matching. With programs proposing, it is the other way round.</p>
+</div>
+
+<p>Gale and Shapley proved the first half in the 1962 paper that introduced the algorithm, as their Theorem 2: “Every applicant is at least as well off under the assignment given by the deferred acceptance procedure as he would be under any other stable assignment” [4]. The Royal Swedish Academy of Sciences, in its popular summary of the 2012 prize, states both halves for men and women: “the resulting matching is better for the women than any other stable matching. Conversely, the reverse algorithm – where the men propose – leads to the worst outcome from the women’s perspective” [3]. So the answer to the second question in Section 1 is that the proposing side gets the better deal, and among stable matchings it gets the best deal possible. Section 6 gives a proof of the first half, for reading after class.</p>
+
+<p>The Result compares stable matchings only. In Example 5, A’s 1st choice is Z. Six of the 24 matchings pair A with Z, and none of them is stable.</p>
+
+<p>Example 5 also settles Task 2(c). M10 is stable, and the algorithm with applicants proposing gives M9, not M10. So M10 is a counterexample, and the converse “If a matching is stable, then it is the result of the algorithm with applicants proposing” is false.</p>
+
+<p>Back to Section 1. In the simplified model, letting the applicants propose gives each applicant the best partner they can have in a stable matching. That is the reason New York City gave for its choice [1], and the residency match made the same switch in 1997 [2]. The real matches have several positions per program, and the residency match has couples. Roth and Peranson point out that with couples “no stable matching may exist, and even when stable matchings exist there may be no optimal stable matchings for either side of the market” [2]. The Result in this lecture is proved for the simplified model only.</p>
+
+<h2>5. Kidney exchange and the 2012 Nobel prize</h2>
+
+<p>In 2012 Alvin Roth and Lloyd Shapley received the Prize in Economic Sciences in Memory of Alfred Nobel “for the theory of stable allocations and the practice of market design” [5]. The announcement names three uses: “matching new doctors with hospitals, students with schools, and organ donors with patients” [5]. Lectures 9.1 to 9.3 covered the first two.</p>
+
+<p>A patient who needs a kidney sometimes has a relative or friend willing to donate one whose kidney does not suit the patient’s body. Roth, Sönmez and Ünver describe exchanges “involving two donor-patient pairs such that each donor cannot give a kidney to the intended recipient because of immunological incompatibility, but each patient can receive a kidney from the other donor” [6]: donor 1 gives to patient 2, and donor 2 gives to patient 1. Each pair both gives and receives, so there are no two sides and nobody proposes. The mathematical question is which swaps to carry out so that as many patients as possible receive a kidney. That is a different kind of matching problem from the one in Lectures 9.1 to 9.3. Swaps can also involve three or more pairs, and “complex multilateral swaps may be quite time consuming” [3].</p>
+
+<p>The National Kidney Registry, a US organization that arranges such swaps, was founded in 2007 and organized its first swap in 2008 [8]. Its web page shows a running total of “13,000 NKR-Facilitated Transplants”, and, as of 2026, 102 member centers in 35 states and the District of Columbia [7].</p>
+
+<h2>6. Proof that the proposing side does best (for reading after class)</h2>
+
+<p class="small">This section is not covered in class.</p>
+
+<p>Call a program <b>possible</b> for an applicant if some stable matching pairs them. In Example 5, X and Z are possible for B (M10 and M9), and W and Y are not.</p>
+
+<p><b>Step 1. No applicant is ever rejected by a program that is possible for them.</b> Suppose, for contradiction, that this does happen. Look at the first round in which it happens, and pick one such rejection: program P rejects applicant a, P is possible for a, and P rejects a because it holds or receives an applicant b whom P ranks above a.</p>
+<ul>
+  <li>P is possible for a, so there is a stable matching N that pairs a with P. In N, applicant b is paired with some other program Q.</li>
+  <li>Suppose b ranks Q above P. By Fact 1, b proposed to Q and Q rejected b before b proposed to P, so in an earlier round. Q is possible for b, because N pairs them. That would be a rejection by a possible program in an earlier round, but we chose the first such round. So b ranks P above Q.</li>
+  <li>Now b prefers P to b’s partner Q in N, and P prefers b to P’s partner a in N. So (b, P) is a blocking pair of N. This contradicts N being stable.</li>
+</ul>
+<p>So no applicant is rejected by a possible program.</p>
+
+<p><b>Step 2.</b> By Fact 1, every program an applicant ranks above their final program rejected them. By Step 1, none of those programs is possible for them. So the applicant’s final program is at least as high on their list as their best possible program. The final matching is stable (Section 3), so the final program is itself possible. So it is exactly the applicant’s best possible program. ∎</p>
+
+<p>The second half of the Result, that each program ends with its worst possible applicant, has a proof of the same kind. It is omitted here.</p>
+
+<h2>Data used in this module</h2>
+<p>The examples, names and figures of Lectures 9.1 to 9.3. Examples 1 and 2 are from Lecture 9.1, and Examples 3 and 4 from Lecture 9.2, with their lists in the “Data used in this module” sections of those lectures. Example 5 is new in this lecture. All five examples are made up.</p>
+
+<h3>Notation added in this lecture</h3>
+<ul>
+  <li>Statement, if-then statement, hypothesis, conclusion, counterexample, converse, proof by contradiction: as defined in Sections 2 and 3.</li>
+  <li>Programs propose: the algorithm of Lecture 9.2 with the two sides swapped (Task 4). Its round table has one column for each applicant.</li>
+  <li>A program is possible for an applicant if some stable matching pairs them (Section 6).</li>
+  <li>Matchings keep the names from Lectures 9.1 and 9.2; this lecture adds M9 and M10.</li>
+</ul>
+
+<h3>Example 5 (4 applicants, 4 programs; lists best first)</h3>
+<div class="table-wrap">
+<table>
+  <tr><th class="l">Applicant</th><th class="l">List</th><th class="l">Program</th><th class="l">List</th></tr>
+  <tr><td class="l">A</td><td class="l">Z, X, Y, W</td><td class="l">W</td><td class="l">A, C, D, B</td></tr>
+  <tr><td class="l">B</td><td class="l">Y, W, Z, X</td><td class="l">X</td><td class="l">B, A, C, D</td></tr>
+  <tr><td class="l">C</td><td class="l">Y, X, W, Z</td><td class="l">Y</td><td class="l">A, C, B, D</td></tr>
+  <tr><td class="l">D</td><td class="l">W, Y, X, Z</td><td class="l">Z</td><td class="l">D, B, A, C</td></tr>
+</table>
+</div>
+
+<h3>Results with each side proposing</h3>
+<div class="table-wrap">
+<table>
+  <tr><th class="l">Example</th><th class="l">Applicants propose</th><th class="l">Programs propose</th><th>Stable matchings</th></tr>
+  <tr><td class="l">1 (9.1)</td><td class="l">M4, 1 round</td><td class="l">M4, 3 rounds</td><td>1</td></tr>
+  <tr><td class="l">2 (9.1)</td><td class="l">M6, 4 rounds</td><td class="l">M6, 4 rounds (by computer)</td><td>1</td></tr>
+  <tr><td class="l">5 (new)</td><td class="l">M9, 4 rounds</td><td class="l">M10, 2 rounds</td><td>2</td></tr>
+</table>
+</div>
+<p>M9 = {(A, X), (B, Z), (C, Y), (D, W)} and M10 = {(A, Y), (B, X), (C, W), (D, Z)}. Average rank in Example 5: applicants 1.75 in M9 and 3.5 in M10; programs 2.25 in M9 and 1.25 in M10.</p>
+
+<h3>Figures</h3>
+<div class="table-wrap">
+<table>
+  <tr><th class="l">Figure</th><th>Value</th><th>Source</th></tr>
+  <tr><td class="l">NYC students entering high school each year (early 2000s)</td><td>over 90,000</td><td>[1]</td></tr>
+  <tr><td class="l">NYC old process (2002–2003): students at a school not on their list</td><td>about 30,000</td><td>[1]</td></tr>
+  <tr><td class="l">NYC new match, first year (2003–2004): matched to a school on their first list</td><td>over 70,000</td><td>[1]</td></tr>
+  <tr><td class="l">NYC first year: placed in the second round</td><td>7,600</td><td>[1]</td></tr>
+  <tr><td class="l">NYC first year: no school they chose, after the second round</td><td>about 3,000</td><td>[1]</td></tr>
+  <tr><td class="l">NYC: most schools on a list (new match)</td><td>12</td><td>[1]</td></tr>
+  <tr><td class="l">Percent decrease, 30,000 to 3,000 (computed)</td><td>90%</td><td>Task 1</td></tr>
+  <tr><td class="l">NRMP switch to applicant-proposing decided; first match</td><td>May 1997; March 1998</td><td>[2]</td></tr>
+  <tr><td class="l">NKR transplants facilitated, running total</td><td>13,000</td><td>[7]</td></tr>
+  <tr><td class="l">NKR member centers, as of 2026</td><td>102, in 35 states and DC</td><td>[7]</td></tr>
+</table>
+</div>
+
+<h2>Sources</h2>
+<ol class="sources">
+  <li>Atila Abdulkadiroğlu, Parag A. Pathak and Alvin E. Roth, “The New York City High School Match,” <i>American Economic Review</i> 95(2), 364–367, May 2005. Quoted: “over 90,000 entering students” each year; the old process allowed “no more than five out of more than 500 programs” in “Three rounds”, and “Only about 50,000 students received offers initially”; “approximately 30,000 students had been assigned to a school that was nowhere on their choice list” (the 2002–2003 procedure); the first year of operation was “in academic year 2003–2004, for students entering high school in fall 2004”; “over 70,000 students” matched “to a school on their initial choice list”; “An additional 7,600 students”; “approximately 8,000 students withdrew”; “more than 2,000 remained in their current school”; “approximately 3,000 students who did not receive any school they chose”; “A student-proposing algorithm was selected because this has the best welfare properties for students”; “a maximum of 12 schools”. https://stanford.edu/~alroth/papers/nycAEAPP.pdf (read 4 October 2026).</li>
+  <li>Alvin E. Roth and Elliott Peranson, “The Redesign of the Matching Market for American Physicians: Some Engineering Aspects of Economic Design,” <i>American Economic Review</i> 89(4), 748–780, September 1999. Quoted: the old algorithm was “functionally equivalent to the program-proposing deferred-acceptance algorithm”; “In May 1997, the NRMP Board of Directors decided to switch to the new algorithm, and the first match using the new algorithm was successfully completed in March 1998”; “In markets with complementarities, no stable matching may exist, and even when stable matchings exist there may be no optimal stable matchings for either side of the market.” https://web.stanford.edu/~alroth/papers/rothperansonaer.PDF (read 4 October 2026). Also source [4] of Lecture 9.2.</li>
+  <li>The Royal Swedish Academy of Sciences, “Popular information: The Prize in Economic Sciences 2012” (Stable matching: theory, evidence, and practical design), October 2012. Quoted: “the resulting matching is better for the women than any other stable matching. Conversely, the reverse algorithm – where the men propose – leads to the worst outcome from the women’s perspective”; the New York redesign was “based on an applicant-proposing version of the Gale-Shapley algorithm”; “a 90 percent reduction in the number of students assigned to schools for which they had expressed no preference”; “complex multilateral swaps may be quite time consuming.” https://www.nobelprize.org/prizes/economic-sciences/2012/popular-information/ (read 4 October 2026).</li>
+  <li>D. Gale and L. S. Shapley, “College Admissions and the Stability of Marriage,” <i>The American Mathematical Monthly</i> 69(1), 9–15, January 1962. Quoted: Theorem 2, “Every applicant is at least as well off under the assignment given by the deferred acceptance procedure as he would be under any other stable assignment.” https://www.math.utoronto.ca/mccann/assignments/477/GaleShapley62.pdf (read 4 October 2026). Also source [2] of Lecture 9.2.</li>
+  <li>The Royal Swedish Academy of Sciences, “The Prize in Economic Sciences 2012,” press release, 15 October 2012. Quoted: the prize motivation “for the theory of stable allocations and the practice of market design”; the uses “matching new doctors with hospitals, students with schools, and organ donors with patients.” https://www.nobelprize.org/prizes/economic-sciences/2012/press-release/ (read 4 October 2026).</li>
+  <li>Alvin E. Roth, Tayfun Sönmez and M. Utku Ünver, “Kidney Exchange,” <i>Quarterly Journal of Economics</i> 119(2), 457–488, May 2004. Quoted from the abstract: exchanges “involving two donor-patient pairs such that each donor cannot give a kidney to the intended recipient because of immunological incompatibility, but each patient can receive a kidney from the other donor.” https://dash.harvard.edu/entities/publication/73120378-7e60-6bd4-e053-0100007fdf3b (read 4 October 2026).</li>
+  <li>National Kidney Registry, home page. Quoted: “13,000 NKR-Facilitated Transplants” (a running total, no date given); “As of 2026, there are 102 NKR Member Centers spanning 35 states and the District of Columbia.” https://www.kidneyregistry.com/ (read 4 October 2026; latest dated item on the page 2 October 2026).</li>
+  <li>Wikipedia, “National Kidney Registry.” Quoted: “Founded: July 12, 2007”; “The NKR organized its first swap on Valentine’s Day in 2008 at Cornell Medical Center”. https://en.wikipedia.org/wiki/National_Kidney_Registry (read 4 October 2026).</li>
+</ol>
+<p class="small">Examples 1, 2 and 5 use made-up lists. All computed numbers were checked by the script checks/numbers.py kept with this lecture.</p>
+
+</main>
+<script>
+// Open every solution when printing, so printed handouts include them.
+window.addEventListener('beforeprint', function () {
+  document.querySelectorAll('details.solution').forEach(function (d) {
+    d.dataset.wasOpen = d.open ? '1' : '0'; d.open = true;
+  });
+});
+window.addEventListener('afterprint', function () {
+  document.querySelectorAll('details.solution').forEach(function (d) {
+    d.open = d.dataset.wasOpen === '1';
+  });
+});
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-09/9-2-the-deferred-acceptance-algorithm/" style="color:inherit">&larr; 9.2 The deferred acceptance algorithm</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-10/10-1-weighted-graphs/" style="color:inherit">10.1 Weighted graphs &rarr;</a></nav>
+</body>
+</html>

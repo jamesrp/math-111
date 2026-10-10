@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minimizing Breakfast Cost</title>
+<style>
+:root {
+  --bg: #fbfaf7; --fg: #1d1d1f; --muted: #5a5a60; --rule: #d9d6cf;
+  --box: #f1efe9; --task: #eef3fa; --task-border: #3d6ea8;
+  --sol: #f6f8f3; --accent: #2f5f97;
+  --region: rgba(125, 143, 179, 0.35); --region-edge: #5d6f93;
+  --protein: #1f5fbf; --calories: #c2561a; --budget: #2e7d32; --whatif: #6d4c41;
+  --cost: #b0179a; --grid: #e4e1da; --axis: #555;
+  --code-bg: #efede7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --fg: #e9e7e2; --muted: #a8a6a0; --rule: #3a3a3f;
+    --box: #222327; --task: #1c2532; --task-border: #6c9bd2;
+    --sol: #1e231d; --accent: #8db6e6;
+    --region: rgba(140, 160, 205, 0.30); --region-edge: #9fb2d8;
+    --protein: #6fa3f0; --calories: #f0965e; --budget: #73c278; --whatif: #c9a28f;
+    --cost: #f07ad8; --grid: #2c2d31; --axis: #b8b6b0;
+    --code-bg: #26272b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --fg: #e9e7e2; --muted: #a8a6a0; --rule: #3a3a3f;
+  --box: #222327; --task: #1c2532; --task-border: #6c9bd2;
+  --sol: #1e231d; --accent: #8db6e6;
+  --region: rgba(140, 160, 205, 0.30); --region-edge: #9fb2d8;
+  --protein: #6fa3f0; --calories: #f0965e; --budget: #73c278; --whatif: #c9a28f;
+  --cost: #f07ad8; --grid: #2c2d31; --axis: #b8b6b0;
+  --code-bg: #26272b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 18px/1.55 Georgia, "Times New Roman", serif;
+}
+main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+.course { font: 15px/1.4 system-ui, sans-serif; color: var(--muted); margin: 0 0 4px; }
+h1 { font-size: 2em; margin: 0 0 20px; line-height: 1.2; }
+h2 { font-size: 1.35em; margin: 40px 0 10px; border-top: 1px solid var(--rule); padding-top: 22px; }
+h3 { font-size: 1.05em; margin: 24px 0 6px; }
+p, li { max-width: 72ch; }
+.eq { display: block; margin: 10px 0 10px 1.2em; font-family: Georgia, serif; }
+i { font-style: italic; }
+table { border-collapse: collapse; margin: 12px 0; font: 16px/1.4 system-ui, sans-serif; }
+p.cap { font: 15px/1.4 system-ui, sans-serif; color: var(--muted); margin: 16px 0 -6px; }
+th, td { border: 1px solid var(--rule); padding: 5px 9px; text-align: left; vertical-align: top; }
+th { background: var(--box); }
+table.sheet { font-size: 14px; }
+table.sheet td { white-space: nowrap; }
+table.sys td { border: none; padding: 2px 12px 2px 0; font: 18px Georgia, serif; }
+table.sys td.lab { font: 15px system-ui, sans-serif; color: var(--muted); }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+td.n { white-space: nowrap; }
+table.sys td:first-child { white-space: nowrap; }
+.scroll { overflow-x: auto; max-width: 100%; }
+.task { background: var(--task); border: 2px solid var(--task-border); border-radius: 8px; padding: 12px 16px; margin: 22px 0 8px; }
+.task .label { font: 700 16px/1.3 system-ui, sans-serif; color: var(--task-border); margin-bottom: 6px; }
+.method { background: var(--box); border-left: 5px solid var(--muted); padding: 8px 16px; margin: 16px 0; }
+details.sol { background: var(--sol); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 16px; margin: 0 0 22px; }
+details.sol summary { cursor: pointer; font: 600 16px system-ui, sans-serif; }
+.graph { background: var(--box); border-radius: 8px; padding: 12px; margin: 16px 0; }
+.graph svg { width: 100%; height: auto; display: block; max-width: 600px; margin: 0 auto; }
+.controls { font: 16px/1.4 system-ui, sans-serif; max-width: 600px; margin: 8px auto 0; }
+.controls label { display: block; margin-top: 8px; }
+.controls input[type=range] { width: 100%; }
+.readout { font: 15px/1.5 system-ui, sans-serif; margin-top: 6px; }
+.legend { font: 14px system-ui, sans-serif; color: var(--muted); max-width: 600px; margin: 6px auto 0; }
+.legend span { white-space: nowrap; margin-right: 12px; display: inline-block; }
+.sw { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 4px; }
+.sw.dash { border-top-style: dashed; }
+button { font: 15px system-ui, sans-serif; padding: 6px 12px; margin: 4px 8px 4px 0; border-radius: 6px; border: 1px solid var(--rule); background: var(--box); color: var(--fg); cursor: pointer; }
+.cite { font-size: 0.85em; }
+ol.sources li { margin-bottom: 8px; font-size: 16px; overflow-wrap: anywhere; }
+svg text { font-family: system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-03/3-2-systems-of-inequalities/" style="color:inherit">&larr; 3.2 Systems of inequalities</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-04/4-1-monthly-mortgage-payment/" style="color:inherit">4.1 Monthly mortgage payment &rarr;</a></nav>
+
+<main>
+<p class="course">Math 111 · Module: Breakfast on a budget (week 3) · Lecture 3 of 3</p>
+<h1>Minimizing cost</h1>
+
+<h2>1. The feasible region from lecture 3.2</h2>
+
+<p>The breakfast is the one from lectures 3.1 and 3.2: <i>e</i> large eggs and <i>m</i> cups of 2% milk. Table 1 repeats the values used there.</p>
+
+<p class="cap">Table 1. The two foods and the three requirements (as in lectures 3.1 and 3.2)</p>
+<div class="scroll"><table>
+<tr><th></th><th class="n">Protein (g)</th><th class="n">Calories</th><th class="n">Price ($)</th></tr>
+<tr><td>1 large egg, 50 g <span class="cite">[1, 3]</span></td><td class="n">6.3</td><td class="n">72</td><td class="n">0.19</td></tr>
+<tr><td>1 cup of 2% milk, 244 g <span class="cite">[2, 4]</span></td><td class="n">8.052</td><td class="n">122</td><td class="n">0.24</td></tr>
+<tr><td>Requirement for the whole breakfast</td><td class="n">at least 30</td><td class="n">at most 600</td><td class="n">at most 1.25</td></tr>
+</table></div>
+
+<p>One egg has 50 × 12.6 ÷ 100 = 6.3 g of protein and 71.5 Calories, rounded up to 72 <span class="cite">[1]</span>. One cup of 2% milk has 244 × 3.30 ÷ 100 = 8.052 g of protein and 122 Calories <span class="cite">[2]</span>. In August 2026, still the newest month published, a dozen large eggs cost $2.272 on average in U.S. cities <span class="cite">[3]</span>, so one egg costs $0.1893, rounded up to $0.19. A gallon of reduced-fat milk cost $3.715 <span class="cite">[4, 5]</span>, so one cup costs $3.715 ÷ 16 = $0.2322, rounded up to $0.24. As before, the prices are national averages, and parts of an egg are allowed, such as 2.5 eggs in a scramble.</p>
+
+<p>Lecture 3.2 ended with this system and its feasible region:</p>
+<div class="scroll"><table class="sys">
+<tr><td>6.3<i>e</i> + 8.052<i>m</i> ≥ 30</td><td class="lab">protein</td></tr>
+<tr><td>72<i>e</i> + 122<i>m</i> ≤ 600</td><td class="lab">Calories</td></tr>
+<tr><td>0.19<i>e</i> + 0.24<i>m</i> ≤ 1.25</td><td class="lab">cost (the budget)</td></tr>
+<tr><td><i>e</i> ≥ 0, &nbsp; <i>m</i> ≥ 0</td><td class="lab">no negative amounts</td></tr>
+</table></div>
+<p>Its five corners, numbered in order around the region as in Table 2 of lecture 3.2, are 1: (4.76, 0), 2: (6.58, 0), 3: (1.44, 4.07), 4: (0, 4.92) and 5: (0, 3.73). Every breakfast in the region meets all three requirements. This lecture asks which of them is cheapest.</p>
+
+<div class="task">
+<div class="label">Task 1 (about 3 minutes, calculator)</div>
+<p>All four breakfasts below are in the feasible region; you met them in lectures 3.1 and 3.2. Compute the cost of each from Table 1, and say which is cheapest.</p>
+<p>(a) 2 eggs and 3 cups of milk &nbsp; (b) 4 eggs and 1 cup &nbsp; (c) 1 egg and 3 cups &nbsp; (d) 5 eggs and no milk</p>
+</div>
+<details class="sol"><summary>Solution to Task 1</summary>
+<div class="scroll"><table>
+<tr><th>Breakfast</th><th class="n">Cost = 0.19<i>e</i> + 0.24<i>m</i></th></tr>
+<tr><td>(a) (2, 3)</td><td class="n">0.38 + 0.72 = $1.10</td></tr>
+<tr><td>(b) (4, 1)</td><td class="n">0.76 + 0.24 = $1.00</td></tr>
+<tr><td>(c) (1, 3)</td><td class="n">0.19 + 0.72 = $0.91</td></tr>
+<tr><td>(d) (5, 0)</td><td class="n">0.95 + 0 = $0.95</td></tr>
+</table></div>
+<p>Breakfast (c) is the cheapest of the four, at $0.91. It has 6.3 + 24.156 = 30.456 g of protein and 72 + 366 = 438 Calories, so it is in the region. Some other breakfast could be cheaper still. The region holds infinitely many breakfasts, so checking them one at a time cannot settle the question.</p>
+</details>
+
+<h2>2. Cost as a linear function and level lines</h2>
+
+<p>The cost of a breakfast with <i>e</i> eggs and <i>m</i> cups of milk is</p>
+<p class="eq">cost = 0.19<i>e</i> + 0.24<i>m</i> &nbsp;(dollars).</p>
+<p>This is a <b>linear function</b> of the two amounts: each amount is multiplied by a fixed number, its price, and the results are added. For 1 egg and 3 cups, cost = 0.19 × 1 + 0.24 × 3 = $0.91, as in Task 1.</p>
+
+<h3>Level lines</h3>
+<p>Fix a cost, for example $1.00. All breakfasts that cost exactly $1.00 satisfy</p>
+<p class="eq">0.19<i>e</i> + 0.24<i>m</i> = 1.00.</p>
+<p>This is the equation of a line, as in week 2. Its intercepts are <i>e</i> = 1.00 ÷ 0.19 = 5.26 eggs with no milk, and <i>m</i> = 1.00 ÷ 0.24 = 4.17 cups with no eggs. Breakfast (b) from Task 1, (4, 1), is on it. A line on which the cost has one fixed value is called a <b>level line</b> of the cost. The level line for $0.80 has intercepts 4.21 and 3.33. The level line for $1.25 has intercepts 6.58 and 5.21: it is the budget line from lecture 3.1, since the budget requirement says the cost is at most $1.25.</p>
+
+<p>Solving for <i>m</i> gives <i>m</i> = −(0.19 ÷ 0.24)<i>e</i> + (cost ÷ 0.24). The slope is −0.19 ÷ 0.24 = −0.79 for every cost, so all level lines are parallel. Only the intercept changes: a lower cost gives a line closer to the origin. The slope is a trade-off rate. Giving up 1 egg saves $0.19, which pays for 0.79 cup of milk.</p>
+
+<p>To find the cheapest feasible breakfast, start with a level line that crosses the feasible region and slide it toward the origin, keeping it parallel. Each step lowers the cost. Stop at the last position where the line still touches the region. The point it touches there is the cheapest feasible breakfast.</p>
+
+<div class="graph" id="g1"></div>
+
+<div class="task">
+<div class="label">Task 2 (about 3 minutes, interactive graph above)</div>
+<p>Move the cost slider down from $1.20. The readout under the graph says whether the dashed cost line touches the shaded region. Write down (1) the lowest slider value at which the line still touches the region and (2) the coordinates of the point of the region it touches last, read from the graph to one decimal place.</p>
+</div>
+<details class="sol"><summary>Solution to Task 2</summary>
+<p>(1) At $0.90 the line still touches the region; at $0.89 it does not. So the lowest slider value that touches is $0.90. The exact minimum lies between $0.89 and $0.90; Section 3 finds it.</p>
+<p>(2) The last point touched is the top end of the protein edge on the milk axis, near (0, 3.7): corner 5, no eggs and about 3.7 cups of milk.</p>
+<p>The cost line runs almost along the protein edge from corner 5 to corner 1. Its slope is −0.79 and the protein line's slope is −0.78 (lecture 3.1). Near $0.90 it is hard to see by eye which end of that edge it leaves last, which is why the next section computes.</p>
+</details>
+
+<h2>3. The corner-point method</h2>
+
+<p>The feasible region is a polygon: a shape bounded by straight edges on all sides. When a straight line slides across such a polygon, the last point it touches is a corner. The one exception is when the line is parallel to an edge. Then it leaves along that whole edge at once, and every point of the edge, including the two corners at its ends, has the same cost. In both cases some corner has the lowest cost. The region must be bounded for this to work. Without the Calorie and budget maximums, the region from lecture 3.2 would continue forever up and to the right, and a line sliding the other way would never leave it.</p>
+
+<div class="method">
+<p><b>Corner-point method.</b> When the cost is a linear function and the feasible region is a bounded polygon:</p>
+<ol>
+<li>Find every corner of the feasible region. Each corner solves a pair of boundary equations (lecture 3.2, Section 5).</li>
+<li>Compute the cost at each corner.</li>
+<li>The corner with the smallest cost is the cheapest feasible breakfast. If two corners tie, every point of the edge between them costs the same.</li>
+</ol>
+</div>
+
+<p>Lecture 3.2 already found the corners. With four decimals they are 1: (4.7619, 0), 2: (6.5789, 0), 3: (1.4407, 4.0678), 4: (0, 4.9180) and 5: (0, 3.7258). Corner 3 was the one that needed two equations solved together, in Task 4 of lecture 3.2.</p>
+
+<div class="task">
+<div class="label">Task 3 (about 5 minutes, calculator)</div>
+<p>Make a table with one row for each of the five corners and columns <i>e</i>, <i>m</i>, cost. Use the four-decimal corners above and give each cost to four decimals. Circle the cheapest corner and say in one sentence what that breakfast is. Then say why corners 2 and 3 have the same cost.</p>
+</div>
+<details class="sol"><summary>Solution to Task 3</summary>
+<div class="scroll"><table>
+<tr><th>Corner</th><th class="n"><i>e</i> (eggs)</th><th class="n"><i>m</i> (cups)</th><th class="n">Cost = 0.19<i>e</i> + 0.24<i>m</i></th></tr>
+<tr><td>1</td><td class="n">4.7619</td><td class="n">0</td><td class="n">0.9048 + 0 = $0.9048</td></tr>
+<tr><td>2</td><td class="n">6.5789</td><td class="n">0</td><td class="n">1.2500 + 0 = $1.2500</td></tr>
+<tr><td>3</td><td class="n">1.4407</td><td class="n">4.0678</td><td class="n">0.2737 + 0.9763 = $1.2500</td></tr>
+<tr><td>4</td><td class="n">0</td><td class="n">4.9180</td><td class="n">0 + 1.1803 = $1.1803</td></tr>
+<tr><td><b>5</b></td><td class="n"><b>0</b></td><td class="n"><b>3.7258</b></td><td class="n"><b>0 + 0.8942 = $0.8942</b></td></tr>
+</table></div>
+<p>The cheapest feasible breakfast is corner 5: no eggs and 3.7258 cups of milk, for $0.8942, about 89 cents. The slider in Task 2 agrees: $0.89 is below it and $0.90 above it.</p>
+<p>Corners 2 and 3 both lie on the budget line 0.19<i>e</i> + 0.24<i>m</i> = 1.25, which is the level line for $1.25. Every breakfast on the edge between them costs exactly $1.25, the most any feasible breakfast can cost.</p>
+</details>
+
+<h3>Why the cheapest breakfast is all milk</h3>
+<p>Both foods are sources of protein, and the requirement is a minimum amount of protein. A dollar buys 6.3 ÷ 0.19 = 33.2 g of protein as eggs and 8.052 ÷ 0.24 = 33.55 g as milk, as lecture 3.2 found. Milk is the slightly cheaper source, so the cheapest breakfast takes all of its protein from milk, and only as much as the requirement asks: exactly 30 g, which is 30 ÷ 8.052 = 3.7258 cups. That breakfast has 455 Calories and costs $0.89, so neither the Calorie limit nor the budget affects the answer. Lecture 3.2 (Section 6) found the same $0.894 as the cheapest way to get 30 g of protein; the corner-point method shows that no mix of eggs and milk does better.</p>
+<p>A budget of at least $0.8942 keeps corner 5 feasible, and it stays the cheapest. With a budget below $0.8942, no breakfast meets every requirement, and the feasible region is empty, as in lecture 3.2.</p>
+<p>To pour it, round the milk in the safe direction from lecture 3.1. A minimum is rounded up: 3.73 cups gives 8.052 × 3.73 = 30.03 g of protein, 455 Calories and $0.8952. Rounding down to 3.72 cups gives 29.95 g, which fails the protein requirement. In a kitchen measuring cup, 3¾ cups is the nearest mark; it gives 30.2 g, 457.5 Calories and $0.90.</p>
+
+<h3>What if the breakfast must include eggs</h3>
+<p>Almost 4 cups of milk and nothing else is a breakfast few people want. Suppose a person adds a requirement of their own: at least 2 eggs, <i>e</i> ≥ 2. This requirement is made up for this example. Its boundary is the vertical line <i>e</i> = 2, and the side to keep is the right side. Lecture 3.1 (Section 4) already worked with 2 eggs and found that the milk must be from 2.17 to 3.625 cups.</p>
+
+<div class="task">
+<div class="label">Task 4 (about 4 minutes, calculator, then the graph in Section 2)</div>
+<p>Add the requirement <i>e</i> ≥ 2 to the system of Section 1.</p>
+<p>(a) Substitute <i>e</i> = 2 into the protein, Calorie and budget equations, and find <i>m</i> in each to four decimals. (b) Check each of the three points against the other requirements and say which are corners of the new region. (c) The new region has four corners: the ones you kept, and corners 1 and 2 from Section 1. Compute the cost at each and name the cheapest breakfast. (d) Tick "What if: at least 2 eggs" on the graph in Section 2 and compare.</p>
+</div>
+<details class="sol"><summary>Solution to Task 4</summary>
+<p>(a) Protein: 12.6 + 8.052<i>m</i> = 30, so <i>m</i> = 17.4 ÷ 8.052 = 2.1610. Calories: 144 + 122<i>m</i> = 600, so <i>m</i> = 456 ÷ 122 = 3.7377. Budget: 0.38 + 0.24<i>m</i> = 1.25, so <i>m</i> = 0.87 ÷ 0.24 = 3.625.</p>
+<p>(b) (2, 2.1610) has 408 Calories and costs $0.90, so it meets both maximums: a corner. (2, 3.625) has 41.8 g of protein and 586 Calories: a corner. (2, 3.7377) costs 0.38 + 0.8970 = $1.277, over the budget, so it is outside the region and is not a corner.</p>
+<div class="scroll"><table>
+<tr><th>Corner</th><th class="n">Cost</th></tr>
+<tr><td><b>(2, 2.1610)</b></td><td class="n"><b>0.38 + 0.5186 = $0.8986</b></td></tr>
+<tr><td>1: (4.7619, 0)</td><td class="n">$0.9048</td></tr>
+<tr><td>2: (6.5789, 0)</td><td class="n">$1.2500</td></tr>
+<tr><td>(2, 3.625)</td><td class="n">0.38 + 0.87 = $1.2500</td></tr>
+</table></div>
+<p>(c) The cheapest breakfast is 2 eggs and 2.1610 cups of milk, for $0.8986. Rounded up as in lecture 3.1, 2 eggs and 2.17 cups give 30.07 g of protein for $0.9008. Requiring 2 eggs adds less than half a cent ($0.8986 − $0.8942 = $0.0044), because eggs are almost as cheap a source of protein as milk.</p>
+<p>(d) With the box ticked, the region loses everything left of <i>e</i> = 2, and the readout shows the line still touching at $0.90 and not at $0.89. The last point it touches is near (2, 2.2).</p>
+</details>
+
+<h2>4. When the price of eggs changes</h2>
+
+<p>Egg prices have moved a lot. A dozen cost $6.227 in March 2025 and $2.272 in August 2026 <span class="cite">[3]</span>. Let <i>p</i> be the price of one egg, with milk at $0.24 a cup. The cost is <i>p</i><i>e</i> + 0.24<i>m</i>, and the level lines have slope −<i>p</i> ÷ 0.24. A higher egg price makes them steeper.</p>
+
+<p>The egg price is also in the budget requirement, <i>p</i><i>e</i> + 0.24<i>m</i> ≤ 1.25, so the budget line turns too, and corners 2 and 3 move. Corners 1, 4 and 5 stay where they are, because the protein and Calorie lines and the axes do not involve prices. Only corners 1 and 5 can ever be cheapest. Corners 2 and 3 lie on the budget line and always cost exactly $1.25. Corner 4 has more milk than corner 5 and no eggs either, so it costs more. When eggs cost more than $1.25 ÷ 4.7619 = $0.2625 (a dozen above $3.15), 4.76 eggs alone are over budget, so corner 1 leaves the region. A new corner, labeled 6 on the graph, appears where the protein line meets the budget line, and it also costs $1.25.</p>
+
+<p>On the graph below, the egg-price slider starts at $2.28 a dozen, which is $0.19 an egg, as in Table 1. Moving it turns both the dashed cost line and the budget line.</p>
+
+<div class="graph" id="g2"></div>
+
+<div class="task">
+<div class="label">Task 5 (about 5 minutes, interactive graph above and calculator)</div>
+<p>Tick "Show the cost at each corner" under the graph.</p>
+<p>(1) Set the egg price to $3.59 a dozen, the August 2025 price <span class="cite">[3]</span>. Write down the cheapest corner and its cost, and say what happened to corner 1.</p>
+<p>(2) Lower the egg price one cent at a time. Write down the two neighboring slider prices, a cent apart, between which the cheapest corner switches from 5 to 1.</p>
+<p>(3) In June 2026 a dozen eggs cost $2.141 <span class="cite">[3]</span> and a gallon of milk $3.750 <span class="cite">[4]</span>. Compute the price of one egg and of one cup of milk, then the cost of one gram of protein from each food (price ÷ grams of protein). Say which corner was cheapest in June 2026.</p>
+</div>
+<details class="sol"><summary>Solution to Task 5</summary>
+<p>(1) At $3.59 a dozen one egg costs $0.2992. The cheapest corner is still 5, all milk, at $0.8942; the milk corners do not depend on the egg price. Corner 1 has left the region: 4.76 eggs would cost 4.7619 × 0.2992 = $1.42, over the budget. Corner 6 is at (3.19, 1.23) and costs $1.25.</p>
+<p>(2) At $2.26 a dozen ($0.1883 an egg), corner 1 costs $0.8968 and corner 5 $0.8942, so corner 5 is cheapest. At $2.25 ($0.1875 an egg), corner 1 costs $0.8929, so corner 1 is cheapest. The switch is between $2.25 and $2.26.</p>
+<p>Algebra gives the exact price. The two corners cost the same when</p>
+<p class="eq">4.7619<i>p</i> = 0.8942, &nbsp; so <i>p</i> = 0.8942 ÷ 4.7619 = $0.1878 per egg,</p>
+<p>or 12 × 0.1878 = $2.2534 a dozen. At this price the level lines have slope −0.1878 ÷ 0.24 = −0.782, the same as the protein line. The cost line is parallel to the edge from corner 1 to corner 5, and every breakfast on that edge costs $0.8942. It is also the price at which both foods cost the same per gram of protein: 0.1878 ÷ 6.3 = 0.24 ÷ 8.052 = $0.0298.</p>
+<p>(3) One egg: 2.141 ÷ 12 = $0.1784, which is 0.1784 ÷ 6.3 = $0.0283 per gram of protein. One cup: 3.750 ÷ 16 = $0.2344, which is 0.2344 ÷ 8.052 = $0.0291 per gram. Eggs were the cheaper source, so the cheapest breakfast was corner 1, all eggs: 4.76 eggs for 4.7619 × 0.1784 = $0.8496, against 3.7258 × 0.2344 = $0.8732 for corner 5. In whole eggs it is closer: 5 eggs cost $0.892, more than the 3.73 cups of milk at $0.874.</p>
+</details>
+
+<p>The same comparison for other months, with the unrounded BLS prices <span class="cite">[3, 4]</span>:</p>
+<p class="cap">Table 2. Cost of 1 g of protein, and the cheapest corner, with that month's egg and milk prices</p>
+<div class="scroll"><table>
+<tr><th>Month</th><th class="n">Dozen eggs</th><th class="n">Gallon of milk</th><th class="n">Egg, per g</th><th class="n">Milk, per g</th><th>Cheapest</th></tr>
+<tr><td>March 2025</td><td class="n">$6.227</td><td class="n">$3.851</td><td class="n">$0.0824</td><td class="n">$0.0299</td><td>5 (milk)</td></tr>
+<tr><td>August 2025</td><td class="n">$3.587</td><td class="n">$3.663</td><td class="n">$0.0474</td><td class="n">$0.0284</td><td>5 (milk)</td></tr>
+<tr><td>January 2026</td><td class="n">$2.577</td><td class="n">$3.426</td><td class="n">$0.0341</td><td class="n">$0.0266</td><td>5 (milk)</td></tr>
+<tr><td>April 2026</td><td class="n">$2.250</td><td class="n">$3.520</td><td class="n">$0.0298</td><td class="n">$0.0273</td><td>5 (milk)</td></tr>
+<tr><td>May 2026</td><td class="n">$2.191</td><td class="n">$3.633</td><td class="n">$0.0290</td><td class="n">$0.0282</td><td>5 (milk)</td></tr>
+<tr><td>June 2026</td><td class="n">$2.141</td><td class="n">$3.750</td><td class="n">$0.0283</td><td class="n">$0.0291</td><td>1 (eggs)</td></tr>
+<tr><td>July 2026</td><td class="n">$2.189</td><td class="n">$3.800</td><td class="n">$0.0290</td><td class="n">$0.0295</td><td>1 (eggs)</td></tr>
+<tr><td>August 2026</td><td class="n">$2.272</td><td class="n">$3.715</td><td class="n">$0.0301</td><td class="n">$0.0288</td><td>5 (milk)</td></tr>
+</table></div>
+<p>The answer switched to eggs in June 2026 and back to milk in August 2026. In those months egg prices fell while milk rose, and the two foods are so close in protein per dollar that a few cents a dozen decide it. The cost of the cheapest breakfast hardly changes at a switch: at the switch price the two corners cost the same. This table uses unrounded prices; rounding each price up to the cent, as in Table 1, can move a close month such as July to the other side.</p>
+<p>A price change can only move the answer from one corner to another. The answer jumps from corner 5 to corner 1 when the level lines become less steep than the protein edge, and back when they become steeper. Between switches the cheapest breakfast stays at the same corner, even though its cost changes.</p>
+
+<h2>5. Checking the answer with Solver</h2>
+
+<p>Excel has an add-in called Solver that finds the smallest (or largest) value of a formula while other formulas meet requirements <span class="cite">[6]</span>. Google Sheets has no built-in Solver; a free Solver add-on from Frontline Systems has been offered for it <span class="cite">[8]</span>. With the Simplex LP method, the method for linear problems <span class="cite">[6]</span>, Solver should return corner 5. Solver may have to be turned on or installed first, so do that before class if you can.</p>
+
+<h3>The layout</h3>
+<p>Cells B2 and B3 hold the amounts of eggs and milk; Solver will change them. Row 4 holds the totals as formulas, and row 5 the requirements. Rows 8 to 14 are a corner table for use without Solver. Every cost in it uses the prices in E2 and E3, so changing a price in E2 or E3 updates the Solver layout and the corner table together.</p>
+
+<div class="scroll"><table class="sheet">
+<tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>
+<tr><th>1</th><td>Food</td><td>Amount</td><td>Protein/unit (g)</td><td>Calories/unit</td><td>Price/unit ($)</td><td></td></tr>
+<tr><th>2</th><td>Large egg</td><td>0</td><td>6.3</td><td>72</td><td>0.19</td><td></td></tr>
+<tr><th>3</th><td>2% milk (cup)</td><td>0</td><td>8.052</td><td>122</td><td>0.24</td><td></td></tr>
+<tr><th>4</th><td>Total</td><td></td><td>=B2*C2+B3*C3</td><td>=B2*D2+B3*D3</td><td>=B2*E2+B3*E3</td><td></td></tr>
+<tr><th>5</th><td>Requirement</td><td></td><td>30</td><td>600</td><td>1.25</td><td></td></tr>
+<tr><th>6</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><th>7</th><td>Corner table</td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><th>8</th><td>Corner</td><td>Eggs</td><td>Milk (cups)</td><td>Protein (g)</td><td>Calories</td><td>Cost ($)</td></tr>
+<tr><th>9</th><td>1</td><td>=30/6.3</td><td>0</td><td>=6.3*B9+8.052*C9</td><td>=72*B9+122*C9</td><td>=E2*B9+E3*C9</td></tr>
+<tr><th>10</th><td>2</td><td>=E5/E2</td><td>0</td><td>=6.3*B10+8.052*C10</td><td>=72*B10+122*C10</td><td>=E2*B10+E3*C10</td></tr>
+<tr><th>11</th><td>3</td><td>=(E5*122-600*E3)/(E2*122-72*E3)</td><td>=(600*E2-72*E5)/(E2*122-72*E3)</td><td>=6.3*B11+8.052*C11</td><td>=72*B11+122*C11</td><td>=E2*B11+E3*C11</td></tr>
+<tr><th>12</th><td>4</td><td>0</td><td>=600/122</td><td>=6.3*B12+8.052*C12</td><td>=72*B12+122*C12</td><td>=E2*B12+E3*C12</td></tr>
+<tr><th>13</th><td>5</td><td>0</td><td>=30/8.052</td><td>=6.3*B13+8.052*C13</td><td>=72*B13+122*C13</td><td>=E2*B13+E3*C13</td></tr>
+<tr><th>14</th><td>Cheapest</td><td></td><td></td><td></td><td></td><td>=MIN(F9:F13)</td></tr>
+</table></div>
+
+<p>Row 10 is the budget line's egg intercept, budget ÷ egg price. Row 11 is the solution of the Calorie and budget equations from Task 4 of lecture 3.2, written as a formula that uses the prices in E2 and E3. Each formula in rows 9 to 13 is typed out for its own row, so nothing needs copying down. The corner table is correct for egg prices from $0.15 to $0.26; outside that range the region has different corners (Section 4).</p>
+
+<p>
+<button type="button" id="dl">Download layout as CSV</button>
+<button type="button" id="cp">Copy layout (paste into cell A1)</button>
+<span id="cpmsg" class="readout"></span>
+</p>
+<p>The CSV file and the copied layout contain every formula shown. They have not been tested in Excel or Google Sheets.</p>
+
+<h3>Running Solver in Excel</h3>
+<ol>
+<li>On the Data tab, in the Analysis group, click Solver <span class="cite">[6]</span>. If there is no Solver command, the Solver add-in has to be activated first <span class="cite">[6]</span>.</li>
+<li>In Set Objective, enter E4, the total cost. Click Min <span class="cite">[6]</span>.</li>
+<li>In By Changing Variable Cells, enter B2:B3 <span class="cite">[6]</span>.</li>
+<li>Click Add for each requirement <span class="cite">[6]</span>, one at a time: C4 &gt;= C5 (protein), D4 &lt;= D5 (Calories), E4 &lt;= E5 (budget), and B2:B3 &gt;= 0 (no negative amounts).</li>
+<li>In Select a Solving Method, choose Simplex LP <span class="cite">[6]</span>.</li>
+<li>Click Solve, then Keep Solver Solution <span class="cite">[6]</span>.</li>
+</ol>
+<p>Solver shows cell addresses with $ signs, such as $E$4. Leave them as Solver writes them; these fixed references are explained in lecture 4.1.</p>
+
+<h3>Running Solver in Google Sheets</h3>
+<ol>
+<li>Click Extensions &gt; Add-ons &gt; Get add-ons <span class="cite">[7]</span>.</li>
+<li>Search for "Frontline Systems" and choose the Solver add-on <span class="cite">[8]</span>. Click Install, then Continue, and click Allow when it asks for access <span class="cite">[7]</span>.</li>
+<li>Open the add-on. Frontline's 2018 instructions say Add-ons &gt; Solver &gt; Start <span class="cite">[8]</span>; Google now lists add-ons under the Extensions menu <span class="cite">[7]</span>, so look for Solver there.</li>
+<li>Enter the same things as in Excel: objective E4, set to minimize; variable cells B2:B3; the constraints C4 &gt;= C5, D4 &lt;= D5, E4 &lt;= E5 and B2:B3 &gt;= 0; a linear (simplex) method if the panel offers a choice.</li>
+<li>Click Solve.</li>
+</ol>
+<p>The add-on's current panel could not be checked for this lecture, so its labels may differ from these steps.</p>
+
+<h3>If Solver is not available</h3>
+<p>Use the corner table in rows 8 to 14. It is the corner-point method from Section 3 done in the spreadsheet: columns B and C hold the corners, column F their costs, and F14 picks the smallest cost. Solver is not needed, because the corner-point method already guarantees that the cheapest breakfast is one of the corners.</p>
+
+<div class="task">
+<div class="label">Task 6 (about 7 minutes, laptop with Excel or Google Sheets)</div>
+<p>Put the layout into a spreadsheet. Run Solver, or without Solver read the corner table, and write down the eggs, the cups of milk and the cost of the cheapest breakfast. Then change the egg price in E2 to 0.18, about the June 2026 price rounded to the cent, run Solver again or read the corner table again, and write down the new answer. Compare both answers with Sections 3 and 4.</p>
+</div>
+<details class="sol"><summary>Solution to Task 6</summary>
+<p>At $0.19 an egg: B2 = 0, B3 = 3.725782…, E4 = 0.894188…, so no eggs, 3.73 cups, $0.89. This is corner 5, as in Task 3. The corner table's costs read 0.9048, 1.2500, 1.2500, 1.1803, 0.8942, and F14 shows 0.8942 (row 13, corner 5).</p>
+<p>At $0.18 an egg: B2 = 4.761905…, B3 = 0, E4 = 0.857143…, so 4.76 eggs and no milk, $0.86. This is corner 1. Below the switch price of $0.1878 found in Task 5, eggs are the cheaper source of protein. The corner table's costs read 0.8571, 1.2500, 1.2500, 1.1803, 0.8942, and F14 shows 0.8571 (row 9). Corners 2 and 3 have moved, to (6.94, 0) and (1.82, 3.85), and still cost $1.25.</p>
+<p>Solver may show tiny rounding differences in the last digits, such as 0.0000001 for 0.</p>
+</details>
+
+<h2>Sources</h2>
+<ol class="sources">
+<li>U.S. Department of Agriculture, FoodData Central, SR Legacy, "Egg, whole, raw, fresh," FDC ID 171287, published April 1, 2019. Per 100 g: protein 12.6 g, energy 143 kcal; one large egg is 50 g. https://fdc.nal.usda.gov/food-details/171287/nutrients, accessed October 4, 2026.</li>
+<li>U.S. Department of Agriculture, FoodData Central, SR Legacy, "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D," FDC ID 171267, published April 1, 2019. Per 100 g: protein 3.30 g, energy 50 kcal; one cup is 244 g. https://fdc.nal.usda.gov/food-details/171267/nutrients, accessed October 4, 2026.</li>
+<li>U.S. Bureau of Labor Statistics, Average Price Data, series APU0000708111, "Average Price: Eggs, Grade A, Large (Cost per Dozen) in U.S. City Average," via FRED, Federal Reserve Bank of St. Louis, updated September 11, 2026. August 2026: $2.272; also March 2025 $6.227, August 2025 $3.587, January 2026 $2.577, April 2026 $2.250, May 2026 $2.191, June 2026 $2.141, July 2026 $2.189. https://fred.stlouisfed.org/series/APU0000708111, accessed October 4, 2026.</li>
+<li>U.S. Bureau of Labor Statistics, Average Price Data, series APU0000FJ1101, "Average Price: Milk, Fresh, Low-Fat, Reduced Fat, Skim (Cost per Gallon/3.8 Liters) in U.S. City Average," via FRED, Federal Reserve Bank of St. Louis, updated September 11, 2026. August 2026: $3.715; also March 2025 $3.851, August 2025 $3.663, January 2026 $3.426, April 2026 $3.520, May 2026 $3.633, June 2026 $3.750, July 2026 $3.800. https://fred.stlouisfed.org/series/APU0000FJ1101, accessed October 4, 2026.</li>
+<li>U.S. Bureau of Labor Statistics, Average Price Data item list (ap.item). Item FJ1101 is "Milk, fresh, low-fat, reduced fat, skim, per gal. (3.8 lit)"; no item covers 2% milk alone, so this average stands in for 2% milk, as in lectures 3.1 and 3.2. https://download.bls.gov/pub/time.series/ap/ap.item, accessed October 4, 2026.</li>
+<li>Microsoft Support, "Define and solve a problem by using Solver," undated page. Quoted: "On the Data tab, in the Analysis group, click Solver"; "If the Solver command or the Analysis group is not available, you need to activate the Solver add-in"; "Simplex LP: Use this method for linear programming problems." https://support.microsoft.com/en-us/office/define-and-solve-a-problem-by-using-solver-5d1a388f-079d-43ac-a7eb-f63e45925040, accessed October 4, 2026.</li>
+<li>Google Docs Editors Help, "Use add-ons, Apps Script &amp; macros," undated page. Quoted: "Click Extensions and then Add-ons and then Get add-ons"; "To install the add-on, click Install and then Continue"; "click Allow." https://support.google.com/docs/answer/2942256, accessed October 4, 2026.</li>
+<li>Frontline Systems, "Inserting the Add-on," last modified August 21, 2018. Quoted: search for "Frontline Systems" and click the "Free" button; "Click Add-ons - Solver - Start." https://www.solver.com/inserting-add, accessed October 4, 2026.</li>
+</ol>
+</main>
+
+<script>
+(function () {
+  // ---------- model (Table 1; region of lecture 3.2) ----------
+  var EP = 6.3, MP = 8.052, EK = 72, MK = 122, MILK = 0.24, BUDGET = 1.25;
+  var NS = "http://www.w3.org/2000/svg";
+  var XMAX = 8, YMAX = 5.5;
+
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(s, attrs, parent) { var t = el("text", attrs, parent); t.textContent = s; return t; }
+  function r4(v) { return (Math.round(v * 10000) / 10000).toFixed(4); }
+  function r2(v) { return (Math.round(v * 100) / 100).toFixed(2); }
+
+  // constraints: a e + b m (>= or <=) c
+  function system(pe, whatIf) {
+    var s = [
+      { id: "protein", a: EP, b: MP, c: 30, ge: true, color: "var(--protein)", label: "protein = 30 g" },
+      { id: "calories", a: EK, b: MK, c: 600, ge: false, color: "var(--calories)", label: "Calories = 600" },
+      { id: "budget", a: pe, b: MILK, c: BUDGET, ge: false, color: "var(--budget)", label: "budget = $1.25" },
+      { id: "eaxis", a: 0, b: 1, c: 0, ge: true, axis: true },
+      { id: "maxis", a: 1, b: 0, c: 0, ge: true, axis: true }
+    ];
+    if (whatIf) s.push({ id: "e2", a: 1, b: 0, c: 2, ge: true, color: "var(--whatif)", label: "e = 2 (what if)", dash: true });
+    return s;
+  }
+  function ok(s, e, m) {
+    for (var i = 0; i < s.length; i++) {
+      var v = s[i].a * e + s[i].b * m, tol = 1e-9 * (1 + Math.abs(s[i].c));
+      if (s[i].ge ? v < s[i].c - tol : v > s[i].c + tol) return false;
+    }
+    return true;
+  }
+  var NAMES = { "protein|eaxis": "1", "budget|eaxis": "2", "calories|budget": "3", "calories|maxis": "4",
+                "protein|maxis": "5", "protein|budget": "6", "protein|e2": "A", "budget|e2": "B", "calories|e2": "C" };
+  function corners(s) {
+    var out = [];
+    for (var i = 0; i < s.length; i++) for (var j = i + 1; j < s.length; j++) {
+      var p = s[i], q = s[j], d = p.a * q.b - q.a * p.b;
+      if (Math.abs(d) < 1e-12) continue;
+      var e = (p.c * q.b - q.c * p.b) / d, m = (p.a * q.c - q.a * p.c) / d;
+      if (!ok(s, e, m)) continue;
+      var dup = out.some(function (c) { return Math.abs(c.e - e) < 1e-9 && Math.abs(c.m - m) < 1e-9; });
+      if (dup) continue;
+      out.push({ e: e, m: m, name: NAMES[p.id + "|" + q.id] || NAMES[q.id + "|" + p.id] || "?" });
+    }
+    var ce = 0, cm = 0;
+    out.forEach(function (c) { ce += c.e; cm += c.m; });
+    ce /= out.length; cm /= out.length;
+    out.sort(function (u, v) { return Math.atan2(u.m - cm, u.e - ce) - Math.atan2(v.m - cm, v.e - ce); });
+    return out;
+  }
+
+  function makeGraph(id, withPrice) {
+    var box = document.getElementById(id);
+    var state = { dozen: 2.28, cost: 1.20, whatIf: false, show: false };
+
+    var holder = document.createElement("div"); box.appendChild(holder);
+    var leg = document.createElement("div"); leg.className = "legend"; box.appendChild(leg);
+    var ctr = document.createElement("div"); ctr.className = "controls"; box.appendChild(ctr);
+
+    var priceIn, priceOut, costIn, costOut, ro, tbl, wi, cb;
+    if (withPrice) {
+      var lp = document.createElement("label");
+      lp.innerHTML = 'Price of a dozen eggs: <b><span></span></b> (one egg: <span></span>)';
+      priceIn = document.createElement("input");
+      priceIn.type = "range"; priceIn.min = 1.9; priceIn.max = 6.4; priceIn.step = 0.01; priceIn.value = state.dozen;
+      priceIn.setAttribute("aria-label", "Price of a dozen eggs");
+      lp.appendChild(priceIn); ctr.appendChild(lp);
+      priceOut = lp.querySelectorAll("span");
+    }
+    var lc = document.createElement("label");
+    lc.innerHTML = 'Cost of the breakfasts on the dashed line: <b><span></span></b>';
+    costIn = document.createElement("input");
+    costIn.type = "range"; costIn.min = 0.6; costIn.max = 1.6; costIn.step = 0.01; costIn.value = state.cost;
+    costIn.setAttribute("aria-label", "Cost of the breakfasts on the dashed line");
+    lc.appendChild(costIn); ctr.appendChild(lc);
+    costOut = lc.querySelector("span");
+    ro = document.createElement("div"); ro.className = "readout"; ctr.appendChild(ro);
+    if (!withPrice) {
+      var wl = document.createElement("label");
+      wi = document.createElement("input"); wi.type = "checkbox";
+      wl.appendChild(wi); wl.appendChild(document.createTextNode(" What if: at least 2 eggs (e ≥ 2), for Task 4"));
+      ctr.appendChild(wl);
+    } else {
+      var cbl = document.createElement("label");
+      cb = document.createElement("input"); cb.type = "checkbox";
+      cbl.appendChild(cb); cbl.appendChild(document.createTextNode(" Show the cost at each corner"));
+      ctr.appendChild(cbl);
+      tbl = document.createElement("div"); tbl.className = "readout"; ctr.appendChild(tbl);
+    }
+
+    function draw() {
+      var narrow = box.clientWidth < 480;
+      var W = narrow ? 360 : 480, H = narrow ? 300 : 340, L = 34, R = 10, T = 26, B = 36;
+      var FS = narrow ? 15 : 13;
+      function sx(x) { return L + (W - L - R) * x / XMAX; }
+      function sy(y) { return H - B - (H - T - B) * y / YMAX; }
+      var pe = withPrice ? state.dozen / 12 : 0.19;
+      var s = system(pe, state.whatIf);
+      var cs = corners(s);
+
+      holder.innerHTML = "";
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img",
+        "aria-label": withPrice
+          ? "Feasible region for eggs and milk; an egg-price slider turns the budget line and the dashed cost line"
+          : "Feasible region for eggs and milk from lecture 3.2 with a movable dashed cost line" }, holder);
+      for (var gx = 0; gx <= XMAX; gx++) {
+        el("line", { x1: sx(gx), y1: sy(0), x2: sx(gx), y2: sy(YMAX), stroke: "var(--grid)" }, svg);
+        txt(String(gx), { x: sx(gx), y: sy(0) + 16, "text-anchor": "middle", "font-size": FS, fill: "var(--axis)" }, svg);
+      }
+      for (var gy = 0; gy <= 5; gy++) {
+        el("line", { x1: sx(0), y1: sy(gy), x2: sx(XMAX), y2: sy(gy), stroke: "var(--grid)" }, svg);
+        txt(String(gy), { x: sx(0) - 7, y: sy(gy) + 4, "text-anchor": "end", "font-size": FS, fill: "var(--axis)" }, svg);
+      }
+      el("line", { x1: sx(0), y1: sy(0), x2: sx(XMAX), y2: sy(0), stroke: "var(--axis)", "stroke-width": 1.5 }, svg);
+      el("line", { x1: sx(0), y1: sy(0), x2: sx(0), y2: sy(YMAX), stroke: "var(--axis)", "stroke-width": 1.5 }, svg);
+      txt("eggs e", { x: sx(XMAX), y: H - 4, "text-anchor": "end", "font-size": FS, fill: "var(--axis)" }, svg);
+      txt("cups of milk m", { x: 4, y: 14, "font-size": FS, fill: "var(--axis)" }, svg);
+
+      if (cs.length > 2) {
+        el("polygon", { points: cs.map(function (c) { return sx(c.e) + "," + sy(c.m); }).join(" "),
+          fill: "var(--region)", stroke: "var(--region-edge)", "stroke-width": 1 }, svg);
+      }
+      // boundary lines, clipped to the plot box
+      function seg(a, b, c) {
+        var pts = [];
+        function add(x, y) { if (x >= -1e-9 && x <= XMAX + 1e-9 && y >= -1e-9 && y <= YMAX + 1e-9) pts.push([x, y]); }
+        if (b !== 0) { add(0, c / b); add(XMAX, (c - a * XMAX) / b); }
+        if (a !== 0) { add(c / a, 0); add((c - b * YMAX) / a, YMAX); }
+        if (pts.length < 2) return null;
+        var best = null, d = -1;
+        for (var i = 0; i < pts.length; i++) for (var j = i + 1; j < pts.length; j++) {
+          var dd = Math.pow(pts[i][0] - pts[j][0], 2) + Math.pow(pts[i][1] - pts[j][1], 2);
+          if (dd > d) { d = dd; best = [pts[i], pts[j]]; }
+        }
+        return best;
+      }
+      var legHTML = "";
+      s.forEach(function (l) {
+        if (l.axis) return;
+        var g = seg(l.a, l.b, l.c);
+        if (g) el("line", { x1: sx(g[0][0]), y1: sy(g[0][1]), x2: sx(g[1][0]), y2: sy(g[1][1]),
+          stroke: l.color, "stroke-width": 2, "stroke-dasharray": l.dash ? "3 3" : "" }, svg);
+        legHTML += '<span><i class="sw' + (l.dash ? ' dash' : '') + '" style="border-color:' + l.color + '"></i>' + l.label + '</span>';
+      });
+      legHTML += '<span><i class="sw dash" style="border-color:var(--cost)"></i>cost line</span>';
+      leg.innerHTML = legHTML;
+
+      var g2 = seg(pe, MILK, state.cost);
+      if (g2) el("line", { x1: sx(g2[0][0]), y1: sy(g2[0][1]), x2: sx(g2[1][0]), y2: sy(g2[1][1]),
+        stroke: "var(--cost)", "stroke-width": 3.5, "stroke-dasharray": "9 5" }, svg);
+
+      // corner labels, pushed away from the region's centre
+      var ce = 0, cm = 0;
+      cs.forEach(function (c) { ce += c.e; cm += c.m; }); ce /= cs.length; cm /= cs.length;
+      cs.forEach(function (c) {
+        el("circle", { cx: sx(c.e), cy: sy(c.m), r: 3.5, fill: "var(--fg)" }, svg);
+        var dx = sx(c.e) - sx(ce), dy = sy(c.m) - sy(cm), n = Math.sqrt(dx * dx + dy * dy) || 1;
+        var lx = sx(c.e) + 14 * dx / n, ly = sy(c.m) + 14 * dy / n + 5;
+        if (c.e < 1e-9) { lx = sx(0) + 10; ly = sy(c.m) + 18; }
+        if (c.m < 1e-9) ly = sy(0) - 6;
+        if (c.name === "1") lx = sx(c.e) - 20;
+        if (c.name === "2") lx = sx(c.e) + 12;
+        if (c.name === "6") { lx = sx(c.e) + 14; ly = sy(c.m) + 5; }
+        if (c.name === "3" || c.name === "B") { lx = sx(c.e) + 8; ly = sy(c.m) - 9; }
+        txt(c.name, { x: lx, y: ly, "text-anchor": "middle", "font-size": narrow ? 16 : 14, "font-weight": 700, fill: "var(--fg)" }, svg);
+      });
+
+      if (withPrice) {
+        priceOut[0].textContent = "$" + state.dozen.toFixed(2);
+        priceOut[1].textContent = "$" + r4(pe);
+      }
+      costOut.textContent = "$" + state.cost.toFixed(2);
+      var costs = cs.map(function (c) { return pe * c.e + MILK * c.m; });
+      var lo = Math.min.apply(null, costs), hi = Math.max.apply(null, costs);
+      var touches = state.cost >= lo - 1e-9 && state.cost <= hi + 1e-9;
+      ro.innerHTML = "Dashed line: " + (withPrice ? r4(pe) : "0.19") + "e + 0.24m = " + state.cost.toFixed(2) +
+        ". It " + (touches ? "<b>touches</b>" : "<b>does not touch</b>") + " the feasible region.";
+      if (tbl) {
+        if (state.show) {
+          var order = cs.slice().sort(function (u, v) { return u.name < v.name ? -1 : 1; });
+          tbl.innerHTML = order.map(function (c) {
+            return "Corner " + c.name + " (" + r2(c.e) + ", " + r2(c.m) + "): $" + r4(pe * c.e + MILK * c.m);
+          }).join("<br>");
+        } else tbl.innerHTML = "";
+      }
+    }
+    costIn.addEventListener("input", function () { state.cost = +costIn.value; draw(); });
+    if (priceIn) priceIn.addEventListener("input", function () { state.dozen = +priceIn.value; draw(); });
+    if (wi) wi.addEventListener("change", function () { state.whatIf = wi.checked; draw(); });
+    if (cb) cb.addEventListener("change", function () { state.show = cb.checked; draw(); });
+    var lastW = -1;
+    window.addEventListener("resize", function () { if (box.clientWidth !== lastW) { lastW = box.clientWidth; draw(); } });
+    draw();
+  }
+  makeGraph("g1", false);
+  makeGraph("g2", true);
+
+  // ---------- spreadsheet layout ----------
+  var rows = [
+    ["Food", "Amount", "Protein/unit (g)", "Calories/unit", "Price/unit ($)", ""],
+    ["Large egg", "0", "6.3", "72", "0.19", ""],
+    ["2% milk (cup)", "0", "8.052", "122", "0.24", ""],
+    ["Total", "", "=B2*C2+B3*C3", "=B2*D2+B3*D3", "=B2*E2+B3*E3", ""],
+    ["Requirement", "", "30", "600", "1.25", ""],
+    ["", "", "", "", "", ""],
+    ["Corner table", "", "", "", "", ""],
+    ["Corner", "Eggs", "Milk (cups)", "Protein (g)", "Calories", "Cost ($)"]
+  ];
+  var cornerBC = [
+    ["1", "=30/6.3", "0"],
+    ["2", "=E5/E2", "0"],
+    ["3", "=(E5*122-600*E3)/(E2*122-72*E3)", "=(600*E2-72*E5)/(E2*122-72*E3)"],
+    ["4", "0", "=600/122"],
+    ["5", "0", "=30/8.052"]
+  ];
+  cornerBC.forEach(function (c, i) {
+    var r = 9 + i;
+    rows.push([c[0], c[1], c[2], "=6.3*B" + r + "+8.052*C" + r, "=72*B" + r + "+122*C" + r, "=E2*B" + r + "+E3*C" + r]);
+  });
+  rows.push(["Cheapest", "", "", "", "", "=MIN(F9:F13)"]);
+  function csvCell(s) { return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  var csv = rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (r) { return r.join("\t"); }).join("\n");
+  window.__layout = { csv: csv, tsv: tsv };
+  document.getElementById("dl").addEventListener("click", function () {
+    var blob = new Blob([csv], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "breakfast-solver-layout.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById("cp").addEventListener("click", function () {
+    var msg = document.getElementById("cpmsg");
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = tsv;
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); msg.textContent = "Copied."; }
+      catch (e) { msg.textContent = "Copy failed; use the CSV download."; }
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () { msg.textContent = "Copied."; }, fallback);
+    } else fallback();
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-03/3-2-systems-of-inequalities/" style="color:inherit">&larr; 3.2 Systems of inequalities</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-04/4-1-monthly-mortgage-payment/" style="color:inherit">4.1 Monthly mortgage payment &rarr;</a></nav>
+</body>
+</html>

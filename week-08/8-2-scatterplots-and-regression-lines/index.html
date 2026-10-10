@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scatterplots and regression lines</title>
+<style>
+:root{--ink:#1d2430;--muted:#5a6473;--line:#d5dae1;--bg:#ffffff;--panel:#f5f7fa;--accent:#1f5fa8;--accent2:#c2410c;--task:#eef4fb;--taskline:#1f5fa8;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+.course{color:var(--muted);font-size:.95rem;margin:0 0 4px}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 18px}
+h2{font-size:1.35rem;margin:38px 0 10px;padding-top:10px;border-top:1px solid var(--line)}
+h3{font-size:1.08rem;margin:22px 0 6px}
+p{margin:10px 0}
+table{border-collapse:collapse;margin:12px 0;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:right}
+th{background:var(--panel);text-align:center;font-weight:600}
+td:first-child,th:first-child{text-align:left}
+.tablewrap{overflow-x:auto;max-width:100%}
+@media (max-width:560px){th,td{padding:4px 5px;font-size:.85rem}body{font-size:16px}}
+.task{border:2px solid var(--taskline);background:var(--task);border-radius:8px;padding:12px 16px;margin:20px 0 8px}
+.task .label{font-weight:700;color:var(--accent);margin:0 0 6px}
+details.solution{border:1px solid var(--line);border-radius:8px;padding:8px 16px;margin:0 0 20px;background:var(--panel)}
+details.solution summary{cursor:pointer;font-weight:600;color:var(--muted)}
+details.solution[open] summary{margin-bottom:6px}
+figure{margin:16px 0}
+figcaption{color:var(--muted);font-size:.9rem;margin-top:4px}
+svg{display:block;width:100%;height:auto;background:#fff}
+svg text{font-family:inherit}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){.gallery{grid-template-columns:repeat(2,1fr)}}
+.gallery figure{margin:0;border:1px solid var(--line);border-radius:6px;padding:4px}
+.gallery figcaption{text-align:center;font-weight:700;color:var(--ink);font-size:1rem}
+.controls{display:grid;grid-template-columns:auto 1fr auto;gap:8px 10px;align-items:center;margin:10px 0}
+.controls input[type=range]{width:100%}
+.controls output{font-variant-numeric:tabular-nums;min-width:4.5em;text-align:right;font-weight:600}
+.readout{font-size:1.15rem;font-weight:700;margin:6px 0;font-variant-numeric:tabular-nums}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+button,.btn{font:inherit;font-size:.95rem;padding:7px 12px;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:6px;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{background:var(--task)}
+code,.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--panel);padding:1px 4px;border-radius:3px}
+.eq{text-align:center;margin:12px 0;font-size:1.08rem}
+.small{font-size:.9rem;color:var(--muted)}
+ol.sources li{margin-bottom:10px}
+.copied{color:var(--muted);font-size:.9rem;align-self:center}
+.var{font-style:italic}
+.xbar,.yhat{font-style:italic;position:relative;display:inline-block;line-height:1}
+.xbar::before{content:"";position:absolute;left:0.1em;right:-0.1em;top:0.1em;border-top:0.07em solid currentColor}
+.yhat::before{content:"^";font-style:normal;position:absolute;left:0.12em;top:-0.42em;font-size:0.8em}
+.notation{border-left:4px solid var(--accent);background:var(--panel);padding:10px 14px;margin:16px 0}
+.notation p{margin:6px 0}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-08/8-1-mean-median-and-standard-deviation/" style="color:inherit">&larr; 8.1 Mean, median and standard deviation</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-08/8-3-misleading-graphs-and-analyses/" style="color:inherit">8.3 Misleading graphs and analyses &rarr;</a></nav>
+
+<main>
+<p class="course">Math 111 · Module: Statistics and regression (week 8) · Lecture 2 of 3</p>
+<h1>Scatterplots and regression lines</h1>
+
+<h2 id="s1">1. Income and life expectancy in ten South American countries</h2>
+
+<p>Table 1 gives two measurements for each of the ten South American countries for which the source gives both values for 2022 [1]. (Guyana and Suriname have no GDP figure for 2022 in the source.) The number of countries is <span class="var">n</span> = 10, using <span class="var">n</span> for the number of data values as in lecture 8.1; here each value is a pair of measurements.</p>
+<ul>
+<li><b>GDP per person</b> is the value of everything a country produced in a year, divided by its population. It is given in thousands of dollars and is adjusted for prices, so that a dollar buys the same amount in every country (the source uses 2011 prices) [1, 2]. Because the figures are in 2011 dollars, they are lower than dollar amounts from today: the United States, for example, shows as $58.5 thousand. GDP per person is a mean over the whole population, in the sense of lecture 8.1. It measures a country's income as a whole and does not describe the income of a typical person.</li>
+<li><b>Life expectancy</b> is the number of years a baby born in 2022 would live, on average, if the death rates at each age stayed as they were in 2022 [1].</li>
+</ul>
+<p>Both columns are rounded to one decimal place. Every calculation in this lecture uses the rounded numbers.</p>
+
+<div class="tablewrap">
+<table id="table1">
+<caption class="small" style="caption-side:bottom;text-align:left;padding-top:4px">Table 1. GDP per person and life expectancy in 2022 [1]. GDP figures from the Maddison Project Database [2].</caption>
+<thead><tr><th>Country</th><th>GDP per person<br>(thousands of $)</th><th>Life expectancy<br>(years)</th></tr></thead>
+<tbody>
+<tr><td>Argentina</td><td>18.3</td><td>75.8</td></tr>
+<tr><td>Bolivia</td><td>6.5</td><td>67.4</td></tr>
+<tr><td>Brazil</td><td>14.6</td><td>74.9</td></tr>
+<tr><td>Chile</td><td>22.7</td><td>79.2</td></tr>
+<tr><td>Colombia</td><td>14.5</td><td>76.5</td></tr>
+<tr><td>Ecuador</td><td>10.1</td><td>76.6</td></tr>
+<tr><td>Paraguay</td><td>8.8</td><td>72.3</td></tr>
+<tr><td>Peru</td><td>12.8</td><td>76.8</td></tr>
+<tr><td>Uruguay</td><td>20.2</td><td>76.5</td></tr>
+<tr><td>Venezuela</td><td>5.3</td><td>72.6</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="task" id="task1">
+<p class="label">Task 1 (about 3 minutes, pencil and paper)</p>
+<p>Use Table 1. Write down the three countries with the highest GDP per person and the three with the lowest, each with its life expectancy. Then answer two questions in one sentence each.</p>
+<ol type="a">
+<li>Do the three richest countries have longer life expectancy than the three poorest?</li>
+<li>Find one pair of countries in which the richer country has the <em>shorter</em> life expectancy.</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 1</summary>
+<p>Highest GDP per person: Chile ($22.7 thousand, 79.2 years), Uruguay (20.2, 76.5), Argentina (18.3, 75.8).<br>
+Lowest GDP per person: Venezuela ($5.3 thousand, 72.6 years), Bolivia (6.5, 67.4), Paraguay (8.8, 72.3).</p>
+<p>(a) Yes. Each of the three richest countries has a longer life expectancy than each of the three poorest. The shortest of the richest three, 75.8 years, is longer than the longest of the poorest three, 72.6 years.</p>
+<p>(b) Several pairs work. Bolivia is richer than Venezuela (6.5 against 5.3) but has the shorter life expectancy (67.4 against 72.6). Uruguay is richer than Peru (20.2 against 12.8) but has the shorter life expectancy (76.5 against 76.8). Brazil and Ecuador are another such pair.</p>
+<p>So the two measurements tend to rise together, with exceptions. Comparing pairs one at a time does not say how strong the tendency is or how much life expectancy goes up per $1,000.</p>
+</details>
+
+<h2 id="s2">2. Scatterplots and association</h2>
+
+<p>Each country gives a coordinate pair (<i>x</i>, <i>y</i>), as in week 2: <i>x</i> is GDP per person and <i>y</i> is life expectancy. Chile is the point (22.7, 79.2). A <b>scatterplot</b> plots one point for each country. The variable used to make predictions goes on the horizontal axis. Here we predict life expectancy from GDP per person, so GDP is <i>x</i>.</p>
+
+<figure>
+<svg id="fig1" viewBox="0 0 640 400" role="img" aria-label="Scatterplot of life expectancy against GDP per person for ten South American countries"></svg>
+<figcaption>Figure 1. Life expectancy against GDP per person, ten South American countries, 2022 [1]. The vertical axis starts at 64 years.</figcaption>
+</figure>
+
+<p>In Figure 1, countries further right tend to be higher. This is a <b>positive association</b>: larger values of <i>x</i> go with larger values of <i>y</i>. A <b>negative association</b> is the opposite: larger values of <i>x</i> go with smaller values of <i>y</i>, and the points drift downward from left to right.</p>
+
+<p>The points do not lie on a line. Bolivia sits well below the others and Ecuador and Peru sit above. An association is a tendency of the whole cloud of points, and single countries can go against it, as Task 1 found.</p>
+
+<h2 id="s3">3. The correlation coefficient r</h2>
+
+<p>The <b>correlation coefficient</b>, written <i>r</i>, is a single number that measures how close the points of a scatterplot are to a straight line. A spreadsheet computes it with the function <code>CORREL</code>. We read <i>r</i> and do not calculate it by hand. To read it:</p>
+<ul>
+<li><i>r</i> is always between −1 and 1.</li>
+<li>The sign gives the direction. A positive <i>r</i> means positive association. A negative <i>r</i> means negative association.</li>
+<li>The size gives the closeness to a line. When <i>r</i> = 1 or <i>r</i> = −1 every point lies exactly on a straight line. When <i>r</i> is near 0 the points show no straight-line pattern: no tilted line fits them better than a flat one.</li>
+</ul>
+<p>For the ten countries in Table 1, <i>r</i> = 0.76. Section 5 computes this in a spreadsheet.</p>
+
+<p>The six panels of Figure 2 are made-up points, generated by a computer to have particular values of <i>r</i>. They are practice for reading <i>r</i>, and they do not describe any real measurements.</p>
+
+<div class="gallery" id="gallery"></div>
+<p class="small">Figure 2. Six made-up scatterplots, labelled A to F.</p>
+
+<div class="task" id="task2">
+<p class="label">Task 2 (about 3 minutes, no tools)</p>
+<p>Five of the panels in Figure 2, A, B, D, E and F, have the correlations</p>
+<p class="eq">−0.9,&nbsp;&nbsp; −0.5,&nbsp;&nbsp; 0,&nbsp;&nbsp; 0.5,&nbsp;&nbsp; 0.95</p>
+<p>in some order. Write down which value belongs to which panel. Then look at panel C, whose correlation is −0.03. Write one sentence: is there a relationship between <i>x</i> and <i>y</i> in panel C?</p>
+</div>
+<details class="solution"><summary>Solution to Task 2</summary>
+<p>A: −0.5. B: 0.95. D: 0. E: −0.9. F: 0.5.</p>
+<p>The negative values go with the panels that slope down, A and E. Panel E is the closer of the two to a line, so it gets −0.9. Among the panels that slope up, B is almost a line, so it gets 0.95, and F is the looser one, 0.5. Panel D shows no tilt at all, so it gets 0.</p>
+<p>Panel C has a strong relationship: the points follow a U-shaped curve, and knowing <i>x</i> tells you <i>y</i> quite well. Its correlation is nearly 0 because the points are not close to any <em>straight</em> line. The correlation coefficient only measures closeness to a straight line, so always look at the scatterplot as well as <i>r</i>.</p>
+</details>
+
+<h2 id="s4">4. Residuals and the least-squares line</h2>
+
+<p>A straight line <i>y</i> = <i>m</i><i>x</i> + <i>b</i> drawn through a scatterplot works as a prediction rule: put in a GDP per person <i>x</i> and the line gives a <b>predicted</b> life expectancy <i>m</i><i>x</i> + <i>b</i>. The predicted value is written <span class="yhat">y</span>, read "y-hat", so <span class="yhat">y</span> = <i>m</i><i>x</i> + <i>b</i>. For a country in the data we also know the actual life expectancy. The difference is the <b>residual</b>:</p>
+<p class="eq">residual = actual <i>y</i> − predicted <i>y</i> = <span style="white-space:nowrap"><i>y</i> − <span class="yhat">y</span>.</span></p>
+<p>A positive residual means the country lies above the line: it lives longer than the line predicts. A negative residual means it lies below the line. On a graph the residual is the vertical distance from the point to the line.</p>
+
+<div class="task" id="task3">
+<p class="label">Task 3 (about 5 minutes, calculator)</p>
+<p>One way to draw a line through Figure 1 is to join two of the points. Use Venezuela (5.3, 72.6) and Chile (22.7, 79.2).</p>
+<ol type="a">
+<li>Find the slope of the line through these two points, as in week 2. Round it to two decimal places.</li>
+<li>Find the intercept <i>b</i> so that the line passes through Venezuela, using your rounded slope. Round <i>b</i> to two decimal places and write the equation <i>y</i> = <i>m</i><i>x</i> + <i>b</i>.</li>
+<li>Use your line to find the predicted life expectancy and the residual for Bolivia (6.5, 67.4) and for Ecuador (10.1, 76.6). Say whether each country lies above or below the line.</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 3</summary>
+<p>(a) Slope = (change in <i>y</i>) ÷ (change in <i>x</i>) = (79.2 − 72.6) ÷ (22.7 − 5.3) = 6.6 ÷ 17.4 = 0.3793…, which rounds to 0.38. In units: 0.38 years of life expectancy per $1,000 of GDP per person.</p>
+<p>(b) The line passes through Venezuela, so 72.6 = 0.38 × 5.3 + <i>b</i>. Then <i>b</i> = 72.6 − 2.014 = 70.586, which rounds to 70.59. The line is <i>y</i> = 0.38<i>x</i> + 70.59.</p>
+<p>(c) Bolivia: predicted = 0.38 × 6.5 + 70.59 = 2.47 + 70.59 = 73.06 years. Residual = 67.4 − 73.06 = −5.66 years. Bolivia lies 5.66 years below the line.<br>
+Ecuador: predicted = 0.38 × 10.1 + 70.59 = 3.838 + 70.59 = 74.428, about 74.43 years. Residual = 76.6 − 74.43 = 2.17 years. Ecuador lies 2.17 years above the line.</p>
+</details>
+
+<h3>Sum of squared residuals</h3>
+<p>Many lines pass through the cloud of points, and each one gives ten residuals. To pick the best line we need one number that says how badly a line misses.</p>
+<p>Adding up the residuals does not work, because positive and negative residuals cancel. A flat line at height 74.86, the mean life expectancy of the ten countries (the mean of lecture 8.1, written <span class="xbar">y</span> for the <i>y</i> values), has residuals that add up to exactly 0, yet it ignores income completely.</p>
+<p>Squaring each residual fixes this. A square is never negative, so misses above and below the line both count. Squaring also makes a large miss count much more than a small one: a residual of 4 years contributes 16, while a residual of 1 year contributes 1. The score of a line is the <b>sum of squared residuals</b>: square each of the ten residuals and add the squares. A smaller sum means a line that fits better.</p>
+<p>For the Venezuela–Chile line of Task 3, the sum of squared residuals is 49.09. For the flat line at 74.86 it is 99.20. The line from Task 3 fits much better than the flat line. Task 4 asks whether any line does better still.</p>
+
+<figure>
+<svg id="fig3" viewBox="0 0 640 400" role="img" aria-label="Scatterplot with a line you can adjust and the residuals drawn as vertical segments"></svg>
+<div class="controls">
+<label for="slopeIn">Slope <i>m</i></label><input id="slopeIn" type="range" min="0" max="1" step="0.01" value="0.38"><output id="slopeOut">0.38</output>
+<label for="intIn">Intercept <i>b</i></label><input id="intIn" type="range" min="62" max="76" step="0.01" value="70.59"><output id="intOut">70.59</output>
+</div>
+<p class="readout" id="ssrOut">Sum of squared residuals: 49.09</p>
+<div class="btns"><button type="button" id="resetBtn">Back to the Task 3 line</button><button type="button" id="lsBtn">Show the least-squares line</button></div>
+<figcaption>Figure 3. The line <i>y</i> = <i>m</i><i>x</i> + <i>b</i> set by the sliders, drawn over the data of Table 1. Each vertical segment is a residual: orange for points above the line, blue for points below. The arrow keys move a selected slider one step at a time.</figcaption>
+</figure>
+
+<div class="task" id="task4">
+<p class="label">Task 4 (about 5 minutes, Figure 3)</p>
+<p>Figure 3 starts at the line from Task 3, with a sum of squared residuals of 49.09. Move the two sliders to make the sum of squared residuals as small as you can. Do not press "Show the least-squares line" until you have finished. Write down your slope, your intercept and your sum of squared residuals.</p>
+</div>
+<details class="solution"><summary>Solution to Task 4</summary>
+<p>The smallest possible sum of squared residuals is 41.54. It is reached by the line</p>
+<p class="eq"><i>y</i> = 0.4348<i>x</i> + 69.04.</p>
+<p>The sliders move in steps of 0.01, so the best they can reach is a sum of about 41.55, with slope 0.43 and intercept 69.11. Any answer close to these is a good fit. A sum near 41.5 can be reached with slightly different pairs of slope and intercept, because raising the slope and lowering the intercept together keeps the line in nearly the same place over the data.</p>
+<p>Adjusting by hand is slow, since changing the slope moves the whole line and the intercept has to be corrected each time. A spreadsheet finds the best line directly (Section 5).</p>
+</details>
+
+<h3>The least-squares regression line</h3>
+<p>The line with the smallest possible sum of squared residuals is called the <b>least-squares regression line</b>, or regression line for short. For the ten countries of Table 1 it is <i>y</i> = 0.4348<i>x</i> + 69.04. Spreadsheets compute its slope and intercept with the functions <code>SLOPE</code> and <code>INTERCEPT</code> (Section 5). We do not derive the formulas in this course, but they use the summary statistics of lecture 8.1:</p>
+<ul>
+<li>The slope is <i>r</i> × (standard deviation of <i>y</i>) ÷ (standard deviation of <i>x</i>), with each standard deviation <span class="var">s</span> computed as in lecture 8.1, dividing by <span class="var">n</span> − 1. For Table 1 the standard deviation of GDP per person is 5.822 thousand dollars and that of life expectancy is 3.320 years, so the slope is 0.7624 × 3.320 ÷ 5.822 = 0.4348.</li>
+<li>The regression line always passes through the point (<span class="xbar">x</span>, <span class="xbar">y</span>), the means of the <i>x</i> values and of the <i>y</i> values. Here <span class="xbar">x</span> = 13.38 thousand dollars and <span class="xbar">y</span> = 74.86 years, and 0.4348 × 13.38 + 69.04 = 74.86.</li>
+</ul>
+
+<div class="notation" id="notation">
+<p><b>Notation.</b> These symbols mean the same thing in this lecture and in lecture 8.3. The symbols <span class="var">n</span>, <span class="xbar">x</span> and <span class="var">s</span> are those of lecture 8.1.</p>
+<p>(<span class="var">x</span>, <span class="var">y</span>): one data point. <span class="var">x</span> is the variable used to predict (here GDP per person) and <span class="var">y</span> the variable predicted (here life expectancy).</p>
+<p><span class="var">n</span>: the number of data points. Here <span class="var">n</span> = 10.</p>
+<p><span class="xbar">x</span> and <span class="xbar">y</span> ("x-bar" and "y-bar"): the mean of the <span class="var">x</span> values and the mean of the <span class="var">y</span> values.</p>
+<p><span class="var">r</span>: the correlation coefficient, between −1 and 1.</p>
+<p><span class="var">y</span> = <span class="var">m</span><span class="var">x</span> + <span class="var">b</span>: the least-squares regression line, with slope <span class="var">m</span> and intercept <span class="var">b</span>, as in week 2.</p>
+<p><span class="yhat">y</span> ("y-hat"): the predicted value, <span class="yhat">y</span> = <span class="var">m</span><span class="var">x</span> + <span class="var">b</span>, the height of the line at <span class="var">x</span>.</p>
+<p><b>Residual</b>: <span class="var">y</span> − <span class="yhat">y</span>, actual minus predicted. Positive above the line, negative below it.</p>
+</div>
+
+<h2 id="s5">5. Fitting the line in a spreadsheet</h2>
+
+<p>The layout below holds Table 1 in columns A to C. Columns D to F compute the predicted value, the residual and the squared residual for each country, using the regression line with its slope and intercept typed in. Column I uses spreadsheet functions to find the slope, intercept, correlation, means and standard deviations.</p>
+
+<div class="tablewrap">
+<table id="layoutTable">
+<thead><tr><th>Cell</th><th>Contents</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>A1 to F1</td><td style="text-align:left">Country, GDP per person ($1000s), Life expectancy (years), Predicted, Residual, Squared residual</td><td style="text-align:left">Header row</td></tr>
+<tr><td>A2 to C11</td><td style="text-align:left">the ten rows of Table 1</td><td style="text-align:left">Data</td></tr>
+<tr><td>D2</td><td style="text-align:left"><code>=0.4348*B2+69.04</code></td><td style="text-align:left">Predicted life expectancy</td></tr>
+<tr><td>E2</td><td style="text-align:left"><code>=C2-D2</code></td><td style="text-align:left">Residual = actual − predicted</td></tr>
+<tr><td>F2</td><td style="text-align:left"><code>=E2^2</code></td><td style="text-align:left">Squared residual</td></tr>
+<tr><td>D3 to F11</td><td style="text-align:left">D2 to F2 copied down</td><td style="text-align:left">Same for each country</td></tr>
+<tr><td>E12, F12</td><td style="text-align:left">Sum of squares, <code>=SUM(F2:F11)</code></td><td style="text-align:left">Sum of squared residuals</td></tr>
+<tr><td>H1, I1</td><td style="text-align:left">Slope, <code>=SLOPE(C2:C11,B2:B11)</code></td><td style="text-align:left">Slope of the regression line</td></tr>
+<tr><td>H2, I2</td><td style="text-align:left">Intercept, <code>=INTERCEPT(C2:C11,B2:B11)</code></td><td style="text-align:left">Intercept of the regression line</td></tr>
+<tr><td>H3, I3</td><td style="text-align:left">Correlation r, <code>=CORREL(B2:B11,C2:C11)</code></td><td style="text-align:left">Correlation coefficient</td></tr>
+<tr><td>H4, I4</td><td style="text-align:left">Mean GDP, <code>=AVERAGE(B2:B11)</code></td><td style="text-align:left">Mean <span class="xbar">x</span> (lecture 8.1)</td></tr>
+<tr><td>H5, I5</td><td style="text-align:left">Mean life expectancy, <code>=AVERAGE(C2:C11)</code></td><td style="text-align:left">Mean <span class="xbar">y</span></td></tr>
+<tr><td>H6, I6</td><td style="text-align:left">SD of GDP, <code>=STDEV(B2:B11)</code></td><td style="text-align:left">Standard deviation <span class="var">s</span> of the <i>x</i> values (lecture 8.1)</td></tr>
+<tr><td>H7, I7</td><td style="text-align:left">SD of life expectancy, <code>=STDEV(C2:C11)</code></td><td style="text-align:left">Standard deviation <span class="var">s</span> of the <i>y</i> values</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>SLOPE</code> and <code>INTERCEPT</code> take the <i>y</i> column first and the <i>x</i> column second. The formula in D2 has the slope and intercept typed in as numbers. That way it can be copied down with relative references (lecture 1.3), and only the B2 changes, to B3, B4, and so on.</p>
+
+<div class="btns">
+<a class="btn" id="csvLink" href="#" download="south-america-regression.csv">Download the layout (CSV)</a>
+<button type="button" id="copyBtn">Copy the layout to the clipboard</button>
+<span class="copied" id="copyMsg"></span>
+</div>
+<p class="small">The copied layout is tab-separated: click cell A1 of an empty sheet and paste, and it fills A1 to I12. The CSV file opens directly in Excel or Google Sheets (File, Import in Sheets). These files were not tested in Excel or Google Sheets. If a formula shows as text, retype it in its cell.</p>
+
+<div class="task" id="task5">
+<p class="label">Task 5 (about 9 minutes, spreadsheet)</p>
+<p>Open the layout in Excel or Google Sheets, either from the CSV file or by pasting. Then:</p>
+<ol type="a">
+<li>Write down the slope, intercept and correlation in I1, I2 and I3, and the sum of squared residuals in F12. Compare them with your answer to Task 4. Then check that I3 × I7 ÷ I6 gives the slope in I1.</li>
+<li>Make a scatter chart of columns B and C (select B1:C11, then insert a scatter chart). Add a trendline and turn on the option that displays its equation on the chart. Write down the equation the chart shows.</li>
+<li>Find the country with the largest residual in column E, positive or negative.</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 5</summary>
+<p>(a) Slope 0.4348 (more digits: 0.434803…), intercept 69.04 (69.0423…), correlation 0.76 (0.7624…), sum of squared residuals 41.54. The means are <span class="xbar">x</span> = 13.38 and <span class="xbar">y</span> = 74.86, and the standard deviations are 5.822 (GDP) and 3.320 (life expectancy). I3 × I7 ÷ I6 = 0.7624 × 3.320 ÷ 5.822 = 0.4348, the slope.</p>
+<p>(b) In Excel: Insert, Scatter. Right-click one of the points, choose Add Trendline, and tick "Display Equation on chart". In Google Sheets: Insert, Chart, and choose Scatter chart as the chart type. Then Customize, Series, tick Trendline, and set Label to "Use Equation". The chart shows <i>y</i> = 0.4348<i>x</i> + 69.04, possibly with more or fewer digits. The trendline a spreadsheet draws <em>is</em> the least-squares regression line. If you also turn on "R²", the chart shows 0.58, which is <i>r</i> × <i>r</i> = 0.7624 × 0.7624.</p>
+<p>(c) Bolivia, with residual 67.4 − 71.87 = −4.47 years. Its life expectancy is about four and a half years shorter than the line predicts for its income. The largest positive residual is Ecuador's, 3.17 years. Table 2 lists all ten residuals.</p>
+<div class="tablewrap"><table>
+
+<thead><tr><th>Country</th><th><i>x</i></th><th><i>y</i></th><th>Predicted <span class="yhat">y</span></th><th>Residual</th><th>Squared</th></tr></thead>
+<tbody id="residTable"></tbody>
+</table></div>
+<p class="small">Table 2. Predicted values <span class="yhat">y</span> = 0.4348<i>x</i> + 69.04, residuals <i>y</i> − <span class="yhat">y</span> and squared residuals for the ten countries of Table 1.</p>
+</details>
+
+<h2 id="s6">6. Reading the slope and making predictions</h2>
+
+<p>The regression line is</p>
+<p class="eq">predicted life expectancy = 0.4348 × (GDP per person in thousands of dollars) + 69.04.</p>
+<p>Rounded, the slope is 0.43. As in week 2, a slope is a rate with units: units of <i>y</i> per unit of <i>x</i>. Here that is <b>0.43 years of life expectancy per $1,000 of GDP per person</b>. Among these ten countries, a country with $1,000 more GDP per person has, on average, a life expectancy about 0.43 years longer. A difference of $5,000 goes with about 5 × 0.43 = 2.15, or roughly 2 years.</p>
+<p>This describes a comparison between countries in 2022. It does not say that a country whose income rises by $1,000 will gain 0.43 years. Richer countries also differ from poorer ones in other ways that affect health, and the line does not separate these.</p>
+<p>The intercept, 69.04, is the height of the line at <i>x</i> = 0, a country with no income at all. No country in the data is anywhere near $0; the poorest, Venezuela, has $5.3 thousand. So the intercept is a number that places the line, and it should not be read as a fact about very poor countries.</p>
+
+<div class="task" id="task6">
+<p class="label">Task 6 (about 4 minutes, calculator)</p>
+<p>Use the line <i>y</i> = 0.43<i>x</i> + 69.04, the regression line with its slope rounded to 0.43 for use on a calculator. For <i>x</i> from 5.3 to 22.7 its predictions differ from those of the regression line by at most 0.11 years. Two countries outside South America had these values in 2022 [1]:</p>
+<ul>
+<li>Costa Rica: GDP per person 15.5 thousand dollars, life expectancy 79.3 years.</li>
+<li>United States: GDP per person 58.5 thousand dollars, life expectancy 78.0 years.</li>
+</ul>
+<p>For each country, compute the predicted life expectancy and the residual. Then write one sentence on which prediction you trust more, and why.</p>
+</div>
+<details class="solution"><summary>Solution to Task 6</summary>
+<p>Costa Rica: predicted = 0.43 × 15.5 + 69.04 = 6.665 + 69.04 = 75.705, about 75.7 years. Residual = 79.3 − 75.7 = 3.6 years.</p>
+<p>United States: predicted = 0.43 × 58.5 + 69.04 = 25.155 + 69.04 = 94.195, about 94.2 years. Residual = 78.0 − 94.2 = −16.2 years.</p>
+<p>The Costa Rica prediction is the more trustworthy one. Costa Rica's GDP per person, 15.5, lies inside the range of the data the line was fitted to (5.3 to 22.7), and the miss of 3.6 years is about the size of the residuals of the ten South American countries (−4.47 to 3.17, Table 2). The United States, at 58.5, is far outside that range, and the line misses by 16 years. Section 7 explains why.</p>
+</details>
+
+<h2 id="s7">7. How far to trust a prediction</h2>
+
+<p><b>Inside the range of the data.</b> The line was fitted to GDP values from 5.3 to 22.7 thousand dollars. For those ten countries the residuals run from −4.47 (Bolivia) to 3.17 (Ecuador). A prediction for another country in that income range can reasonably be expected to miss by a few years, as Costa Rica's did. The correlation of 0.76 says the points are fairly close to the line, but not on it.</p>
+
+<p><b>Outside the range of the data.</b> Using a line to predict for <i>x</i> values outside the range it was fitted to is called <b>extrapolation</b>. The line itself says nothing about what happens there. To check, compare the line with the rest of the world's countries in Figure 4.</p>
+
+<figure>
+<svg id="fig4" viewBox="0 0 640 420" role="img" aria-label="World scatterplot of life expectancy against GDP per person with the South American regression line extended"></svg>
+<figcaption>Figure 4. Life expectancy against GDP per person in 2022 for 164 countries [1]. Orange: the ten South American countries of Table 1. Grey: all other countries. The line is the South American regression line <i>y</i> = 0.4348<i>x</i> + 69.04, solid and thick over the range it was fitted to (5.3 to 22.7) and dashed beyond it. The vertical axis starts at 50 years. The Central African Republic is left out because the source's estimate for it jumps from year to year (40.3 years in 2021, 18.8 in 2022, 57.4 in 2023) [1], so its 2022 value is not a reliable figure. Leaving it out changes the result: <i>r</i> for the world is 0.70 without it and 0.63 with it.</figcaption>
+</figure>
+
+<p>Across the world, life expectancy rises steeply at low incomes and then levels off. The 24 countries with GDP per person above $40,000 all have life expectancies between 77.3 and 83.5 years. The straight line keeps climbing. For Qatar, with GDP per person of 149.2 thousand dollars, the regression line predicts 0.4348 × 149.2 + 69.04 = 133.9 years. Qatar's actual life expectancy in 2022 was 81.9 years [1].</p>
+
+<p>The world data also show why <i>r</i> alone is not enough. For all 164 countries in Figure 4, <i>r</i> = 0.70, which sounds like a fairly strong straight-line relationship. The scatterplot shows a curve, which no straight line can follow closely.</p>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li>Our World in Data, "Life expectancy vs. GDP per capita" (chart and data download), <span style="word-break:break-all">https://ourworldindata.org/grapher/life-expectancy-vs-gdp-per-capita</span>. Data for 2022, downloaded 4 October 2026. Life expectancy: "Period life expectancy at birth", from UN World Population Prospects (2024) with processing by Our World in Data, last updated 22 October 2025. GDP per capita: international dollars at 2011 prices, from the Maddison Project Database 2023 [2], last updated 26 April 2024. Figures quoted: GDP per capita and life expectancy for 2022 for the ten countries in Table 1 (for example Chile, $22,740.72 and 79.1762 years), Costa Rica ($15,496.82, 79.3164 years), the United States ($58,487.465, 77.9789 years), Qatar ($149,171.11, 81.8566 years), the Central African Republic (life expectancy 40.2791 years in 2021, 18.8177 in 2022 and 57.4077 in 2023, from the "Life expectancy" chart, https://ourworldindata.org/grapher/life-expectancy, read 4 October 2026), and the 164 countries in Figure 4. Values are rounded to one decimal place in this lecture, with GDP in thousands of dollars.</li>
+<li>J. Bolt and J. L. van Zanden (2024), "Maddison style estimates of the evolution of the world economy: A new 2023 update", <i>Journal of Economic Surveys</i>, 1–41, doi:10.1111/joes.12618. Maddison Project Database 2023, Groningen Growth and Development Centre, release page published 26 April 2024, <span style="word-break:break-all">https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2023</span>, accessed 4 October 2026. Figure quoted: GDP per capita estimates, covering 169 countries up to 2022, used through [1].</li>
+</ol>
+<p class="small">Calculations: every number in this lecture was computed with the scripts in the <code>checks</code> folder that accompanies this page, from the data file saved with it.</p>
+
+</main>
+<script id="lecture-data" type="application/json">{"sa":[{"n":"Argentina","x":18.3,"y":75.8},{"n":"Bolivia","x":6.5,"y":67.4},{"n":"Brazil","x":14.6,"y":74.9},{"n":"Chile","x":22.7,"y":79.2},{"n":"Colombia","x":14.5,"y":76.5},{"n":"Ecuador","x":10.1,"y":76.6},{"n":"Paraguay","x":8.8,"y":72.3},{"n":"Peru","x":12.8,"y":76.8},{"n":"Uruguay","x":20.2,"y":76.5},{"n":"Venezuela","x":5.3,"y":72.6}],"fit":{"n":10,"mx":13.379999999999999,"my":74.85999999999999,"m":0.4348034201484514,"b":69.04233023841371,"r":0.7624119072543479},"task3":{"m":0.38,"b":70.59},"world":[{"n":"Afghanistan","c":"AFG","x":1.4,"y":65.6,"sa":false},{"n":"Albania","c":"ALB","x":13,"y":78.8,"sa":false},{"n":"Algeria","c":"DZA","x":13.5,"y":76.1,"sa":false},{"n":"Angola","c":"AGO","x":6.1,"y":64.2,"sa":false},{"n":"Argentina","c":"ARG","x":18.3,"y":75.8,"sa":true},{"n":"Armenia","c":"ARM","x":13.8,"y":74.6,"sa":false},{"n":"Australia","c":"AUS","x":52,"y":82.8,"sa":false},{"n":"Austria","c":"AUT","x":43.8,"y":81.3,"sa":false},{"n":"Azerbaijan","c":"AZE","x":17.7,"y":74.1,"sa":false},{"n":"Bahrain","c":"BHR","x":38.7,"y":81,"sa":false},{"n":"Bangladesh","c":"BGD","x":4.9,"y":74.3,"sa":false},{"n":"Barbados","c":"BRB","x":11.5,"y":75.7,"sa":false},{"n":"Belarus","c":"BLR","x":18.7,"y":74.4,"sa":false},{"n":"Belgium","c":"BEL","x":41.9,"y":81.2,"sa":false},{"n":"Benin","c":"BEN","x":2.5,"y":60.5,"sa":false},{"n":"Bolivia","c":"BOL","x":6.5,"y":67.4,"sa":true},{"n":"Bosnia and Herzegovina","c":"BIH","x":12.1,"y":76.8,"sa":false},{"n":"Botswana","c":"BWA","x":16.4,"y":68.7,"sa":false},{"n":"Brazil","c":"BRA","x":14.6,"y":74.9,"sa":true},{"n":"Bulgaria","c":"BGR","x":20.6,"y":74,"sa":false},{"n":"Burkina Faso","c":"BFA","x":1.7,"y":60.7,"sa":false},{"n":"Burundi","c":"BDI","x":0.7,"y":62.9,"sa":false},{"n":"Cambodia","c":"KHM","x":3.9,"y":70.5,"sa":false},{"n":"Cameroon","c":"CMR","x":2.8,"y":62.4,"sa":false},{"n":"Canada","c":"CAN","x":45.5,"y":81.2,"sa":false},{"n":"Cape Verde","c":"CPV","x":7.2,"y":75.9,"sa":false},{"n":"Chad","c":"TCD","x":1.4,"y":54.5,"sa":false},{"n":"Chile","c":"CHL","x":22.7,"y":79.2,"sa":true},{"n":"China","c":"CHN","x":19.2,"y":78.2,"sa":false},{"n":"Colombia","c":"COL","x":14.5,"y":76.5,"sa":true},{"n":"Comoros","c":"COM","x":1.9,"y":66.5,"sa":false},{"n":"Congo","c":"COG","x":4.2,"y":65,"sa":false},{"n":"Costa Rica","c":"CRI","x":15.5,"y":79.3,"sa":false},{"n":"Cote d'Ivoire","c":"CIV","x":4,"y":61.6,"sa":false},{"n":"Croatia","c":"HRV","x":27,"y":78.3,"sa":false},{"n":"Cuba","c":"CUB","x":7.6,"y":77.6,"sa":false},{"n":"Cyprus","c":"CYP","x":31.5,"y":80.4,"sa":false},{"n":"Czechia","c":"CZE","x":32.2,"y":79.2,"sa":false},{"n":"Democratic Republic of Congo","c":"COD","x":0.8,"y":61,"sa":false},{"n":"Denmark","c":"DNK","x":50.7,"y":81.3,"sa":false},{"n":"Djibouti","c":"DJI","x":3.6,"y":65.5,"sa":false},{"n":"Dominica","c":"DMA","x":8.9,"y":71.1,"sa":false},{"n":"Dominican Republic","c":"DOM","x":17.7,"y":74.2,"sa":false},{"n":"Ecuador","c":"ECU","x":10.1,"y":76.6,"sa":true},{"n":"Egypt","c":"EGY","x":13.2,"y":71,"sa":false},{"n":"El Salvador","c":"SLV","x":9.2,"y":72,"sa":false},{"n":"Equatorial Guinea","c":"GNQ","x":22.7,"y":63.4,"sa":false},{"n":"Estonia","c":"EST","x":30.1,"y":78.2,"sa":false},{"n":"Eswatini","c":"SWZ","x":8.5,"y":63,"sa":false},{"n":"Ethiopia","c":"ETH","x":2.3,"y":66.9,"sa":false},{"n":"Finland","c":"FIN","x":40.7,"y":81.2,"sa":false},{"n":"France","c":"FRA","x":39.1,"y":82.5,"sa":false},{"n":"Gabon","c":"GAB","x":15.7,"y":67.7,"sa":false},{"n":"Gambia","c":"GMB","x":2,"y":64.9,"sa":false},{"n":"Georgia","c":"GEO","x":14.4,"y":74.1,"sa":false},{"n":"Germany","c":"DEU","x":46.6,"y":80.6,"sa":false},{"n":"Ghana","c":"GHA","x":4.2,"y":65.2,"sa":false},{"n":"Greece","c":"GRC","x":25.3,"y":79.9,"sa":false},{"n":"Guatemala","c":"GTM","x":8,"y":71.2,"sa":false},{"n":"Guinea","c":"GIN","x":1.8,"y":60.4,"sa":false},{"n":"Guinea-Bissau","c":"GNB","x":1.6,"y":63.6,"sa":false},{"n":"Haiti","c":"HTI","x":1.5,"y":63.9,"sa":false},{"n":"Honduras","c":"HND","x":5.2,"y":72.7,"sa":false},{"n":"Hong Kong","c":"HKG","x":48.3,"y":83.5,"sa":false},{"n":"Hungary","c":"HUN","x":29.5,"y":76.2,"sa":false},{"n":"Iceland","c":"ISL","x":42.1,"y":81.6,"sa":false},{"n":"India","c":"IND","x":7.8,"y":71.7,"sa":false},{"n":"Indonesia","c":"IDN","x":12.8,"y":70.9,"sa":false},{"n":"Iran","c":"IRN","x":18.5,"y":76.8,"sa":false},{"n":"Iraq","c":"IRQ","x":13.1,"y":72,"sa":false},{"n":"Ireland","c":"IRL","x":60.3,"y":82.1,"sa":false},{"n":"Israel","c":"ISR","x":36.6,"y":82.8,"sa":false},{"n":"Italy","c":"ITA","x":36.2,"y":82.1,"sa":false},{"n":"Jamaica","c":"JAM","x":7.5,"y":71.5,"sa":false},{"n":"Japan","c":"JPN","x":38.3,"y":84.1,"sa":false},{"n":"Jordan","c":"JOR","x":9.2,"y":77.1,"sa":false},{"n":"Kazakhstan","c":"KAZ","x":26.5,"y":73.5,"sa":false},{"n":"Kenya","c":"KEN","x":3.4,"y":63.5,"sa":false},{"n":"Kuwait","c":"KWT","x":71.5,"y":78.8,"sa":false},{"n":"Kyrgyzstan","c":"KGZ","x":5.3,"y":71.5,"sa":false},{"n":"Laos","c":"LAO","x":7.2,"y":68.7,"sa":false},{"n":"Latvia","c":"LVA","x":27.2,"y":74.9,"sa":false},{"n":"Lebanon","c":"LBN","x":10.3,"y":78,"sa":false},{"n":"Lesotho","c":"LSO","x":2.3,"y":56.8,"sa":false},{"n":"Liberia","c":"LBR","x":0.8,"y":61.9,"sa":false},{"n":"Libya","c":"LBY","x":12.8,"y":74.5,"sa":false},{"n":"Lithuania","c":"LTU","x":30.9,"y":74.7,"sa":false},{"n":"Luxembourg","c":"LUX","x":55.5,"y":82.2,"sa":false},{"n":"Madagascar","c":"MDG","x":1.4,"y":63.1,"sa":false},{"n":"Malawi","c":"MWI","x":1.2,"y":66,"sa":false},{"n":"Malaysia","c":"MYS","x":26.6,"y":75.4,"sa":false},{"n":"Mali","c":"MLI","x":1.7,"y":60,"sa":false},{"n":"Malta","c":"MLT","x":34.5,"y":82.2,"sa":false},{"n":"Mauritania","c":"MRT","x":3.7,"y":68.3,"sa":false},{"n":"Mauritius","c":"MUS","x":20.6,"y":73.5,"sa":false},{"n":"Mexico","c":"MEX","x":16.2,"y":74,"sa":false},{"n":"Moldova","c":"MDA","x":6.7,"y":71.5,"sa":false},{"n":"Mongolia","c":"MNG","x":13.4,"y":71.5,"sa":false},{"n":"Montenegro","c":"MNE","x":20.9,"y":75.9,"sa":false},{"n":"Morocco","c":"MAR","x":8.4,"y":75.2,"sa":false},{"n":"Mozambique","c":"MOZ","x":1.1,"y":63,"sa":false},{"n":"Myanmar","c":"MMR","x":5.2,"y":66.5,"sa":false},{"n":"Namibia","c":"NAM","x":8,"y":64.2,"sa":false},{"n":"Nepal","c":"NPL","x":3,"y":70.1,"sa":false},{"n":"Netherlands","c":"NLD","x":49.7,"y":81.9,"sa":false},{"n":"New Zealand","c":"NZL","x":38.3,"y":81,"sa":false},{"n":"Nicaragua","c":"NIC","x":5.1,"y":74.5,"sa":false},{"n":"Niger","c":"NER","x":1,"y":60.4,"sa":false},{"n":"Nigeria","c":"NGA","x":5.1,"y":54.1,"sa":false},{"n":"North Korea","c":"PRK","x":1.6,"y":73.6,"sa":false},{"n":"North Macedonia","c":"MKD","x":14.1,"y":76.6,"sa":false},{"n":"Norway","c":"NOR","x":88.4,"y":82.6,"sa":false},{"n":"Oman","c":"OMN","x":48,"y":77.9,"sa":false},{"n":"Pakistan","c":"PAK","x":5.5,"y":67.4,"sa":false},{"n":"Palestine","c":"PSE","x":4.8,"y":76.7,"sa":false},{"n":"Panama","c":"PAN","x":23.6,"y":79.3,"sa":false},{"n":"Paraguay","c":"PRY","x":8.8,"y":72.3,"sa":true},{"n":"Peru","c":"PER","x":12.8,"y":76.8,"sa":true},{"n":"Philippines","c":"PHL","x":8.4,"y":69.5,"sa":false},{"n":"Poland","c":"POL","x":32.5,"y":77.9,"sa":false},{"n":"Portugal","c":"PRT","x":29,"y":81.2,"sa":false},{"n":"Puerto Rico","c":"PRI","x":35.3,"y":79.4,"sa":false},{"n":"Qatar","c":"QAT","x":149.2,"y":81.9,"sa":false},{"n":"Romania","c":"ROU","x":26.2,"y":75.3,"sa":false},{"n":"Russia","c":"RUS","x":25.4,"y":72.5,"sa":false},{"n":"Rwanda","c":"RWA","x":2.2,"y":67.5,"sa":false},{"n":"Saint Lucia","c":"LCA","x":10.5,"y":72.7,"sa":false},{"n":"Sao Tome and Principe","c":"STP","x":3.8,"y":69.2,"sa":false},{"n":"Saudi Arabia","c":"SAU","x":53.5,"y":77.3,"sa":false},{"n":"Senegal","c":"SEN","x":2.7,"y":67.8,"sa":false},{"n":"Serbia","c":"SRB","x":17.1,"y":75.5,"sa":false},{"n":"Seychelles","c":"SYC","x":31.1,"y":71.2,"sa":false},{"n":"Sierra Leone","c":"SLE","x":1.7,"y":61.3,"sa":false},{"n":"Singapore","c":"SGP","x":80.3,"y":82.9,"sa":false},{"n":"Slovakia","c":"SVK","x":27.5,"y":77,"sa":false},{"n":"Slovenia","c":"SVN","x":32.7,"y":80.8,"sa":false},{"n":"South Africa","c":"ZAF","x":11.4,"y":65.5,"sa":false},{"n":"South Korea","c":"KOR","x":41.3,"y":82.7,"sa":false},{"n":"Spain","c":"ESP","x":34.1,"y":82.4,"sa":false},{"n":"Sri Lanka","c":"LKA","x":10.7,"y":77.3,"sa":false},{"n":"Sweden","c":"SWE","x":47.1,"y":83,"sa":false},{"n":"Switzerland","c":"CHE","x":63.3,"y":83.2,"sa":false},{"n":"Syria","c":"SYR","x":2.5,"y":72.8,"sa":false},{"n":"Taiwan","c":"TWN","x":53.1,"y":80.2,"sa":false},{"n":"Tajikistan","c":"TJK","x":5.5,"y":71.6,"sa":false},{"n":"Tanzania","c":"TZA","x":3.1,"y":66.9,"sa":false},{"n":"Thailand","c":"THA","x":16.4,"y":75.3,"sa":false},{"n":"Togo","c":"TGO","x":1.6,"y":62.3,"sa":false},{"n":"Trinidad and Tobago","c":"TTO","x":25.8,"y":73.3,"sa":false},{"n":"Tunisia","c":"TUN","x":10.9,"y":76.1,"sa":false},{"n":"Turkey","c":"TUR","x":27.4,"y":77.6,"sa":false},{"n":"Turkmenistan","c":"TKM","x":17.2,"y":69.9,"sa":false},{"n":"Uganda","c":"UGA","x":2.1,"y":67.7,"sa":false},{"n":"Ukraine","c":"UKR","x":7.7,"y":72.7,"sa":false},{"n":"United Arab Emirates","c":"ARE","x":77.2,"y":80.5,"sa":false},{"n":"United Kingdom","c":"GBR","x":38.4,"y":81.1,"sa":false},{"n":"United States","c":"USA","x":58.5,"y":78,"sa":false},{"n":"Uruguay","c":"URY","x":20.2,"y":76.5,"sa":true},{"n":"Uzbekistan","c":"UZB","x":12.6,"y":72.1,"sa":false},{"n":"Venezuela","c":"VEN","x":5.3,"y":72.6,"sa":true},{"n":"Vietnam","c":"VNM","x":8.1,"y":74.5,"sa":false},{"n":"Yemen","c":"YEM","x":2,"y":68,"sa":false},{"n":"Zambia","c":"ZMB","x":3.3,"y":65.3,"sa":false},{"n":"Zimbabwe","c":"ZWE","x":1.7,"y":62.4,"sa":false}],"gallery":{"A":{"pts":[{"x":-2.038,"y":1.136},{"x":2.403,"y":-1.459},{"x":1.332,"y":-0.002},{"x":-1.848,"y":2.373},{"x":-3.112,"y":2.374},{"x":-0.081,"y":-1.165},{"x":1.361,"y":0.762},{"x":1.626,"y":0},{"x":0.825,"y":-2.814},{"x":-0.185,"y":1.212},{"x":0.028,"y":2.31},{"x":1.55,"y":0.012},{"x":-2.513,"y":-1.775},{"x":-0.447,"y":-3.803},{"x":1.399,"y":-1.974},{"x":0.858,"y":2.515},{"x":-3.273,"y":2.523},{"x":0.656,"y":-1.578},{"x":-2.054,"y":1.23},{"x":-1.057,"y":1.656},{"x":2.255,"y":-1.928},{"x":-0.203,"y":1.131},{"x":2.285,"y":0.725},{"x":2.334,"y":-1.083},{"x":-1.097,"y":1.296},{"x":0.453,"y":0.76},{"x":3.638,"y":-4.173},{"x":-3.02,"y":0.672},{"x":-0.735,"y":-0.944},{"x":-1.339,"y":0.011}],"r":-0.5},"B":{"pts":[{"x":-3.136,"y":-3.705},{"x":0.698,"y":0.643},{"x":-3.008,"y":-1.736},{"x":-0.145,"y":-0.79},{"x":-3.008,"y":-2.552},{"x":2.777,"y":3.088},{"x":1.234,"y":1.563},{"x":-0.483,"y":-0.646},{"x":0.244,"y":0.607},{"x":1.042,"y":0.568},{"x":2.414,"y":1.903},{"x":-4.14,"y":-3.281},{"x":1.283,"y":1.244},{"x":-0.251,"y":0.347},{"x":2.253,"y":1.536},{"x":-1.497,"y":-1.759},{"x":0.035,"y":-0.441},{"x":-0.803,"y":-0.131},{"x":0.713,"y":0.548},{"x":-1.902,"y":-2.739},{"x":-1.759,"y":-2.493},{"x":2.797,"y":3.11},{"x":2.155,"y":1.56},{"x":-0.957,"y":-1.174},{"x":0.596,"y":0.593},{"x":2.093,"y":3.02},{"x":1.305,"y":0.931},{"x":0.16,"y":1.318},{"x":0.344,"y":0.018},{"x":-1.054,"y":-1.151}],"r":0.95},"C":{"pts":[{"x":-9.938,"y":10.014},{"x":-9.257,"y":9.651},{"x":-8.549,"y":6.826},{"x":-8.062,"y":6.057},{"x":-7.158,"y":3.718},{"x":-6.456,"y":0.963},{"x":-5.745,"y":-0.79},{"x":-5.14,"y":-1.738},{"x":-4.599,"y":-1.197},{"x":-3.645,"y":-2.315},{"x":-3.259,"y":-3.675},{"x":-2.321,"y":-4.773},{"x":-1.812,"y":-5.104},{"x":-0.867,"y":-4.253},{"x":-0.377,"y":-5.456},{"x":0.473,"y":-6.082},{"x":0.898,"y":-5.626},{"x":1.675,"y":-4.84},{"x":2.603,"y":-4.297},{"x":3.205,"y":-4.343},{"x":3.768,"y":-2.095},{"x":4.61,"y":-2.38},{"x":5.187,"y":-0.129},{"x":5.942,"y":-0.623},{"x":6.587,"y":0.623},{"x":7.318,"y":3.017},{"x":8.011,"y":4.353},{"x":8.574,"y":6.212},{"x":9.278,"y":9.582},{"x":9.972,"y":9.418}],"r":-0.03},"D":{"pts":[{"x":0.576,"y":-2.977},{"x":1.5,"y":-2.297},{"x":-1.807,"y":0.477},{"x":-2.241,"y":1.69},{"x":1.84,"y":0.026},{"x":0.6,"y":-1.281},{"x":0.368,"y":-2.139},{"x":-2.011,"y":4.148},{"x":-1.586,"y":1.248},{"x":-0.902,"y":0.085},{"x":-0.317,"y":-0.776},{"x":-2.026,"y":-2.559},{"x":2.865,"y":0.411},{"x":2.429,"y":0.109},{"x":0.653,"y":3.041},{"x":1.077,"y":-2.06},{"x":-1.628,"y":-0.289},{"x":-0.102,"y":0.347},{"x":-0.622,"y":-1.598},{"x":1.679,"y":2.204},{"x":-0.354,"y":-2.257},{"x":-3.321,"y":-1.23},{"x":1.288,"y":1.519},{"x":3.36,"y":-2.242},{"x":-1.981,"y":0.74},{"x":2.854,"y":3.356},{"x":-3.246,"y":0.133},{"x":-1.034,"y":-0.431},{"x":2.083,"y":1.203},{"x":0.005,"y":1.398}],"r":0},"E":{"pts":[{"x":0.042,"y":-1.428},{"x":0.455,"y":-2.205},{"x":1.124,"y":-1.504},{"x":1.982,"y":-1.587},{"x":-0.964,"y":0.811},{"x":-2.413,"y":4.086},{"x":0.874,"y":-0.88},{"x":-0.923,"y":1.516},{"x":-0.065,"y":0.313},{"x":4.664,"y":-3.937},{"x":-0.233,"y":0.391},{"x":-2.92,"y":2.285},{"x":1.336,"y":-1.173},{"x":0.055,"y":0.051},{"x":1.857,"y":-0.46},{"x":0.513,"y":-1.813},{"x":-1.211,"y":2.303},{"x":0.631,"y":-0.078},{"x":-0.034,"y":-0.65},{"x":-3.391,"y":3.822},{"x":1.941,"y":-1.501},{"x":-0.187,"y":0.806},{"x":1.44,"y":-0.791},{"x":1.842,"y":-2.068},{"x":0.837,"y":-1.151},{"x":-2.669,"y":2.106},{"x":-3.514,"y":2.121},{"x":-0.837,"y":1.016},{"x":1.737,"y":-1.324},{"x":-1.968,"y":0.926}],"r":-0.9},"F":{"pts":[{"x":0.696,"y":-0.686},{"x":1.662,"y":3.165},{"x":-1.828,"y":-1.243},{"x":0.401,"y":1.552},{"x":-1.937,"y":-2.574},{"x":-2.878,"y":-3.223},{"x":0.029,"y":-0.51},{"x":2.014,"y":1.053},{"x":1.96,"y":0.685},{"x":-1.258,"y":-2.688},{"x":-4.062,"y":-2.517},{"x":0.445,"y":1.555},{"x":-1.232,"y":0.415},{"x":0.817,"y":-0.531},{"x":-1.999,"y":1.525},{"x":0.605,"y":-1.955},{"x":2.683,"y":0.16},{"x":-0.072,"y":-0.87},{"x":-1.206,"y":0.235},{"x":1.571,"y":1.929},{"x":1.615,"y":-4.152},{"x":4.001,"y":3.441},{"x":-1.064,"y":-0.012},{"x":-1.195,"y":0.863},{"x":-0.782,"y":0.391},{"x":-2.028,"y":-0.639},{"x":1.656,"y":0.665},{"x":-0.462,"y":-0.206},{"x":2.77,"y":2.132},{"x":-0.92,"y":2.04}],"r":0.5}}}</script>
+<script>
+(function(){
+var D=JSON.parse(document.getElementById('lecture-data').textContent);
+var NS='http://www.w3.org/2000/svg';
+var C={axis:'#5a6473',grid:'#e6e9ee',pt:'#1f5fa8',sa:'#c2410c',world:'#9aa3ad',line:'#1d2430',pos:'#c2410c',neg:'#1f5fa8',ls:'#15803d'};
+function el(tag,attrs,parent,text){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function frame(svg,o){
+  var W=o.W,H=o.H,L=o.L,R=o.R,T=o.T,B=o.B;
+  var sx=function(x){return L+(x-o.x0)/(o.x1-o.x0)*(W-L-R);};
+  var sy=function(y){return H-B-(y-o.y0)/(o.y1-o.y0)*(H-T-B);};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  var g=el('g',{},svg);
+  o.xt.forEach(function(t){el('line',{x1:sx(t),x2:sx(t),y1:T,y2:H-B,stroke:C.grid},g);el('text',{x:sx(t),y:H-B+20,'text-anchor':'middle','font-size':o.fs||14,fill:C.axis},g,t);});
+  o.yt.forEach(function(t){el('line',{x1:L,x2:W-R,y1:sy(t),y2:sy(t),stroke:C.grid},g);el('text',{x:L-8,y:sy(t)+5,'text-anchor':'end','font-size':o.fs||14,fill:C.axis},g,t);});
+  el('line',{x1:L,x2:W-R,y1:H-B,y2:H-B,stroke:C.axis},g);
+  el('line',{x1:L,x2:L,y1:T,y2:H-B,stroke:C.axis},g);
+  if(o.xl)el('text',{x:(L+W-R)/2,y:H-6,'text-anchor':'middle','font-size':15,fill:C.axis},g,o.xl);
+  if(o.yl)el('text',{x:-(T+H-B)/2,y:16,transform:'rotate(-90)','text-anchor':'middle','font-size':15,fill:C.axis},g,o.yl);
+  return {sx:sx,sy:sy,g:g};
+}
+var labelPos={Argentina:[0,24,'middle'],Bolivia:[9,5,'start'],Brazil:[-9,14,'end'],Chile:[-9,-8,'end'],Colombia:[9,-8,'start'],Ecuador:[0,-12,'middle'],Paraguay:[9,14,'start'],Peru:[0,-12,'middle'],Uruguay:[9,16,'start'],Venezuela:[9,-8,'start']};
+var NARROW=document.querySelector('main').clientWidth<520;
+if(NARROW)labelPos.Ecuador=[-9,-6,'end'];
+var saBox={W:NARROW?380:640,H:NARROW?340:400,L:58,R:16,T:14,B:50,x0:0,x1:25,y0:64,y1:82,xt:[0,5,10,15,20,25],yt:[64,66,68,70,72,74,76,78,80,82],xl:'GDP per person (thousands of dollars)',yl:'Life expectancy (years)'};
+// Figure 1
+(function(){var s=document.getElementById('fig1');var f=frame(s,saBox);
+D.sa.forEach(function(p){el('circle',{cx:f.sx(p.x),cy:f.sy(p.y),r:6,fill:C.pt},s);var lp=labelPos[p.n];el('text',{x:f.sx(p.x)+lp[0],y:f.sy(p.y)+lp[1],'text-anchor':lp[2],'font-size':14,fill:C.line},s,p.n);});})();
+// Figure 2 gallery
+(function(){var g=document.getElementById('gallery');['A','B','C','D','E','F'].forEach(function(k){
+ var fig=document.createElement('figure');var s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','0 0 200 170');s.setAttribute('role','img');s.setAttribute('aria-label','Made-up scatterplot '+k);fig.appendChild(s);
+ var pts=D.gallery[k].pts;var xs=pts.map(function(p){return p.x}),ys=pts.map(function(p){return p.y});
+ var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
+ var px=function(x){return 12+(x-x0)/(x1-x0)*176},py=function(y){return 158-(y-y0)/(y1-y0)*146};
+ el('rect',{x:4,y:4,width:192,height:162,fill:'none',stroke:C.grid},s);
+ pts.forEach(function(p){el('circle',{cx:px(p.x),cy:py(p.y),r:4,fill:C.pt},s);});
+ var cap=document.createElement('figcaption');cap.textContent=k;fig.appendChild(cap);g.appendChild(fig);});})();
+// Figure 3 interactive
+(function(){var s=document.getElementById('fig3');var f=frame(s,saBox);
+ var lineG=el('g',{},s);var ptG=el('g',{},s);
+ D.sa.forEach(function(p){el('circle',{cx:f.sx(p.x),cy:f.sy(p.y),r:6,fill:C.line},ptG);});
+ var mIn=document.getElementById('slopeIn'),bIn=document.getElementById('intIn');
+ var mOut=document.getElementById('slopeOut'),bOut=document.getElementById('intOut'),sOut=document.getElementById('ssrOut');
+ var showLS=false;
+ function draw(){var m=+mIn.value,b=+bIn.value;mOut.textContent=m.toFixed(2);bOut.textContent=b.toFixed(2);
+  while(lineG.firstChild)lineG.removeChild(lineG.firstChild);
+  var clip=function(y){return Math.max(saBox.y0,Math.min(saBox.y1,y));};
+  if(showLS){var M=D.fit.m,B=D.fit.b;el('line',{x1:f.sx(0),y1:f.sy(B),x2:f.sx(25),y2:f.sy(M*25+B),stroke:C.ls,'stroke-width':3,'stroke-dasharray':'8 5'},lineG);
+   el('text',{x:f.sx(24.5),y:f.sy(64.8),'text-anchor':'end','font-size':14,fill:C.ls},lineG,NARROW?'green: least squares':'dashed green: least squares, y = 0.4348x + 69.04');}
+  var tot=0;D.sa.forEach(function(p){var pred=m*p.x+b;var r=p.y-pred;tot+=r*r;
+   el('line',{x1:f.sx(p.x),x2:f.sx(p.x),y1:f.sy(p.y),y2:f.sy(clip(pred)),stroke:r>=0?C.pos:C.neg,'stroke-width':3},lineG);});
+  // line clipped to box
+  var xa=0,xb=25,ya=b,yb=m*25+b;
+  if(m>0){if(ya<saBox.y0){xa=(saBox.y0-b)/m;ya=saBox.y0;}if(yb>saBox.y1){xb=(saBox.y1-b)/m;yb=saBox.y1;}}
+  if(xa<xb&&ya<=saBox.y1&&yb>=saBox.y0)el('line',{x1:f.sx(xa),y1:f.sy(ya),x2:f.sx(xb),y2:f.sy(yb),stroke:C.line,'stroke-width':2.5},lineG);
+  sOut.textContent='Sum of squared residuals: '+tot.toFixed(2);}
+ mIn.addEventListener('input',draw);bIn.addEventListener('input',draw);
+ document.getElementById('resetBtn').addEventListener('click',function(){mIn.value=D.task3.m;bIn.value=D.task3.b;showLS=false;draw();});
+ document.getElementById('lsBtn').addEventListener('click',function(){showLS=!showLS;this.textContent=showLS?'Hide the least-squares line':'Show the least-squares line';draw();});
+ draw();})();
+// Figure 4 world
+(function(){var s=document.getElementById('fig4');var box={W:NARROW?380:640,H:NARROW?380:420,L:58,R:16,T:14,B:50,x0:0,x1:160,y0:50,y1:140,xt:NARROW?[0,40,80,120,160]:[0,20,40,60,80,100,120,140,160],yt:[50,60,70,80,90,100,110,120,130,140],xl:'GDP per person (thousands of dollars)',yl:'Life expectancy (years)'};
+ var f=frame(s,box);var M=D.fit.m,B=D.fit.b;
+ D.world.filter(function(p){return !p.sa}).forEach(function(p){el('circle',{cx:f.sx(p.x),cy:f.sy(p.y),r:3.5,fill:C.world,'fill-opacity':0.8},s);});
+ D.world.filter(function(p){return p.sa}).forEach(function(p){el('circle',{cx:f.sx(p.x),cy:f.sy(p.y),r:4.5,fill:C.sa},s);});
+ el('line',{x1:f.sx(5.3),y1:f.sy(M*5.3+B),x2:f.sx(22.7),y2:f.sy(M*22.7+B),stroke:C.line,'stroke-width':5,'stroke-linecap':'round'},s);
+ el('line',{x1:f.sx(22.7),y1:f.sy(M*22.7+B),x2:f.sx(160),y2:f.sy(M*160+B),stroke:C.line,'stroke-width':2,'stroke-dasharray':'7 5'},s);
+ var q=D.world.filter(function(p){return p.c==='QAT'})[0];var qp=M*q.x+B;
+ el('circle',{cx:f.sx(q.x),cy:f.sy(qp),r:5,fill:'none',stroke:C.line,'stroke-width':2},s);
+ el('line',{x1:f.sx(q.x),x2:f.sx(q.x),y1:f.sy(q.y)-6,y2:f.sy(qp)+7,stroke:C.neg,'stroke-width':1.5,'stroke-dasharray':'3 3'},s);
+ el('text',{x:f.sx(q.x)-14,y:f.sy(qp)+5,'text-anchor':'end','font-size':14,fill:C.line},s,'line predicts '+qp.toFixed(1));
+ el('text',{x:f.sx(q.x)-8,y:f.sy(q.y)+5,'text-anchor':'end','font-size':14,fill:C.line},s,'Qatar: 81.9');
+ var u=D.world.filter(function(p){return p.c==='USA'})[0];
+ el('text',{x:f.sx(u.x),y:f.sy(u.y)+20,'text-anchor':'middle','font-size':13,fill:C.line},s,'United States');
+})();
+// residual table in Task 5 solution
+(function(){var tb=document.getElementById('residTable');var sum=0;D.sa.forEach(function(p){var pr=0.4348*p.x+69.04,r=p.y-pr;sum+=r*r;var tr=document.createElement('tr');
+ [p.n,p.x.toFixed(1),p.y.toFixed(1),pr.toFixed(2),r.toFixed(2),(r*r).toFixed(2)].forEach(function(v){var td=document.createElement('td');td.textContent=v.replace('-','\u2212');tr.appendChild(td);});tb.appendChild(tr);});
+ var tr=document.createElement('tr');tr.innerHTML='<td>Sum</td><td></td><td></td><td></td><td></td><td>'+sum.toFixed(2)+'</td>';tb.appendChild(tr);})();
+// spreadsheet layout
+(function(){
+ var rows=[['Country','GDP per person ($1000s)','Life expectancy (years)','Predicted','Residual','Squared residual','','Slope','=SLOPE(C2:C11,B2:B11)']];
+ var side=[['Intercept','=INTERCEPT(C2:C11,B2:B11)'],['Correlation r','=CORREL(B2:B11,C2:C11)'],['Mean GDP','=AVERAGE(B2:B11)'],['Mean life expectancy','=AVERAGE(C2:C11)'],['SD of GDP','=STDEV(B2:B11)'],['SD of life expectancy','=STDEV(C2:C11)']];
+ D.sa.forEach(function(p,i){var n=i+2;var r=[p.n,p.x.toFixed(1),p.y.toFixed(1),'=0.4348*B'+n+'+69.04','=C'+n+'-D'+n,'=E'+n+'^2'];if(side[i])r=r.concat(['',side[i][0],side[i][1]]);rows.push(r);});
+ rows.push(['','','','','Sum of squares','=SUM(F2:F11)']);
+ var csv=rows.map(function(r){return r.map(function(v){return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(',');}).join('\r\n')+'\r\n';
+ var tsv=rows.map(function(r){return r.join('\t');}).join('\n')+'\n';
+ var a=document.getElementById('csvLink');
+ a.addEventListener('click',function(){try{var blob=new Blob([csv],{type:'text/csv'});a.href=URL.createObjectURL(blob);}catch(e){a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);}});
+ a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+ var msg=document.getElementById('copyMsg');
+ document.getElementById('copyBtn').addEventListener('click',function(){
+  function fallback(){var t=document.createElement('textarea');t.value=tsv;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();var ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(t);msg.textContent=ok?'Copied.':'Copying failed; use the CSV file.';}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(tsv).then(function(){msg.textContent='Copied.';},fallback);}else fallback();});
+ window.__layout={csv:csv,tsv:tsv};
+})();
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-08/8-1-mean-median-and-standard-deviation/" style="color:inherit">&larr; 8.1 Mean, median and standard deviation</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-08/8-3-misleading-graphs-and-analyses/" style="color:inherit">8.3 Misleading graphs and analyses &rarr;</a></nav>
+</body>
+</html>

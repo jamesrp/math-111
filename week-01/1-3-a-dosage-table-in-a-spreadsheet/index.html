@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A dosage table in a spreadsheet</title>
+<style>
+:root{
+  --bg:#fdfdfb; --text:#1d1d1f; --muted:#5a5a60; --rule:#d9d9d4;
+  --box:#f3f5f8; --boxrule:#9fb3c8; --sol:#f6f6f1; --code:#eef0f3; --accent:#1f5f99;
+  --head:#e9edf2;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17181b; --text:#e6e6e6; --muted:#a4a4ab; --rule:#3a3b40;
+    --box:#20252c; --boxrule:#4f6b88; --sol:#1f2023; --code:#2a2c31; --accent:#8cc0f0;
+    --head:#262b33;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17181b; --text:#e6e6e6; --muted:#a4a4ab; --rule:#3a3b40;
+  --box:#20252c; --boxrule:#4f6b88; --sol:#1f2023; --code:#2a2c31; --accent:#8cc0f0;
+  --head:#262b33;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:18px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:46rem;margin:0 auto;padding:1.5rem 16px 4rem}
+.kicker{font:600 0.9rem/1.3 system-ui,sans-serif;color:var(--muted);letter-spacing:.02em;margin:0}
+h1{font:700 2rem/1.2 system-ui,sans-serif;margin:.3rem 0 1.2rem}
+h2{font:700 1.35rem/1.3 system-ui,sans-serif;margin:2.4rem 0 .6rem;padding-top:.6rem;border-top:1px solid var(--rule)}
+h3{font:700 1.05rem/1.3 system-ui,sans-serif;margin:1.6rem 0 .4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.f{font:0.88em/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--code);padding:.05em .3em;border-radius:3px;white-space:nowrap}
+.scroll{overflow-x:auto;margin:.8rem 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font:0.92rem/1.35 system-ui,sans-serif}
+th,td{border:1px solid var(--rule);padding:.3rem .55rem;text-align:left;vertical-align:top}
+th{background:var(--head)}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+caption{caption-side:top;text-align:left;font:0.85rem/1.35 system-ui,sans-serif;color:var(--muted);padding-bottom:.3rem}
+.sheet th.rc{background:var(--head);color:var(--muted);font-weight:500;text-align:center}
+.sheet td{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;white-space:nowrap}
+.math{white-space:normal}
+.frac{white-space:nowrap}
+.frac{display:inline-block;vertical-align:middle;text-align:center;font-size:.92em;margin:0 .15em}
+.frac>span{display:block;padding:0 .2em}
+.frac>span:first-child{border-bottom:1px solid currentColor}
+.display{margin:.8rem 0 .8rem 1rem;line-height:2.2}
+.task{border:2px solid var(--boxrule);background:var(--box);border-radius:6px;padding:.7rem 1rem;margin:1.4rem 0 .4rem}
+.task h3{margin:.1rem 0 .4rem;font-size:1rem}
+.task ol,.task ul{margin:.4rem 0;padding-left:1.4rem}
+details.sol{border:1px solid var(--rule);background:var(--sol);border-radius:6px;padding:.5rem 1rem;margin:0 0 1.4rem}
+details.sol summary{cursor:pointer;font:600 .95rem/1.4 system-ui,sans-serif;color:var(--accent)}
+details.sol[open] summary{margin-bottom:.4rem}
+.quote{border-left:3px solid var(--rule);margin:.8rem 0;padding:.1rem 0 .1rem .9rem;color:var(--text)}
+.tools{border:1px dashed var(--boxrule);border-radius:6px;padding:.7rem 1rem;margin:1rem 0}
+.tools h3{margin:.1rem 0 .4rem;font-size:1rem}
+.btns{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
+button{font:600 .9rem/1.2 system-ui,sans-serif;padding:.5rem .8rem;border-radius:5px;border:1px solid var(--boxrule);background:var(--bg);color:var(--text);cursor:pointer}
+button:hover{border-color:var(--accent)}
+.status{font:0.85rem/1.3 system-ui,sans-serif;color:var(--muted);min-height:1.2em}
+textarea{width:100%;height:9rem;font:0.8rem/1.35 ui-monospace,Menlo,Consolas,monospace;background:var(--code);color:var(--text);border:1px solid var(--rule);border-radius:4px;padding:.4rem}
+.small{font-size:.9rem;color:var(--muted)}
+.full{max-height:26rem;overflow:auto}
+.full th{position:sticky;top:0}
+ol.sources{padding-left:1.6rem}
+ol.sources li{margin:.5rem 0;font-size:.95rem}
+@media (max-width:520px){
+  body{font-size:17px}
+  h1{font-size:1.6rem}
+  .display{margin-left:0}
+  table{font-size:.8rem}
+  th,td{padding:.25rem .35rem}
+  .task,details.sol,.tools{padding-left:.7rem;padding-right:.7rem}
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-01/1-2-concentrations-and-percentages/" style="color:inherit">&larr; 1.2 Concentrations and percentages</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-02/2-1-linear-equations-from-a-nutrition-target/" style="color:inherit">2.1 Linear equations from a nutrition target &rarr;</a></nav>
+
+<main>
+
+<p class="kicker">Math 111 · Module: Titrating medicine · Lecture 3 of 3</p>
+<h1>A dosage table in a spreadsheet</h1>
+
+<p>A bottle of Children's Tylenol liquid contains 160 mg of acetaminophen in each 5 mL, and its label prints a dosing chart by weight [1]. In lecture 1.1 you computed one dose by hand. The chart covers children from 24 to 95 pounds, which is 72 whole-pound weights. Computing each of them by hand is slow, and one slip on a calculator gives a wrong dose that looks like a right one.</p>
+
+<p>This is a mathematics lecture, not clinical training. Real dosing follows the prescriber's order, the product label and the institution's protocol; the numbers here illustrate the arithmetic.</p>
+
+<h2>1. The dosing chart on the package</h2>
+
+<p>The label of Children's Tylenol oral suspension (160 mg per 5 mL) says: “find right dose on chart below. If possible, use weight to dose; otherwise, use age.” It also says “repeat dose every 4 hours while symptoms last” and “do not give more than 5 times in 24 hours” [1]. Its chart, quoted exactly:</p>
+
+<div class="scroll">
+<table>
+<caption>Dosing chart from the Children's Tylenol label [1]</caption>
+<thead><tr><th>Weight (lb)</th><th>Age (yr)</th><th>Dose (mL)*</th></tr></thead>
+<tbody>
+<tr><td>under 24</td><td>under 2 years</td><td>ask a doctor</td></tr>
+<tr><td>24-35 lbs</td><td>2-3 years</td><td>5 mL</td></tr>
+<tr><td>36-47 lbs</td><td>4-5 years</td><td>7.5 mL</td></tr>
+<tr><td>48-59 lbs</td><td>6-8 years</td><td>10 mL</td></tr>
+<tr><td>60-71 lbs</td><td>9-10 years</td><td>12.5 mL</td></tr>
+<tr><td>72-95 lbs</td><td>11 years</td><td>15 mL</td></tr>
+</tbody>
+</table>
+</div>
+<p class="small">*or as directed by a doctor</p>
+
+<p>Each row of the chart is a <b>weight band</b>: a range of weights that all get the same dose. A child who weighs 24 lb and a child who weighs 35 lb both get 5 mL.</p>
+
+<p>To compute a dose from weight we need a dose per kilogram. StatPearls, a medical reference hosted on the National Library of Medicine's NCBI Bookshelf, says: “The recommended dosage for children aged 2 to 12 is 12.5 mg/kg every 4 hours or 15 mg/kg every 6 hours,” and “The maximum single dose should not exceed 15 mg/kg” [2]. The label repeats doses every 4 hours, so our computed column uses <b>12.5 mg per kg</b>.</p>
+
+<p>One pound is 0.4535924 kg [3], so 1 kg is 1 ÷ 0.4535924 = 2.2046 lb. We round this to <b>2.2 lb per kg</b>. This simplification makes every weight in kg about 0.2% too large, which is far smaller than the differences we will find between the chart and our table.</p>
+
+<h2>2. One dose by hand</h2>
+
+<p>For a child who weighs 50 lb, the dose takes three conversions, each a multiplication by a fraction equal to 1, as in lecture 1.1.</p>
+
+<div class="display">
+<span class="math">50 lb × <span class="frac"><span>1 kg</span><span>2.2 lb</span></span> = 22.727 kg</span><br>
+<span class="math">22.727 kg × <span class="frac"><span>12.5 mg</span><span>1 kg</span></span> = 284.09 mg</span><br>
+<span class="math">284.09 mg × <span class="frac"><span>5 mL</span><span>160 mg</span></span> = 8.88 mL</span>
+</div>
+
+<p>The first fraction changes pounds to kilograms. The second is the dose rate: 12.5 mg for each kg of body weight. The third uses the concentration of the liquid, 160 mg in 5 mL, turned so that mg cancels and mL is left. We keep all the digits until the last step and round only the answer.</p>
+
+<p>The chart puts 50 lb in the 48-59 lb band and gives 10 mL. Our computed 8.88 mL is different. Section 4 explains why.</p>
+
+<div class="task">
+<h3>Task 1 (about 3 minutes, calculator)</h3>
+<p>A child weighs 30 lb. Using 2.2 lb per kg, 12.5 mg per kg and 160 mg per 5 mL, write down the three answers below. Keep all the digits on your calculator from one step to the next; round only what you write down.</p>
+<ol>
+<li>the weight in kg, to two decimal places;</li>
+<li>the dose in mg, to two decimal places;</li>
+<li>the dose in mL, to two decimal places;</li>
+<li>the dose the chart gives for 30 lb.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 1</summary>
+<div class="display">
+<span class="math">30 lb × <span class="frac"><span>1 kg</span><span>2.2 lb</span></span> = 13.636… kg</span><br>
+<span class="math">13.636… kg × <span class="frac"><span>12.5 mg</span><span>1 kg</span></span> = 170.45 mg</span><br>
+<span class="math">170.45 mg × <span class="frac"><span>5 mL</span><span>160 mg</span></span> = 5.33 mL</span>
+</div>
+<p>Written to two decimal places, the answers are 13.64 kg, 170.45 mg and 5.33 mL.</p>
+<p>If you carried the rounded 13.64 kg into the second step, you got 13.64 × 12.5 = 170.50 mg. The small difference comes from rounding too early; the dose in mL is 5.33 either way.</p>
+<p>The chart puts 30 lb in the 24-35 lb band, so it gives 5 mL.</p>
+</details>
+
+<p>Each weight needs three calculator steps. For 72 weights that is 216 steps, with 216 chances to mistype. A spreadsheet does the three steps for one weight, and then repeats them for every other weight with no further typing.</p>
+
+<h2>3. Using a spreadsheet</h2>
+
+<h3>Cells, columns and the header row</h3>
+
+<p>A spreadsheet is a grid. Columns are named by letters (A, B, C, …) and rows by numbers (1, 2, 3, …). Each box in the grid is a <b>cell</b>, and its <b>address</b> is its column letter followed by its row number. The cell in column B, row 2 has address B2.</p>
+
+<p>We put one kind of quantity in each column, with its unit. Row 1 is the <b>header row</b>: it holds the name of each column and nothing else. Each later row is one child's weight.</p>
+
+<h3>Formulas</h3>
+
+<p>A <b>formula</b> is a cell entry that starts with <code>=</code>. The spreadsheet computes it and shows the result. A formula can use the number in another cell by naming its address. For example, <code>=A2/2.2</code> means “take the number in A2 and divide it by 2.2”. If you later change the number in A2, the result changes too.</p>
+
+<p>The spreadsheet uses <code>*</code> for multiplication and <code>/</code> for division, and it follows the order of operations from lecture 1.1.</p>
+
+<p>The three hand steps from Section 2 become three formulas, one per column:</p>
+
+<div class="scroll">
+<table class="sheet">
+<caption>Dosage table, rows 1 to 3 as typed</caption>
+<thead><tr><th class="rc"></th><th class="rc">A</th><th class="rc">B</th><th class="rc">C</th><th class="rc">D</th></tr></thead>
+<tbody>
+<tr><th class="rc">1</th><td>Weight (lb)</td><td>Weight (kg)</td><td>Dose (mg)</td><td>Dose (mL)</td></tr>
+<tr><th class="rc">2</th><td>24</td><td>=A2/2.2</td><td>=B2*12.5</td><td>=C2*5/160</td></tr>
+<tr><th class="rc">3</th><td>=A2+1</td><td></td><td></td><td></td></tr>
+</tbody>
+</table>
+</div>
+
+<ul>
+<li><code>=A2/2.2</code> in B2 changes the pounds in A2 to kilograms.</li>
+<li><code>=B2*12.5</code> in C2 multiplies the kilograms in B2 by 12.5 mg per kg.</li>
+<li><code>=C2*5/160</code> in D2 multiplies the milligrams in C2 by the fraction 5 mL / 160 mg.</li>
+<li><code>=A2+1</code> in A3 adds 1 to the weight above it, which gives 25.</li>
+</ul>
+
+<p>The numbers 2.2, 12.5, 5 and 160 are typed inside the formulas. A number fixed inside a formula is called a <b>constant</b>. Section 6 comes back to them.</p>
+
+<h3>Copying a formula down</h3>
+
+<p>To fill the table, copy the formulas down to row 73. Row 73 is the last row because the weights 24 through 95 take 72 rows, and they start in row 2.</p>
+
+<ul>
+<li>Fill handle: click a cell, then drag the small square at its bottom-right corner down to row 73.</li>
+<li>Keyboard: select from the formula cell down to row 73 (for example B2 to D73), then press Ctrl+D (Cmd+D on a Mac). This works in Excel and in Google Sheets.</li>
+</ul>
+
+<p>When a formula is copied down one row, every cell address in it moves down one row as well. The copy of <code>=A2/2.2</code> in B3 becomes <code>=A3/2.2</code>, and the copy in B73 becomes <code>=A73/2.2</code>. Addresses that shift like this are called <b>relative references</b>. The spreadsheet stores <code>=A2/2.2</code> in B2 as “the cell in the same row, one column to the left, divided by 2.2”, so each row uses its own weight.</p>
+
+<div class="scroll">
+<table class="sheet">
+<caption>What the copies in column B and column A contain</caption>
+<thead><tr><th>Cell</th><th>Formula</th><th>Uses</th><th>Shows</th></tr></thead>
+<tbody>
+<tr><td>B2</td><td>=A2/2.2</td><td>A2 = 24</td><td>10.909…</td></tr>
+<tr><td>B3</td><td>=A3/2.2</td><td>A3 = 25</td><td>11.363…</td></tr>
+<tr><td>B73</td><td>=A73/2.2</td><td>A73 = 95</td><td>43.181…</td></tr>
+<tr><td>A3</td><td>=A2+1</td><td>A2 = 24</td><td>25</td></tr>
+<tr><td>A73</td><td>=A72+1</td><td>A72 = 94</td><td>95</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two display settings help. Ctrl+` (the key left of 1, also marked ~) switches between showing results and showing formulas, in Excel and in Google Sheets. The “decrease decimal places” button on the toolbar shows fewer digits; the cell still keeps all of them for later formulas.</p>
+
+<div class="task">
+<h3>Task 2 (about 8 minutes, laptop with Excel or Google Sheets)</h3>
+<ol>
+<li>In a new sheet, type rows 1 to 3 exactly as in the table “Dosage table, rows 1 to 3 as typed” earlier in this section.</li>
+<li>Copy A3 down to A73. Check that A73 shows 95.</li>
+<li>Copy B2:D2 down to row 73.</li>
+<li>Write down the dose in mL (column D, two decimal places) for 24 lb, 50 lb and 95 lb, and the formula that is in D73.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 2</summary>
+<div class="scroll">
+<table>
+<thead><tr><th>Row</th><th>Weight (lb)</th><th>Weight (kg)</th><th>Dose (mg)</th><th>Dose (mL)</th></tr></thead>
+<tbody>
+<tr><td>2</td><td class="n">24</td><td class="n">10.91</td><td class="n">136.36</td><td class="n">4.26</td></tr>
+<tr><td>28</td><td class="n">50</td><td class="n">22.73</td><td class="n">284.09</td><td class="n">8.88</td></tr>
+<tr><td>73</td><td class="n">95</td><td class="n">43.18</td><td class="n">539.77</td><td class="n">16.87</td></tr>
+</tbody>
+</table>
+</div>
+<p>D73 contains <code>=C73*5/160</code>. The 50 lb row matches the hand calculation in Section 2. If your 95 lb row is not in row 73, check A2 and A3: A2 must hold the number 24 and A3 the formula <code>=A2+1</code>.</p>
+</details>
+
+<div class="tools" id="tools-dose4">
+<h3>Spreadsheet layout: dosage table, columns A to D (with formulas)</h3>
+<p>This is the sheet from Task 2, all 73 rows. Use it if your own sheet goes wrong, or to check it.</p>
+<ul>
+<li>Copy: click cell A1 of an empty sheet and paste (Ctrl+V, or Cmd+V on a Mac).</li>
+<li>CSV: open the downloaded file in Excel, or in Google Sheets use File › Import › Upload.</li>
+<li>If pasting puts every row into column A: in Google Sheets use Data › Split text to columns; in Excel use Data › Text to Columns with Tab as the delimiter.</li>
+<li>If formulas appear as text, open the CSV file instead.</li>
+<li>If the Copy button does nothing, open “Show the layout as text”, select all of it and copy it.</li>
+</ul>
+<p>The formulas use only cell addresses, numbers and the signs <code>+</code> <code>-</code> <code>*</code> <code>/</code>. A script recalculated every formula in the layouts and compared the results with the numbers on this page. The layouts have not been tested inside Excel or Google Sheets themselves; the steps above are what to try if pasting fails.</p>
+<div class="btns">
+<button type="button" data-copy="dose4">Copy layout</button>
+<button type="button" data-csv="dose4">Download CSV</button>
+</div>
+<p class="status" aria-live="polite"></p>
+<details><summary class="small">Show the layout as text</summary>
+<textarea readonly data-text="dose4" aria-label="Dosage table layout, columns A to D, tab-separated"></textarea>
+</details>
+</div>
+
+<h2>4. Comparing the computed table with the chart</h2>
+
+<p>We add three columns to the dosage table.</p>
+
+<ul>
+<li><b>E, Chart dose (mL).</b> The dose the label gives for that weight. Copying a plain number down copies the same number. Type 5 in E2 and copy it down to E13 (24 to 35 lb). Then type 7.5 in E14 and copy to E25 (36 to 47 lb), 10 in E26 to E37 (48 to 59 lb), 12.5 in E38 to E49 (60 to 71 lb), and 15 in E50 to E73 (72 to 95 lb).</li>
+<li><b>F, Difference (mL).</b> <code>=E2-D2</code>, copied down. A positive difference means the chart gives more than our computed dose; a negative one means it gives less.</li>
+<li><b>G, Chart rate (mg/kg).</b> <code>=E2*160/5/B2</code>, copied down. The part <code>E2*160/5</code> changes the chart's mL to mg. Dividing by the weight in kg in B2 gives the mg per kg that the chart's dose amounts to for that child.</li>
+</ul>
+
+<p>To find the largest number in a column, a spreadsheet has the function MAX. A <b>range</b> such as F2:F73 means every cell from F2 down to F73. Typing <code>=MAX(F2:F73)</code> in an empty cell shows the largest difference, and <code>=MIN(F2:F73)</code> shows the smallest. You can also find them by reading down the column.</p>
+
+<div class="task">
+<h3>Task 3 (about 10 minutes, laptop with Excel or Google Sheets)</h3>
+<ol>
+<li>Add columns E, F and G as described above.</li>
+<li>Write down the largest and the smallest value in column F, to two decimal places, and the weight in each of those rows.</li>
+<li>Write down the largest and the smallest value in column G, to two decimal places, and the weight or weights where each occurs.</li>
+<li>Look at the rows for 24 to 35 lb. Write one sentence that says why column F starts positive and ends negative inside that band.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 3</summary>
+
+<ol start="2">
+<li>The largest difference is +2.22 mL, at 72 lb (chart 15 mL, computed 12.78 mL). The smallest is −1.87 mL, at 95 lb (chart 15 mL, computed 16.87 mL).</li>
+<li>The largest chart rate is 14.67 mg/kg. It occurs five times, at 24, 36, 48, 60 and 72 lb, the lightest weight in each band. The smallest is 10.06 mg/kg, at 35 lb.</li>
+<li>Inside the band the chart dose stays at 5 mL while the computed dose grows with weight, from 4.26 mL at 24 lb to 6.21 mL at 35 lb, so it passes 5 mL (between 28 and 29 lb) and the difference turns negative.</li>
+</ol>
+<p>The full table (step 1), rounded for display; your spreadsheet shows more digits.</p>
+<div class="scroll full">
+<table id="fulltable">
+<thead><tr><th>Row</th><th>A Weight (lb)</th><th>B Weight (kg)</th><th>C Dose (mg)</th><th>D Dose (mL)</th><th>E Chart dose (mL)</th><th>F Difference (mL)</th><th>G Chart rate (mg/kg)</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</details>
+
+<div class="tools" id="tools-dose">
+<h3>Spreadsheet layout: dosage table, columns A to G (with formulas)</h3>
+<p>This is the finished sheet from Task 3, all 73 rows. It is used the same way as the layout for columns A to D in Section 3.</p>
+<div class="btns">
+<button type="button" data-copy="dose">Copy layout</button>
+<button type="button" data-csv="dose">Download CSV</button>
+</div>
+<p class="status" aria-live="polite"></p>
+<details><summary class="small">Show the layout as text</summary>
+<textarea readonly data-text="dose" aria-label="Dosage table layout, columns A to G, tab-separated"></textarea>
+</details>
+</div>
+
+<p>The chart and the computed table differ for three reasons.</p>
+
+<p><b>Weight bands.</b> The chart gives one dose for a band of 12 whole-pound weights (24 for the last band, 72 to 95 lb). The computed dose rises a little with every pound. So the chart gives more than the computed dose at the light end of each band and less at the heavy end. The biggest gaps sit at the edges of the bands: +2.22 mL at 72 lb, the first weight of the last band, and −1.87 mL at 95 lb, its last weight.</p>
+
+<p><b>Rounding.</b> The chart's doses are multiples of 2.5 mL. Our computed doses such as 8.88 mL are not.</p>
+
+<p><b>The dose rate.</b> We used 12.5 mg/kg for every child. Column G shows the rate the chart's doses amount to: it starts at 14.67 mg/kg at the lightest weight of each band and falls as weight rises within the band, to between 10.06 and 12.39 mg/kg at the heaviest weight of a band. It never goes above 15 mg/kg, the maximum single dose in [2]. The light end of each band shows a pattern:</p>
+
+<div class="display">
+<span class="math"><span class="frac"><span>160 mg</span><span>24 lb</span></span> = <span class="frac"><span>240 mg</span><span>36 lb</span></span> = <span class="frac"><span>320 mg</span><span>48 lb</span></span> = <span class="frac"><span>400 mg</span><span>60 lb</span></span> = <span class="frac"><span>480 mg</span><span>72 lb</span></span> = 6.67 mg per lb</span>
+</div>
+
+<p>and 6.67 mg per lb × 2.2 lb per kg = 14.67 mg per kg. The label does not say how its chart was made; this pattern is what the numbers show. In every band the chart's rate falls from above 12.5 mg/kg to below it, which is why our computed dose is under the chart dose at the light end of each band and over it at the heavy end.</p>
+
+<h2>5. IV infusion rates</h2>
+
+<p>An IV bag can run fluid into a vein by gravity through IV tubing [4]. The fluid falls in drops, so the rate can be given in mL per hour or in drops per minute.</p>
+
+<p>An infusion order gives a volume and a time. The order used here is <b>made up for this example</b>: 1,000 mL of fluid over 8 hours. The rate in mL per hour is volume divided by time:</p>
+
+<div class="display"><span class="math"><span class="frac"><span>1000 mL</span><span>8 h</span></span> = 125 mL per hour</span></div>
+
+<p>To count drops we need the <b>drip factor</b> of the tubing (also called the drop factor). Open RN's nursing textbook defines it: “The drop factor is the number of drops in one mL of solution using gravity IV tubing.” It continues: “Macrodrip includes tubing with drop factors of 10, 15, or 20 drops per mililiter [sic] and is typically used to deliver general IV solutions to adults. Microdrip includes tubing with a drop factor of 60 drops per milliliter” [4]. The textbook adds: “The drop factor is printed on the IV tubing package” [4].</p>
+
+<p>With 15 drops per mL tubing, change mL per hour to drops per minute by multiplying by two fractions equal to 1:</p>
+
+<div class="display">
+<span class="math">125 <span class="frac"><span>mL</span><span>h</span></span> × <span class="frac"><span>1 h</span><span>60 min</span></span> × <span class="frac"><span>15 drops</span><span>1 mL</span></span> = 31.25 drops per minute</span>
+</div>
+
+<p>Hours cancel, mL cancels, and drops per minute is left. Nobody can count a quarter of a drop, so the textbook rounds to the nearest whole number [4]: 31 drops per minute.</p>
+
+<p>The same two steps build a second small table. Put it in a new sheet (the tabs at the bottom of the window), so that its cell addresses do not mix with the dosage table. The orders in rows 2 to 5 are made up. Column B holds the time in hours, so the 30 minutes in row 5 is typed as 0.5.</p>
+
+<div class="scroll">
+<table class="sheet">
+<caption>IV table as typed</caption>
+<thead><tr><th class="rc"></th><th class="rc">A</th><th class="rc">B</th><th class="rc">C</th><th class="rc">D</th></tr></thead>
+<tbody>
+<tr><th class="rc">1</th><td>Volume (mL)</td><td>Time (h)</td><td>Rate (mL/h)</td><td>Drops per minute</td></tr>
+<tr><th class="rc">2</th><td>1000</td><td>8</td><td>=A2/B2</td><td>=C2/60*15</td></tr>
+<tr><th class="rc">3</th><td>500</td><td>6</td><td></td><td></td></tr>
+<tr><th class="rc">4</th><td>250</td><td>2.5</td><td></td><td></td></tr>
+<tr><th class="rc">5</th><td>100</td><td>0.5</td><td></td><td></td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>=A2/B2</code> divides volume by time. <code>=C2/60*15</code> divides mL per hour by 60 minutes per hour, then multiplies by 15 drops per mL. Copied down, each row uses its own volume and time.</p>
+
+<div class="task">
+<h3>Task 4 (about 4 minutes, laptop with Excel or Google Sheets)</h3>
+<ol>
+<li>In a new sheet, type the IV table above and copy C2:D2 down to row 5.</li>
+<li>For each of the four orders, write down the rate in mL per hour (two decimal places) and the drops per minute, both as the spreadsheet shows them (two decimal places) and rounded to a whole number.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 4</summary>
+<div class="scroll">
+<table>
+<thead><tr><th>Order</th><th>Rate (mL/h)</th><th>Drops per minute</th><th>Rounded</th></tr></thead>
+<tbody>
+<tr><td>1000 mL over 8 h</td><td class="n">125.00</td><td class="n">31.25</td><td class="n">31</td></tr>
+<tr><td>500 mL over 6 h</td><td class="n">83.33</td><td class="n">20.83</td><td class="n">21</td></tr>
+<tr><td>250 mL over 2.5 h</td><td class="n">100.00</td><td class="n">25.00</td><td class="n">25</td></tr>
+<tr><td>100 mL over 0.5 h</td><td class="n">200.00</td><td class="n">50.00</td><td class="n">50</td></tr>
+</tbody>
+</table>
+</div>
+<p>Row 3 by hand: 500 ÷ 6 = 83.33 mL per hour, and 83.333 ÷ 60 × 15 = 20.83, which rounds to 21 drops per minute.</p>
+</details>
+
+<div class="task">
+<h3>Task 5 (about 3 minutes, laptop with Excel or Google Sheets)</h3>
+<ol>
+<li>The hospital unit switches to tubing with a drip factor of 20 drops per mL. Change column D of your IV table so it uses 20. Write down the new drops per minute for the four orders (rounded to whole numbers) and which cells you had to change.</li>
+<li>Now change column D to the microdrip factor, 60 drops per mL. Compare columns C and D and write one sentence explaining what you see.</li>
+</ol>
+</div>
+<details class="sol"><summary>Solution to Task 5</summary>
+<ol>
+<li>Change D2 to <code>=C2/60*20</code> and copy it down to D5 again (or edit D2, D3, D4 and D5 one at a time). The new values are 41.67, 27.78, 33.33 and 66.67, which round to 42, 28, 33 and 67 drops per minute. Every cell in column D had to change, because each one holds its own copy of the 15.</li>
+<li>With <code>=C2/60*60</code>, column D shows the same numbers as column C: 125, 83.33, 100 and 200. Dividing by 60 minutes per hour and multiplying by 60 drops per mL cancel, so with microdrip tubing the drops per minute equal the mL per hour.</li>
+</ol>
+</details>
+
+<div class="tools" id="tools-iv">
+<h3>Spreadsheet layout: IV table (with formulas, 15 drops per mL)</h3>
+<p>This is the sheet from Task 4. It is used the same way as the dosage layouts.</p>
+<div class="btns">
+<button type="button" data-copy="iv">Copy layout</button>
+<button type="button" data-csv="iv">Download CSV</button>
+</div>
+<p class="status" aria-live="polite"></p>
+<details><summary class="small">Show the layout as text</summary>
+<textarea readonly data-text="iv" aria-label="IV table layout, tab-separated"></textarea>
+</details>
+</div>
+
+<h2>6. Constants inside formulas</h2>
+
+<p>Every formula in both tables carries its own constants. Each of the 72 cells in column B holds its own 2.2, each cell in column C its own 12.5, and each cell in column D of the IV table its own 15. When a constant changes, every formula that contains it has to be edited. Task 5 showed this with the drip factor. In the dosage table, switching to 15 mg/kg, the other rate in [2], means rewriting C2 and copying it down all 72 rows again. Using 2.2046 lb per kg instead of 2.2 means the same for column B, and column G uses B. In a larger spreadsheet, a constant that is missed in one cell leaves a wrong number that looks exactly like the right ones around it.</p>
+
+<p>A tempting fix is to type the constant once, say 12.5 in cell H1, and write <code>=B2*H1</code> in C2. Copying that down does not work. Relative references move, so C3 receives <code>=B3*H2</code>, and H2 is empty, so C3 shows 0.</p>
+
+<p>That leaves a question for lecture 4.1 (Buying a house): how to write a formula that refers to one fixed cell holding a constant, and keeps referring to that same cell when it is copied down.</p>
+
+<h2>Sources</h2>
+<ol class="sources">
+<li>Kenvue Brands LLC. <i>Children's Tylenol (acetaminophen) suspension</i>, drug label. DailyMed, U.S. National Library of Medicine. Label updated November 7, 2024; read October 4, 2026. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=46ddbfde-54ab-4373-b832-b9c0620b1e9d">dailymed.nlm.nih.gov, setid 46ddbfde-54ab-4373-b832-b9c0620b1e9d</a>. Quoted: “Acetaminophen 160 mg” in each 5 mL; the directions and the dosing chart in Section 1.</li>
+<li>Gerriets V, Patel P, Nappe TM. Acetaminophen. In: <i>StatPearls</i>. StatPearls Publishing, NCBI Bookshelf NBK482369. Last update January 11, 2024; read October 4, 2026. <a href="https://www.ncbi.nlm.nih.gov/books/NBK482369/">ncbi.nlm.nih.gov/books/NBK482369</a>. Quoted: “The recommended dosage for children aged 2 to 12 is 12.5 mg/kg every 4 hours or 15 mg/kg every 6 hours”; “The maximum single dose should not exceed 15 mg/kg.”</li>
+<li>National Institute of Standards and Technology. <i>NIST Guide to the SI</i> (Special Publication 811), Appendix B.9. Last modified August 18, 2025; read October 4, 2026. <a href="https://www.nist.gov/pml/special-publication-811/nist-guide-si-appendix-b-conversion-factors/nist-guide-si-appendix-b9">nist.gov, SP 811 Appendix B.9</a>. Quoted: pound (avoirdupois) to kilogram, 4.535 924 E−01, that is 1 lb = 0.4535924 kg.</li>
+<li>Ernstmeyer K, Christman E, editors. <i>Nursing Skills</i>, 2nd edition, Section 5.14 “IV Infusion by Gravity”. Open Resources for Nursing (Open RN), WisTech Open, 2023; read October 4, 2026. <a href="https://wtcs.pressbooks.pub/nursingskills/chapter/5-14-iv-infusion-by-gravity/">wtcs.pressbooks.pub/nursingskills</a>. Quoted: the definition of drop factor; macrodrip 10, 15 or 20 drops per mL; microdrip 60 drops per mL; “The drop factor is printed on the IV tubing package”; rounding drops to the nearest whole number.</li>
+</ol>
+
+</main>
+
+<script>
+(function(){
+  // One source of truth for the layouts, the full table and the downloads.
+  function chartDose(lb){
+    if(lb<=35) return 5;
+    if(lb<=47) return 7.5;
+    if(lb<=59) return 10;
+    if(lb<=71) return 12.5;
+    return 15;
+  }
+  function doseRows(){
+    var rows=[["Weight (lb)","Weight (kg)","Dose (mg)","Dose (mL)","Chart dose (mL)","Difference (mL)","Chart rate (mg/kg)"]];
+    for(var lb=24; lb<=95; lb++){
+      var r=lb-22; // row number in the sheet
+      rows.push([
+        r===2 ? "24" : "=A"+(r-1)+"+1",
+        "=A"+r+"/2.2",
+        "=B"+r+"*12.5",
+        "=C"+r+"*5/160",
+        String(chartDose(lb)),
+        "=E"+r+"-D"+r,
+        "=E"+r+"*160/5/B"+r
+      ]);
+    }
+    return rows;
+  }
+  function ivRows(){
+    var data=[[1000,8],[500,6],[250,2.5],[100,0.5]];
+    var rows=[["Volume (mL)","Time (h)","Rate (mL/h)","Drops per minute"]];
+    data.forEach(function(d,i){
+      var r=i+2;
+      rows.push([String(d[0]),String(d[1]),"=A"+r+"/B"+r,"=C"+r+"/60*15"]);
+    });
+    return rows;
+  }
+  var full=doseRows();
+  var layouts={dose:full, dose4:full.map(function(r){return r.slice(0,4);}), iv:ivRows()};
+  function tsv(rows){ return rows.map(function(r){return r.join("\t");}).join("\n"); }
+  function csv(rows){
+    return rows.map(function(r){
+      return r.map(function(c){ return /[",\n]/.test(c) ? '"'+c.replace(/"/g,'""')+'"' : c; }).join(",");
+    }).join("\r\n")+"\r\n";
+  }
+  window.math111Layouts={tsv:function(k){return tsv(layouts[k]);}, csv:function(k){return csv(layouts[k]);}, chartDose:chartDose};
+
+  document.querySelectorAll("textarea[data-text]").forEach(function(t){ t.value=tsv(layouts[t.getAttribute("data-text")]); });
+
+  function status(btn,msg){ var s=btn.closest(".tools").querySelector(".status"); if(s) s.textContent=msg; }
+  function fallbackCopy(text){
+    var ta=document.createElement("textarea");
+    ta.value=text; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    var ok=false; try{ ok=document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(ta); return ok;
+  }
+  document.querySelectorAll("button[data-copy]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var text=tsv(layouts[b.getAttribute("data-copy")]);
+      var done=function(){status(b,"Copied. Click cell A1 of an empty sheet and paste.");};
+      var fail=function(){ if(fallbackCopy(text)) done(); else status(b,"Copying was blocked. Open “Show the layout as text”, select it and copy it."); };
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,fail); }
+        else fail();
+      }catch(e){ fail(); }
+    });
+  });
+  document.querySelectorAll("button[data-csv]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var k=b.getAttribute("data-csv");
+      try{
+        var blob=new Blob([csv(layouts[k])],{type:"text/csv"});
+        var a=document.createElement("a");
+        a.href=URL.createObjectURL(blob);
+        a.download= {dose:"dosage-table-A-to-G.csv", dose4:"dosage-table-A-to-D.csv", iv:"iv-table.csv"}[k];
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+        status(b,"Download started: "+a.download);
+      }catch(e){ status(b,"Download was blocked. Open “Show the layout as text” and copy it instead."); }
+    });
+  });
+
+  // Full table for the Task 3 solution, computed the way the spreadsheet does.
+  var tb=document.querySelector("#fulltable tbody");
+  if(tb){
+    var html="";
+    for(var lb=24; lb<=95; lb++){
+      var kg=lb/2.2, mg=kg*12.5, ml=mg*5/160, ch=chartDose(lb), diff=ch-ml, rate=ch*160/5/kg;
+      var sign = diff>0 ? "+" : (diff<0 ? "−" : "");
+      html+="<tr><td>"+(lb-22)+"</td><td class='n'>"+lb+"</td><td class='n'>"+kg.toFixed(2)+"</td><td class='n'>"+mg.toFixed(2)+
+        "</td><td class='n'>"+ml.toFixed(2)+"</td><td class='n'>"+ch+"</td><td class='n'>"+sign+Math.abs(diff).toFixed(2)+
+        "</td><td class='n'>"+rate.toFixed(2)+"</td></tr>";
+    }
+    tb.innerHTML=html;
+  }
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-01/1-2-concentrations-and-percentages/" style="color:inherit">&larr; 1.2 Concentrations and percentages</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-02/2-1-linear-equations-from-a-nutrition-target/" style="color:inherit">2.1 Linear equations from a nutrition target &rarr;</a></nav>
+</body>
+</html>

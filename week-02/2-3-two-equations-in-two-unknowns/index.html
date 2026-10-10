@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two equations in two unknowns</title>
+<style>
+:root {
+  --bg: #ffffff; --text: #1d1d1f; --muted: #5a5a60; --rule: #d8d8de;
+  --task-bg: #f3f6fb; --task-border: #3b6fb6; --sol-bg: #fbfbf4; --sol-border: #b9b38a;
+  --protein: #1f6fd1; --cal: #d0601b; --third: #2f8f4e; --grid: #e6e6ec; --axis: #44444a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 18px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+.header-line { color: var(--muted); font-size: 0.9rem; margin: 0 0 4px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 24px; }
+h2 { font-size: 1.4rem; margin: 40px 0 12px; padding-top: 12px; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.1rem; margin: 24px 0 8px; }
+p, li { max-width: 72ch; }
+var { font-style: italic; font-family: Georgia, "Times New Roman", serif; }
+.eq { display: block; margin: 10px 0 10px 1.2em; font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; overflow-x: auto; white-space: nowrap; }
+.eq .why { font-family: system-ui, sans-serif; font-size: 0.9rem; color: var(--muted); margin-left: 1em; white-space: normal; }
+.steps .eq { margin-left: 0; }
+table { border-collapse: collapse; margin: 12px 0; font-size: 0.95rem; }
+caption { caption-side: top; text-align: left; font-size: 0.9rem; color: var(--muted); padding-bottom: 4px; }
+th, td { border: 1px solid var(--rule); padding: 6px 10px; text-align: right; }
+th { background: #f5f5f7; text-align: center; }
+td:first-child, th:first-child { text-align: left; }
+.table-wrap { overflow-x: auto; }
+table.text td { text-align: left; }
+code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9em; white-space: nowrap; }
+.task { background: var(--task-bg); border-left: 5px solid var(--task-border); padding: 12px 16px; margin: 20px 0 8px; border-radius: 4px; }
+.task h3 { margin-top: 0; }
+details.solution { background: var(--sol-bg); border: 1px solid var(--sol-border); border-radius: 4px; padding: 8px 14px; margin: 0 0 20px; }
+details.solution summary { cursor: pointer; font-weight: 600; }
+details.solution[open] summary { margin-bottom: 8px; }
+figure { margin: 16px 0; }
+figcaption { font-size: 0.9rem; color: var(--muted); margin-top: 4px; }
+svg.graph { width: 100%; max-width: 640px; height: auto; display: block; background: #fff; border: 1px solid var(--rule); border-radius: 4px; touch-action: none; }
+.readout { font-variant-numeric: tabular-nums; margin: 8px 0; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 4px; max-width: 640px; }
+.readout b.p { color: var(--protein); } .readout b.c { color: var(--cal); }
+.hit { color: #1b7a3a; font-weight: 600; }
+button { font: inherit; font-size: 0.95rem; padding: 6px 12px; border: 1px solid var(--task-border); background: #fff; color: var(--task-border); border-radius: 4px; cursor: pointer; margin: 4px 8px 4px 0; }
+.sources li { margin-bottom: 8px; word-break: break-word; }
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .eq { white-space: normal; }
+  h1 { font-size: 1.6rem; }
+  th, td { padding: 4px 6px; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-02/2-2-graphing-lines-and-slope/" style="color:inherit">&larr; 2.2 Graphing lines and slope</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-03/3-1-inequalities/" style="color:inherit">3.1 Inequalities &rarr;</a></nav>
+
+<main>
+
+<p class="header-line">Math 111 · Module: What's for breakfast? (week 2) · Lecture 3 of 3</p>
+<h1>Two equations in two unknowns</h1>
+
+<h2>1. Two targets for one breakfast</h2>
+
+<p>In lecture 2.1 the target was 30 g of protein, and infinitely many combinations of oats and Greek yogurt reached it. A breakfast also has calories. Suppose the student wants 30 g of protein and 400 calories, from rolled oats and plain Greek yogurt. The 30 g is the target from lecture 2.1, and the 400 kcal is the student's own choice for this example.</p>
+
+<p>The foods and values are the ones in Table 1 of lecture 2.1, from USDA FoodData Central [1–5].</p>
+
+<div class="table-wrap">
+<table>
+<caption>Table 1. Protein and calories in one serving (USDA FoodData Central [1–5])</caption>
+<tr><th>Food</th><th>Serving</th><th>Weight (g)</th><th>Protein (g)</th><th>Calories (kcal)</th></tr>
+<tr><td>Oats, rolled or quick, dry [1]</td><td>½ cup</td><td>40.5</td><td>5.346</td><td>153</td></tr>
+<tr><td>Greek yogurt, plain, lowfat [2]</td><td>1 container (7 oz)</td><td>200</td><td>19.900</td><td>146</td></tr>
+<tr><td>Egg, whole, raw [3]</td><td>1 large egg</td><td>50</td><td>6.300</td><td>72</td></tr>
+<tr><td>Milk, 2% [4]</td><td>1 cup</td><td>244</td><td>8.052</td><td>122</td></tr>
+<tr><td>Peanut butter, smooth, unsalted [5]</td><td>2 tablespoons</td><td>32</td><td>7.104</td><td>191</td></tr>
+</table>
+</div>
+
+<p>Each value is the USDA per-100 g value scaled to the serving weight. For half a cup of oats: 13.2 g of protein per 100 g and 40.5 g of oats give 13.2 × 40.5 ÷ 100 = 5.346 g. Protein keeps three decimals and calories are rounded to whole numbers, as in lecture 2.1. These are USDA averages; the label on a particular brand can differ a little.</p>
+
+<p>Let <var>x</var> be the number of servings of oats (half-cups, dry) and <var>y</var> the number of containers of yogurt. Each target gives an equation, written the way lecture 2.1 wrote the protein target:</p>
+
+<span class="eq">protein: &nbsp; 5.346<var>x</var> + 19.9<var>y</var> = 30</span>
+<span class="eq">calories: &nbsp; 153<var>x</var> + 146<var>y</var> = 400</span>
+
+<p>A breakfast meets both targets when the same pair (<var>x</var>, <var>y</var>) makes both equations true. Lecture 2.1 already gives a way to search: choose <var>x</var>, solve the protein equation for <var>y</var>, and see what the calories come to.</p>
+
+<div class="task" id="task1">
+<h3>Task 1 (about 6 minutes, spreadsheet)</h3>
+<p>Build the sheet below. Type rows 1 to 3 yourself, or download the CSV or copy the layout and paste it into cell A1; both contain rows 1 to 3 only. Then copy row 3 (cells A3 to D3) down to row 14, and check that A14 shows 3.</p>
+<p>Column A lists servings of oats from 0 to 3 in steps of 0.25. Column B gives the yogurt that brings the protein to exactly 30 g. Column D gives the calories of that breakfast.</p>
+<p>Produce: (a) the two rows of the sheet between which the calories pass 400; (b) an estimate, to one decimal place, of the servings of oats in the breakfast that has 30 g of protein and 400 calories.</p>
+<p>
+<button type="button" id="csv-btn">Download CSV (rows 1 to 3)</button>
+<button type="button" id="copy-btn">Copy layout (rows 1 to 3)</button>
+<span id="copy-msg" aria-live="polite"></span>
+</p>
+<div class="table-wrap"><table class="text" id="layout">
+<tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+<tr><th>1</th><td>Oats servings (x)</td><td>Yogurt containers (y)</td><td>Protein (g)</td><td>Calories (kcal)</td></tr>
+<tr><th>2</th><td>0</td><td><code>=(30-5.346*A2)/19.9</code></td><td><code>=5.346*A2+19.9*B2</code></td><td><code>=153*A2+146*B2</code></td></tr>
+<tr><th>3</th><td><code>=A2+0.25</code></td><td><code>=(30-5.346*A3)/19.9</code></td><td><code>=5.346*A3+19.9*B3</code></td><td><code>=153*A3+146*B3</code></td></tr>
+<tr><th>4–14</th><td colspan="4">copy row 3 down to row 14</td></tr>
+</table></div>
+<p>The formulas use only relative references, so copying row 3 down changes A3 to A4, A5, and so on, as in lecture 1.3. The formulas were checked by computing the same table in code; they were not tested in Excel or Google Sheets.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<div class="table-wrap">
+<table>
+<tr><th>Oats <var>x</var></th><th>Yogurt <var>y</var></th><th>Protein (g)</th><th>Calories (kcal)</th></tr>
+<tr><td>0</td><td>1.5075</td><td>30</td><td>220.10</td></tr>
+<tr><td>0.25</td><td>1.4404</td><td>30</td><td>248.55</td></tr>
+<tr><td>0.5</td><td>1.3732</td><td>30</td><td>276.99</td></tr>
+<tr><td>0.75</td><td>1.3061</td><td>30</td><td>305.43</td></tr>
+<tr><td>1</td><td>1.2389</td><td>30</td><td>333.88</td></tr>
+<tr><td>1.25</td><td>1.1717</td><td>30</td><td>362.32</td></tr>
+<tr><td><b>1.5</b></td><td><b>1.1046</b></td><td><b>30</b></td><td><b>390.77</b></td></tr>
+<tr><td><b>1.75</b></td><td><b>1.0374</b></td><td><b>30</b></td><td><b>419.21</b></td></tr>
+<tr><td>2</td><td>0.9703</td><td>30</td><td>447.66</td></tr>
+<tr><td>2.25</td><td>0.9031</td><td>30</td><td>476.10</td></tr>
+<tr><td>2.5</td><td>0.8359</td><td>30</td><td>504.55</td></tr>
+<tr><td>2.75</td><td>0.7688</td><td>30</td><td>532.99</td></tr>
+<tr><td>3</td><td>0.7016</td><td>30</td><td>561.43</td></tr>
+</table>
+</div>
+<p>(Yogurt is shown to four decimals and calories to two. The spreadsheet shows more digits unless you change the number format.)</p>
+<p>(a) The calories pass 400 between <var>x</var> = 1.5 (390.77 kcal) and <var>x</var> = 1.75 (419.21 kcal).</p>
+<p>(b) Each step of 0.25 servings adds about 28.44 kcal. From 390.77 kcal, 9.23 kcal more is needed, about a third of a step (9.23 ÷ 28.44 ≈ 0.32). A third of 0.25 is about 0.08, so <var>x</var> ≈ 1.5 + 0.08 ≈ 1.6. To pin it down further you would make a new table with smaller steps between 1.5 and 1.75, and then another. Sections 2 and 3 find the answer directly.</p>
+</details>
+
+<p>Every row of the sheet has exactly 30 g of protein, and the calories climb by the same amount, about 28.44 kcal, at each step. So the calories pass 400 exactly once, and there is exactly one breakfast from these two foods with both 30 g of protein and 400 calories. Narrowing down to it by smaller and smaller steps works, but it is slow.</p>
+
+<h2>2. Two targets as two lines</h2>
+
+<p>Lecture 2.2 showed that all the solutions of a linear equation such as 5.346<var>x</var> + 19.9<var>y</var> = 30 form a straight line. The calorie equation also has a line. In Figure 1 the blue line holds every breakfast with exactly 30 g of protein, and the orange line every breakfast with exactly 400 calories.</p>
+
+<p>A breakfast that meets both targets is a point on both lines. Two lines with different slopes cross at exactly one point. That crossing point is called the <b>intersection</b> of the lines. A pair of equations that must both be true at the same time is called a <b>system of equations</b>, and the coordinates of the intersection are the <b>solution</b> of the system.</p>
+
+<figure>
+<svg class="graph" id="g-main" viewBox="0 0 640 440" role="img" aria-label="Graph with the protein line and the calorie line for oats and yogurt, and a draggable point"></svg>
+<div class="readout" id="readout-main" aria-live="polite"></div>
+<figcaption>Figure 1. Oats and yogurt. Blue: protein = 30 g. Orange: calories = 400 kcal. Drag the black point or tap a spot; on a laptop, click the graph and use the arrow keys to move the point by 0.01.</figcaption>
+</figure>
+
+<div class="task" id="task2">
+<h3>Task 2 (about 4 minutes, Figure 1 on a phone or laptop, calculator)</h3>
+<p>Produce: (a) the protein and calories at the point (1, 1), and whether that point is above or below each line; (b) the amounts <var>x</var> and <var>y</var>, to two decimal places, at the point where you get closest to 30 g and 400 kcal at once; (c) the two intercepts of each line, to two decimals, and the slope of each line computed from its intercepts. Figure 1 shows roughly where the intercepts are; compute them by setting <var>x</var> = 0, then <var>y</var> = 0, as in lecture 2.2.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<p>(a) At (1, 1): protein 5.346 + 19.9 = 25.246 g, about 25.2 g; calories 153 + 146 = 299 kcal. At <var>x</var> = 1 the blue line is at <var>y</var> ≈ 1.24 and the orange line at <var>y</var> ≈ 1.69, so the point is below both lines. It is short on both targets.</p>
+<p>(b) The lines cross near <var>x</var> = 1.58, <var>y</var> = 1.08. Answers within about 0.05 of these are as close as dragging allows on a phone; the arrow keys get closer. The exact values come from Section 3.</p>
+<p>(c) Blue line: with <var>x</var> = 0, <var>y</var> = 30 ÷ 19.9 ≈ 1.51; with <var>y</var> = 0, <var>x</var> = 30 ÷ 5.346 ≈ 5.61. The intercepts are (0, 1.51) and (5.61, 0), so slope = (0 − 1.51) ÷ (5.61 − 0) ≈ −0.27 containers of yogurt per serving of oats. Each extra serving of oats lets you drop about 0.27 containers of yogurt and keep 30 g of protein. Orange line: 400 ÷ 146 ≈ 2.74 and 400 ÷ 153 ≈ 2.61, so the intercepts are (0, 2.74) and (2.61, 0), and slope = (0 − 2.74) ÷ (2.61 − 0) ≈ −1.05. Each extra serving of oats means about 1.05 fewer containers of yogurt to stay at 400 kcal. The slopes are different, so the lines cross.</p>
+</details>
+
+<p>Reading the intersection off a graph is called <b>solving by graphing</b>. It shows whether there is a solution and roughly where. Its accuracy is limited by how carefully you can read the graph, here about one or two hundredths.</p>
+
+<h2>3. Solving by substitution</h2>
+
+<p>Substitution finds the intersection exactly. One equation tells you <var>y</var> in terms of <var>x</var>. Put that expression in place of <var>y</var> in the other equation. The result is one equation with one unknown, which you solve as in lecture 2.1.</p>
+
+<h3>Worked example: oats and yogurt</h3>
+<div class="steps">
+<p><b>Step 1. Solve one equation for <var>y</var>.</b> Start from the protein equation and write it in the slope-intercept form <var>y</var> = <var>m</var><var>x</var> + <var>b</var> from lecture 2.2.</p>
+<span class="eq">5.346<var>x</var> + 19.9<var>y</var> = 30</span>
+<span class="eq">19.9<var>y</var> = −5.346<var>x</var> + 30 <span class="why">subtract 5.346<var>x</var> from both sides</span></span>
+<span class="eq"><var>y</var> = −(5.346 ÷ 19.9)<var>x</var> + 30 ÷ 19.9 ≈ −0.2686<var>x</var> + 1.5075 <span class="why">divide both sides by 19.9</span></span>
+<p>The slope is <var>m</var> ≈ −0.2686 and the <var>y</var>-intercept is <var>b</var> ≈ 1.5075, the blue line of Figure 1.</p>
+
+<p><b>Step 2. Substitute into the other equation.</b> In the calorie equation, replace <var>y</var> by −0.2686<var>x</var> + 1.5075. The parentheses matter: 146 multiplies the whole expression.</p>
+<span class="eq">153<var>x</var> + 146(−0.2686<var>x</var> + 1.5075) = 400</span>
+
+<p><b>Step 3. Solve for <var>x</var>.</b></p>
+<span class="eq">153<var>x</var> − 39.22<var>x</var> + 220.10 = 400 <span class="why">146 × 0.2686 ≈ 39.22 and 146 × 1.5075 ≈ 220.10</span></span>
+<span class="eq">113.78<var>x</var> + 220.10 = 400 <span class="why">153 − 39.22 = 113.78</span></span>
+<span class="eq">113.78<var>x</var> = 179.90 <span class="why">subtract 220.10 from both sides</span></span>
+<span class="eq"><var>x</var> = 179.90 ÷ 113.78 ≈ 1.5811 <span class="why">divide both sides by 113.78</span></span>
+
+<p><b>Step 4. Find <var>y</var>.</b> Put <var>x</var> into the expression from Step 1.</p>
+<span class="eq"><var>y</var> ≈ −0.2686 × 1.5811 + 1.5075 ≈ 1.0828</span>
+
+<p><b>Step 5. Check in both equations.</b> With <var>x</var> = 1.5811 and <var>y</var> = 1.0828:</p>
+<span class="eq">protein: 5.346 × 1.5811 + 19.9 × 1.0828 = 8.4526 + 21.5477 = 30.0003 g</span>
+<span class="eq">calories: 153 × 1.5811 + 146 × 1.0828 = 241.9083 + 158.0888 = 399.9971 kcal</span>
+<p>Both are within 0.01 of the targets (30 g and 400 kcal). Step 4 used only the protein equation, so a mistake in Step 2 or 3 shows up only in the calorie check. That is why the check uses both equations.</p>
+</div>
+
+<p>In the kitchen: about 1.58 servings of oats is 1.58 × ½ cup = 0.79 cup of dry oats (about 64 g), and 1.08 containers is about 216 g of yogurt. With these rounded amounts the totals are 29.94 g and 399.42 kcal. Allowing fractions of a serving is a simplification: a real breakfast uses amounts you can measure, and the totals are then close to the targets, not exact.</p>
+
+<h3>The method</h3>
+<ol>
+<li>Write one equation per target, with the same two unknowns.</li>
+<li>Solve one equation for one unknown.</li>
+<li>Substitute that expression into the other equation and solve for the remaining unknown.</li>
+<li>Put the value back to find the first unknown.</li>
+<li>Check the pair in both original equations, and check that it makes sense (no negative amounts).</li>
+</ol>
+<p>Either equation can be used in step 2, and you can solve for <var>x</var> instead of <var>y</var>; the answer is the same. Keep four decimals in the expression from step 2 and in the unknown you find in step 3, and at least two decimals in the numbers in between, as in the worked example. Round the answer only at the end. Another method, called elimination, adds or subtracts multiples of the two equations to remove one unknown. It gives the same answer; this course uses substitution.</p>
+
+<div class="task" id="task3">
+<h3>Task 3 (about 7 minutes, calculator)</h3>
+<p>A different breakfast with the same targets: <var>x</var> large eggs and <var>y</var> cups of 2% milk, with 30 g of protein and 400 calories. Use Table 1.</p>
+<p>Produce: (a) the two equations; (b) the solution by substitution, with each step written out, rounded to two decimals at the end; (c) the check of your rounded answer in both equations.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<p>(a) Protein: 6.3<var>x</var> + 8.052<var>y</var> = 30. Calories: 72<var>x</var> + 122<var>y</var> = 400.</p>
+<p>(b) From the protein equation: 8.052<var>y</var> = −6.3<var>x</var> + 30, so <var>y</var> = −(6.3 ÷ 8.052)<var>x</var> + 30 ÷ 8.052 ≈ −0.7824<var>x</var> + 3.7258.</p>
+<p>Substitute: 72<var>x</var> + 122(−0.7824<var>x</var> + 3.7258) = 400.</p>
+<p>Multiply out: 72<var>x</var> − 95.45<var>x</var> + 454.55 = 400, so −23.45<var>x</var> + 454.55 = 400.</p>
+<p>Subtract 454.55 from both sides: −23.45<var>x</var> = −54.55. Divide both sides by −23.45: <var>x</var> ≈ 2.3262 (a negative divided by a negative is positive).</p>
+<p>Then <var>y</var> ≈ −0.7824 × 2.3262 + 3.7258 ≈ 1.9058. Rounded: <var>x</var> = 2.33 eggs and <var>y</var> = 1.91 cups of milk.</p>
+<p>(c) Protein: 6.3 × 2.33 + 8.052 × 1.91 = 14.679 + 15.379 = 30.058 g ≈ 30 g. Calories: 72 × 2.33 + 122 × 1.91 = 167.76 + 233.02 = 400.78 kcal ≈ 400 kcal. Both are within rounding.</p>
+<p>Eggs come whole, so no real breakfast of these two foods meets both targets exactly. With 2 eggs, 2.16 cups of milk give 30 g of protein and about 408 kcal, close to both.</p>
+</details>
+
+<h2>4. When there is no solution, or infinitely many</h2>
+
+<h3>Parallel lines: large eggs and extra-large eggs</h3>
+
+<p>Take large eggs and extra-large eggs as the two foods, with the same targets, 30 g of protein and 400 calories. This is really one food in two sizes, which is what makes it useful here. A large egg weighs 50 g and an extra-large egg 56 g [3], so an extra-large egg is 56 ÷ 50 = 1.12 large eggs. This uses the same nutrition per gram for both sizes, as USDA does; real eggs vary a little. So an extra-large egg has</p>
+<span class="eq">1.12 × 6.3 = 7.056 g of protein &nbsp; and &nbsp; 1.12 × 72 = 80.64 kcal.</span>
+<p>(USDA's 143 kcal per 100 g gives 80.08 kcal for 56 g. Scaling the 72 kcal of Table 1 instead computes both sizes the same way.)</p>
+
+<div class="task" id="task4">
+<h3>Task 4 (about 5 minutes, calculator)</h3>
+<p>Let <var>x</var> be the number of large eggs and <var>y</var> the number of extra-large eggs.</p>
+<p>Produce: (a) the protein equation and the calorie equation; (b) each equation in the form <var>y</var> = <var>m</var><var>x</var> + <var>b</var>, with <var>m</var> to three decimals; (c) the calories in a large egg for each gram of its protein, the same for an extra-large egg, and one sentence explaining why no mix of these eggs has 30 g of protein and 400 calories.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<p>(a) Protein: 6.3<var>x</var> + 7.056<var>y</var> = 30. Calories: 72<var>x</var> + 80.64<var>y</var> = 400.</p>
+<p>(b) Protein line: <var>y</var> = −(6.3 ÷ 7.056)<var>x</var> + 30 ÷ 7.056 ≈ −0.893<var>x</var> + 4.252. Calorie line: <var>y</var> = −(72 ÷ 80.64)<var>x</var> + 400 ÷ 80.64 ≈ −0.893<var>x</var> + 4.960. The slopes are equal; both are −50 ÷ 56, the ratio of the egg weights. The <var>y</var>-intercepts are different.</p>
+<p>(c) Large: 72 ÷ 6.3 ≈ 11.43 kcal per gram of protein. Extra-large: 80.64 ÷ 7.056 ≈ 11.43 kcal per gram of protein. Any mix of the eggs has 11.43 kcal for every gram of protein, so 30 g of protein always comes with 30 × 72 ÷ 6.3 ≈ 342.86 kcal, never 400.</p>
+</details>
+
+<figure>
+<svg class="graph" id="g-eggs" viewBox="0 0 640 440" role="img" aria-label="Two parallel lines: protein 30 g and calories 400 kcal for large and extra-large eggs"></svg>
+<figcaption>Figure 2. Large eggs (<var>x</var>) and extra-large eggs (<var>y</var>). Blue: protein = 30 g. Orange: calories = 400 kcal.</figcaption>
+</figure>
+
+<p>Two lines with the same slope and different <var>y</var>-intercepts are <b>parallel</b>: they never cross. A system whose lines are parallel has <b>no solution</b>. Here the reason is in the food. One gram of egg has 6.3 ÷ 50 = 0.126 g of protein and 72 ÷ 50 = 1.44 kcal, whatever the size of the egg. Reaching 30 g of protein takes 30 ÷ 0.126 ≈ 238.1 g of egg; reaching 400 kcal takes 400 ÷ 1.44 ≈ 277.8 g of egg. No amount of egg is both.</p>
+
+<p>Substitution shows the same thing in the algebra. Solving the protein equation for <var>y</var> and substituting into the calorie equation makes the <var>x</var> terms cancel, and what is left is the false statement 342.86 = 400 (to two decimals). When substitution removes the unknown and leaves a false statement, the system has no solution.</p>
+
+<h3>Identical lines: the same eggs with a different calorie target</h3>
+
+<p>Changing the calorie target moves the orange line in Figure 2 without changing its slope. With a target of 30 × 72 ÷ 6.3 ≈ 342.86 kcal, the orange line lands exactly on the blue one: the calorie equation 72<var>x</var> + 80.64<var>y</var> = 30 × 72 ÷ 6.3 is the protein equation with both sides multiplied by 72 ÷ 6.3 ≈ 11.43. Every pair that solves one equation solves the other. A system whose two equations give the same line has <b>infinitely many solutions</b>: every point on the line. Substitution shows this by leaving a statement that is always true, such as 342.86 = 342.86.</p>
+
+<h3>Lines that cross at a negative amount: oats and peanut butter</h3>
+
+<p>Oats and peanut butter [5] with the targets 30 g and 400 kcal give 5.346<var>x</var> + 7.104<var>y</var> = 30 and 153<var>x</var> + 191<var>y</var> = 400, where <var>y</var> counts 2-tablespoon servings of peanut butter. The slopes are −5.346 ÷ 7.104 ≈ −0.75 and −153 ÷ 191 ≈ −0.80. They differ, so the lines cross, but far off Figure 3: substitution gives <var>x</var> ≈ −43.88 and <var>y</var> ≈ 37.24. That pair satisfies both equations and is not a breakfast, because nobody eats −43.88 servings of oats.</p>
+
+<figure>
+<svg class="graph" id="g-pb" viewBox="0 0 640 440" role="img" aria-label="Protein and calorie lines for oats and peanut butter that do not meet at non-negative amounts"></svg>
+<figcaption>Figure 3. Oats (<var>x</var>, servings) and peanut butter (<var>y</var>, 2-tablespoon servings). Blue: protein = 30 g. Orange: calories = 400 kcal. The lines meet at (−43.88, 37.24), off the graph.</figcaption>
+</figure>
+
+<p>The food explains it. Oats have 153 ÷ 5.346 ≈ 28.6 kcal per gram of protein and peanut butter 191 ÷ 7.104 ≈ 26.9. Any mix of the two has between 26.9 and 28.6 kcal per gram of protein, so 30 g of protein brings at least 30 × 191 ÷ 7.104 ≈ 807 kcal. The target asks for 400 ÷ 30 ≈ 13.3 kcal per gram of protein, which is outside that range. The algebra answers with a negative amount, and the check "no negative amounts" in step 5 of the method rejects it.</p>
+
+<div class="table-wrap">
+<table class="text">
+<caption>Table 2. The three cases for two lines</caption>
+<tr><th>Lines</th><th>Slopes</th><th>Solutions</th><th>Example</th></tr>
+<tr><td>cross</td><td>different</td><td>exactly one</td><td>oats and yogurt, 30 g and 400 kcal</td></tr>
+<tr><td>parallel</td><td>same, different <var>y</var>-intercepts</td><td>none</td><td>large and extra-large eggs, 30 g and 400 kcal</td></tr>
+<tr><td>identical</td><td>same, same <var>y</var>-intercept</td><td>infinitely many</td><td>large and extra-large eggs, 30 g and 342.86 kcal</td></tr>
+</table>
+</div>
+<p>When the one solution has a negative amount, as with oats and peanut butter, the system has a solution but no breakfast meets both targets.</p>
+
+<h2>5. A third food, a third target, and targets out of reach</h2>
+
+<p>Add 2% milk (8.052 g of protein and 122 kcal per cup [4]) to the oats and yogurt, with the same targets of 30 g and 400 kcal. Now there are three unknowns and still two equations. Choose an amount of milk, and the oats and yogurt must cover the rest. With 1 cup of milk, the rest is 30 − 8.052 = 21.948 g of protein and 400 − 122 = 278 kcal, and substitution gives about 1.03 servings of oats and 0.83 containers of yogurt. With ½ cup of milk it gives about 1.30 servings of oats and 0.95 containers of yogurt. Each amount of milk from 0 to about 2.86 cups gives a different breakfast that meets both targets. With more milk than that, the oats would have to be negative. So a third food gives infinitely many breakfasts again, and the freedom to pick the one you like.</p>
+
+<p>A third target, such as a fixed amount of fat, adds a third equation. Three equations in three unknowns usually have exactly one solution, found with the same substitution idea used twice. This course does not go further with them.</p>
+
+<p>Some targets cannot be reached with a given set of foods. Write each food's nutrition as a pair (protein, calories). A breakfast's totals come from multiplying each food's pair by its amount and adding. The set of all totals you can make this way, with any amounts, even negative ones, is called the <b>span</b> of the foods.</p>
+<ul>
+<li>The span of large and extra-large eggs is a single line of totals: every total has 11.43 kcal per gram of protein. The target (30 g, 400 kcal) is off that line, so no amounts of these eggs reach it, even negative ones.</li>
+<li>The span of oats and yogurt is every (protein, calories) pair: their lines always have different slopes, so substitution always finds one solution. With these two foods the only obstacle is that real amounts cannot be negative, as with oats and peanut butter in Section 4.</li>
+</ul>
+<p>Task 5 is about that second obstacle, for all five foods.</p>
+
+<div class="task" id="task5">
+<h3>Task 5 (about 3 minutes, calculator)</h3>
+<p>Produce: (a) the calories per gram of protein for each of the five foods in Table 1, to two decimals; (b) the smallest number of calories a breakfast made from these foods can have if it has 30 g of protein; (c) a yes or no: can a breakfast from these five foods have 30 g of protein and 200 kcal?</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<p>(a) Oats 153 ÷ 5.346 ≈ 28.62; yogurt 146 ÷ 19.9 ≈ 7.34; egg 72 ÷ 6.3 ≈ 11.43; milk 122 ÷ 8.052 ≈ 15.15; peanut butter 191 ÷ 7.104 ≈ 26.89.</p>
+<p>(b) Every food has at least 7.34 kcal per gram of protein, so any mix does too. The least is 30 × 146 ÷ 19.9 ≈ 220 kcal, from 30 ÷ 19.9 ≈ 1.51 containers of yogurt and nothing else.</p>
+<p>(c) No. 200 kcal is below the 220 kcal minimum, so the target is out of reach with these five foods in any non-negative amounts. Reaching it would need a food with fewer than 200 ÷ 30 ≈ 6.67 kcal per gram of protein.</p>
+</details>
+
+<h2>Sources</h2>
+<p>Sources 1 to 5 are from the SR Legacy data set in USDA FoodData Central (U.S. Department of Agriculture, Agricultural Research Service). Each record was last updated 1 April 2019 and was retrieved 4 October 2026. The per-serving values in Table 1 are computed from the per-100 g values and serving weights below.</p>
+<ol class="sources">
+<li>USDA FoodData Central, "Cereals, oats, regular and quick, not fortified, dry", FDC ID 173904. Per 100 g: protein 13.2 g, energy 379 kcal. Serving weight: 1 cup = 81 g. https://fdc.nal.usda.gov/food-details/173904/nutrients</li>
+<li>USDA FoodData Central, "Yogurt, Greek, plain, lowfat", FDC ID 170903. Per 100 g: protein 9.95 g, energy 73 kcal. Serving weight: 1 container (7 oz) = 200 g. https://fdc.nal.usda.gov/food-details/170903/nutrients</li>
+<li>USDA FoodData Central, "Egg, whole, raw, fresh", FDC ID 171287. Per 100 g: protein 12.6 g, energy 143 kcal. Serving weights: 1 large egg = 50 g, 1 extra-large egg = 56 g. https://fdc.nal.usda.gov/food-details/171287/nutrients</li>
+<li>USDA FoodData Central, "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D", FDC ID 171267. Per 100 g: protein 3.30 g, energy 50 kcal. Serving weight: 1 cup = 244 g. https://fdc.nal.usda.gov/food-details/171267/nutrients</li>
+<li>USDA FoodData Central, "Peanut butter, smooth style, without salt", FDC ID 172470. Per 100 g: protein 22.2 g, energy 598 kcal. Serving weight: 2 tablespoons = 32 g. https://fdc.nal.usda.gov/food-details/172470/nutrients</li>
+</ol>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var COL = { protein: "#1f6fd1", cal: "#d0601b", grid: "#e6e6ec", axis: "#44444a", text: "#1d1d1f" };
+
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // Draws axes and lines a*x + b*y = c on an SVG; returns coordinate helpers.
+  // Each line may carry a label drawn at data point (lx, ly).
+  function makeGraph(svg, o) {
+    var W = 640, H = 440, L = 84, R = 24, T = 18, B = 80, FS = 22;
+    var sx = function (x) { return L + (x - o.xmin) / (o.xmax - o.xmin) * (W - L - R); };
+    var sy = function (y) { return H - B - (y - o.ymin) / (o.ymax - o.ymin) * (H - T - B); };
+    var x, y;
+    for (x = o.xmin; x <= o.xmax + 1e-9; x += o.xstep) {
+      el("line", { x1: sx(x), x2: sx(x), y1: sy(o.ymin), y2: sy(o.ymax), stroke: COL.grid }, svg);
+      el("text", { x: sx(x), y: sy(o.ymin) + 28, "text-anchor": "middle", "font-size": FS, fill: COL.text }, svg).textContent = +x.toFixed(2);
+    }
+    for (y = o.ymin; y <= o.ymax + 1e-9; y += o.ystep) {
+      el("line", { x1: sx(o.xmin), x2: sx(o.xmax), y1: sy(y), y2: sy(y), stroke: COL.grid }, svg);
+      el("text", { x: sx(o.xmin) - 8, y: sy(y) + 7, "text-anchor": "end", "font-size": FS, fill: COL.text }, svg).textContent = +y.toFixed(2);
+    }
+    el("line", { x1: sx(o.xmin), x2: sx(o.xmax), y1: sy(o.ymin), y2: sy(o.ymin), stroke: COL.axis, "stroke-width": 1.5 }, svg);
+    el("line", { x1: sx(o.xmin), x2: sx(o.xmin), y1: sy(o.ymin), y2: sy(o.ymax), stroke: COL.axis, "stroke-width": 1.5 }, svg);
+    el("text", { x: (sx(o.xmin) + sx(o.xmax)) / 2, y: H - 12, "text-anchor": "middle", "font-size": FS, fill: COL.text }, svg).textContent = o.xlabel;
+    var my = (sy(o.ymin) + sy(o.ymax)) / 2;
+    el("text", { x: 22, y: my, "text-anchor": "middle", "font-size": FS, fill: COL.text,
+      transform: "rotate(-90 22 " + my + ")" }, svg).textContent = o.ylabel;
+    var clip = el("clipPath", { id: svg.id + "-clip" }, el("defs", {}, svg));
+    el("rect", { x: sx(o.xmin), y: sy(o.ymax), width: sx(o.xmax) - sx(o.xmin), height: sy(o.ymin) - sy(o.ymax) }, clip);
+    o.lines.forEach(function (ln) {
+      var y1 = (ln.c - ln.a * o.xmin) / ln.b, y2 = (ln.c - ln.a * o.xmax) / ln.b;
+      el("line", { x1: sx(o.xmin), y1: sy(y1), x2: sx(o.xmax), y2: sy(y2), stroke: ln.color, "stroke-width": 3.5,
+        "clip-path": "url(#" + svg.id + "-clip)" }, svg);
+    });
+    o.lines.forEach(function (ln) {
+      if (!ln.label) return;
+      var t = el("text", { x: sx(ln.lx), y: sy(ln.ly), "font-size": FS, "font-weight": 700, fill: ln.color,
+        stroke: "#fff", "stroke-width": 5, "paint-order": "stroke" }, svg);
+      t.textContent = ln.label;
+    });
+    return { sx: sx, sy: sy, W: W, H: H, L: L, R: R, T: T, B: B };
+  }
+
+  // Figure 1: oats x, yogurt y (interactive)
+  var gm = document.getElementById("g-main");
+  var om = { xmin: 0, xmax: 6, xstep: 1, ymin: 0, ymax: 3, ystep: 0.5,
+    xlabel: "x = servings of oats (½ cup dry)", ylabel: "y = containers of yogurt",
+    lines: [{ a: 5.346, b: 19.9, c: 30, color: COL.protein, label: "protein 30 g", lx: 3.55, ly: 0.75 },
+            { a: 153, b: 146, c: 400, color: COL.cal, label: "calories 400 kcal", lx: 0.4, ly: 2.62 }] };
+  var h = makeGraph(gm, om);
+  var pt = { x: 1, y: 1 };
+  var dot = el("circle", { r: 9, fill: "#111", stroke: "#fff", "stroke-width": 2, style: "cursor:grab" }, gm);
+  var readout = document.getElementById("readout-main");
+  function draw() {
+    dot.setAttribute("cx", h.sx(pt.x)); dot.setAttribute("cy", h.sy(pt.y));
+    var p = 5.346 * pt.x + 19.9 * pt.y, c = 153 * pt.x + 146 * pt.y;
+    var both = Math.abs(p - 30) < 0.25 && Math.abs(c - 400) < 3;
+    readout.innerHTML = "oats <i>x</i> = " + pt.x.toFixed(2) + " servings, yogurt <i>y</i> = " + pt.y.toFixed(2) +
+      " containers<br><b class='p'>protein " + p.toFixed(1) + " g</b> &nbsp; <b class='c'>calories " + c.toFixed(0) + " kcal</b>" +
+      (both ? " &nbsp; <span class='hit'>both targets met (within rounding)</span>" : "");
+  }
+  function clampRound(v, max) { return Math.round(Math.min(max, Math.max(0, v)) * 100) / 100; }
+  function setFromEvent(ev) {
+    var r = gm.getBoundingClientRect();
+    var px = (ev.clientX - r.left) / r.width * h.W, py = (ev.clientY - r.top) / r.height * h.H;
+    var x = om.xmin + (px - h.L) / (h.W - h.L - h.R) * (om.xmax - om.xmin);
+    var y = om.ymin + (h.H - h.B - py) / (h.H - h.T - h.B) * (om.ymax - om.ymin);
+    pt.x = clampRound(x, om.xmax); pt.y = clampRound(y, om.ymax);
+    draw();
+  }
+  var dragging = false;
+  gm.addEventListener("pointerdown", function (ev) { dragging = true; gm.setPointerCapture(ev.pointerId); setFromEvent(ev); ev.preventDefault(); });
+  gm.addEventListener("pointermove", function (ev) { if (dragging) setFromEvent(ev); });
+  gm.addEventListener("pointerup", function () { dragging = false; });
+  gm.addEventListener("pointercancel", function () { dragging = false; });
+  gm.setAttribute("tabindex", "0");
+  gm.addEventListener("keydown", function (ev) {
+    var d = { ArrowRight: [0.01, 0], ArrowLeft: [-0.01, 0], ArrowUp: [0, 0.01], ArrowDown: [0, -0.01] }[ev.key];
+    if (!d) return;
+    pt.x = clampRound(pt.x + d[0], om.xmax); pt.y = clampRound(pt.y + d[1], om.ymax);
+    draw(); ev.preventDefault();
+  });
+  draw();
+
+  // Figure 2: eggs, parallel lines
+  makeGraph(document.getElementById("g-eggs"), { xmin: 0, xmax: 6, xstep: 1, ymin: 0, ymax: 5, ystep: 1,
+    xlabel: "x = large eggs", ylabel: "y = extra-large eggs",
+    lines: [{ a: 6.3, b: 7.056, c: 30, color: COL.protein, label: "protein 30 g", lx: 0.6, ly: 1.0 },
+            { a: 72, b: 80.64, c: 400, color: COL.cal, label: "calories 400 kcal", lx: 2.9, ly: 2.75 }] });
+
+  // Figure 3: oats and peanut butter
+  makeGraph(document.getElementById("g-pb"), { xmin: 0, xmax: 6, xstep: 1, ymin: 0, ymax: 5, ystep: 1,
+    xlabel: "x = servings of oats (½ cup dry)", ylabel: "y = servings of peanut butter",
+    lines: [{ a: 5.346, b: 7.104, c: 30, color: COL.protein, label: "protein 30 g", lx: 2.7, ly: 2.75 },
+            { a: 153, b: 191, c: 400, color: COL.cal, label: "calories 400 kcal", lx: 2.7, ly: 0.12 }] });
+
+  // Spreadsheet layout, rows 1 to 3: CSV download and tab-separated copy
+  var rows = [["Oats servings (x)", "Yogurt containers (y)", "Protein (g)", "Calories (kcal)"]];
+  for (var r = 2; r <= 3; r++) {
+    rows.push([r === 2 ? "0" : "=A" + (r - 1) + "+0.25", "=(30-5.346*A" + r + ")/19.9", "=5.346*A" + r + "+19.9*B" + r, "=153*A" + r + "+146*B" + r]);
+  }
+  var csv = rows.map(function (row) { return row.map(function (c) { return /[",]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (row) { return row.join("\t"); }).join("\n");
+  document.getElementById("csv-btn").addEventListener("click", function () {
+    var a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    a.download = "oats-yogurt-protein-calories.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  var msg = document.getElementById("copy-msg");
+  document.getElementById("copy-btn").addEventListener("click", function () {
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = tsv; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      ta.remove(); msg.textContent = ok ? "Copied. Paste into cell A1." : "Copy failed; download the CSV instead.";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () { msg.textContent = "Copied. Paste into cell A1."; }, fallback);
+    } else { fallback(); }
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-02/2-2-graphing-lines-and-slope/" style="color:inherit">&larr; 2.2 Graphing lines and slope</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-03/3-1-inequalities/" style="color:inherit">3.1 Inequalities &rarr;</a></nav>
+</body>
+</html>

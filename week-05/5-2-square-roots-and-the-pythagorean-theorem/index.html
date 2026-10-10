@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Square roots and the Pythagorean theorem</title>
+<style>
+  :root {
+    --ink: #1d232b;
+    --muted: #55606d;
+    --bg: #ffffff;
+    --panel: #f4f6f9;
+    --line: #c9d0d9;
+    --accent: #1f5f99;
+    --task: #fff8e6;
+    --task-line: #d9a520;
+    --good: #2b7a3d;
+    --bad: #b03a2e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 19px; line-height: 1.55;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+  .course { font-family: system-ui, sans-serif; font-size: 15px; color: var(--muted); margin: 0 0 4px; }
+  h1 { font-size: 1.9em; line-height: 1.2; margin: 0 0 28px; }
+  h2 { font-size: 1.35em; margin: 44px 0 12px; border-bottom: 2px solid var(--line); padding-bottom: 4px; }
+  h3 { font-size: 1.05em; margin: 24px 0 8px; }
+  p, li { max-width: 72ch; }
+  .m { font-style: italic; }
+  .eq { display: block; text-align: center; margin: 14px 0; font-size: 1.08em; }
+  table { border-collapse: collapse; margin: 12px 0; font-family: system-ui, sans-serif; font-size: 16px; }
+  th, td { border: 1px solid var(--line); padding: 5px 9px; text-align: right; }
+  th { background: var(--panel); }
+  td:first-child, th:first-child { text-align: left; }
+  .scroll { overflow-x: auto; max-width: 100%; }
+  .task {
+    background: var(--task); border: 2px solid var(--task-line); border-radius: 6px;
+    padding: 12px 16px; margin: 22px 0 6px;
+  }
+  .task .label { font-family: system-ui, sans-serif; font-weight: 700; margin: 0 0 6px; }
+  details.sol {
+    border: 1px solid var(--line); border-radius: 6px; background: var(--panel);
+    padding: 8px 16px; margin: 0 0 22px;
+  }
+  details.sol summary { cursor: pointer; font-family: system-ui, sans-serif; font-weight: 600; color: var(--accent); }
+  figure { margin: 18px 0; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-family: system-ui, sans-serif; font-size: 15px; color: var(--muted); margin-top: 4px; }
+  .two { display: flex; gap: 16px; flex-wrap: wrap; }
+  .two > div { flex: 1 1 260px; }
+  .tool {
+    border: 1px solid var(--line); border-radius: 6px; padding: 12px; margin: 14px 0;
+    font-family: system-ui, sans-serif; font-size: 16px;
+  }
+  .tool input[type=range] { width: 100%; }
+  .readout { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 6px; }
+  .readout b { font-variant-numeric: tabular-nums; }
+  pre {
+    background: var(--panel); border: 1px solid var(--line); padding: 10px; overflow-x: auto;
+    font-size: 14px; line-height: 1.4;
+  }
+  button {
+    font: inherit; font-size: 15px; padding: 6px 12px; margin: 4px 8px 4px 0;
+    border: 1px solid var(--accent); background: #fff; color: var(--accent); border-radius: 4px; cursor: pointer;
+  }
+  .ok { color: var(--good); font-weight: 600; }
+  .no { color: var(--bad); font-weight: 600; }
+  ol.sources li { margin-bottom: 10px; font-size: 16px; }
+  a { color: var(--accent); overflow-wrap: anywhere; }
+  sup { line-height: 0; font-size: 0.7em; vertical-align: 0.5em; }
+  #tipSvg { max-height: 380px; }
+  sup, .cite { font-family: system-ui, sans-serif; font-size: 0.85em; }
+  @media (max-width: 480px) {
+    table { font-size: 14px; }
+    th, td { padding: 4px 5px; }
+    details.sol { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-05/5-1-reading-a-shop-drawing/" style="color:inherit">&larr; 5.1 Reading a shop drawing</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-05/5-3-volume-and-surface-area/" style="color:inherit">5.3 Volume and surface area &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Remodeling a kitchen (week 5) · Lecture 2 of 3</p>
+<h1>Square roots and the Pythagorean theorem</h1>
+
+<h2>1. A refrigerator and a doorway</h2>
+
+<p>The new refrigerator in this kitchen is a GE French-door model, GNE27JSM. Its specification sheet lists these sizes, in inches <span class="cite">[1]</span>:</p>
+
+<div class="scroll">
+<table>
+  <tr><th>Measurement on the spec sheet</th><th>Inches</th></tr>
+  <tr><td>Height to top of door</td><td>69 7/8</td></tr>
+  <tr><td>Height to top of case</td><td>68 5/8</td></tr>
+  <tr><td>Width</td><td>35 5/8</td></tr>
+  <tr><td>Case depth with door handle</td><td>36 3/8</td></tr>
+  <tr><td>Case depth less door handle</td><td>33 7/8</td></tr>
+  <tr><td>Case depth without door</td><td>29</td></tr>
+</table>
+</div>
+
+<p>For this example, the kitchen doorway has a clear width of 32 inches and a height of 80 inches. Both are example values. The 32 inches is the minimum clear width the ADA Standards require for doors in public buildings, measured from the door stop to the face of the door when the door is open 90 degrees <span class="cite">[2]</span>. Private homes are not covered by those standards, and home doorways are often narrower, so measure yours the same way before delivery day.</p>
+
+<p>Only the measurement that goes <em>across</em> the opening matters for the 32 inches. The height is checked against the doorway's height separately; the refrigerator's 69 7/8 inches is well under 80.</p>
+
+<div class="task">
+<p class="label">Task 1 (about 4 minutes, calculator)</p>
+<p>Write the width and the three depths as decimals. For each one, decide whether that side of the refrigerator can go across a 32-inch opening, and how many inches are left over. Then write one sentence saying how the delivery crew should bring the refrigerator in.</p>
+</div>
+<details class="sol"><summary>Solution to Task 1</summary>
+<p>5/8 = 0.625, 3/8 = 0.375, 7/8 = 0.875.</p>
+<div class="scroll">
+<table>
+  <tr><th>Side across the opening</th><th>Inches</th><th>Fits in 32?</th><th>Left over</th></tr>
+  <tr><td>Width</td><td>35.625</td><td class="no">no</td><td>3.625 too wide</td></tr>
+  <tr><td>Depth with handle</td><td>36.375</td><td class="no">no</td><td>4.375 too wide</td></tr>
+  <tr><td>Depth less handle</td><td>33.875</td><td class="no">no</td><td>1.875 too wide</td></tr>
+  <tr><td>Depth without doors</td><td>29</td><td class="ok">yes</td><td>3 inches</td></tr>
+</table>
+</div>
+<p>The crew takes the doors off and brings the refrigerator through side first (turned sideways, one side panel leading), so the 29-inch depth goes across the opening and the 35 5/8-inch width runs in the direction of travel. That leaves 32 &minus; 29 = 3 inches, or 1.5 inches on each side if they keep it centered. This is a simplification: it ignores the hinge brackets, the dolly, and any trim around the frame.</p>
+<figure>
+<svg viewBox="-30 -14 96 80" style="max-width:420px" role="img" aria-label="Top view: the refrigerator footprint, 29 inches across and 35 5/8 inches long, moving side first toward a 32-inch doorway">
+  <rect x="-24" y="0" width="24" height="5" fill="#c9d0d9" stroke="#1d232b" stroke-width="0.4"/>
+  <rect x="32" y="0" width="24" height="5" fill="#c9d0d9" stroke="#1d232b" stroke-width="0.4"/>
+  <line x1="0" y1="-5" x2="32" y2="-5" stroke="#55606d" stroke-width="0.3"/>
+  <line x1="0" y1="-7" x2="0" y2="-3" stroke="#55606d" stroke-width="0.3"/>
+  <line x1="32" y1="-7" x2="32" y2="-3" stroke="#55606d" stroke-width="0.3"/>
+  <text x="16" y="-8.5" font-size="3.4" text-anchor="middle" font-family="system-ui, sans-serif" fill="#1d232b">32 in clear opening</text>
+  <text x="-12" y="3.6" font-size="2.8" text-anchor="middle" font-family="system-ui, sans-serif" fill="#1d232b">wall</text>
+  <rect x="1.5" y="14" width="29" height="35.625" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.6"/>
+  <text x="16" y="18.5" font-size="3" text-anchor="middle" font-family="system-ui, sans-serif" fill="#1f5f99">side panel leads</text>
+  <text x="16" y="47" font-size="3" text-anchor="middle" font-family="system-ui, sans-serif" fill="#1f5f99">other side</text>
+  <text x="3.5" y="32" font-size="3" font-family="system-ui, sans-serif" fill="#1f5f99" transform="rotate(-90 3.5 32)" text-anchor="middle" dy="2.4">front (doors off)</text>
+  <text x="28.5" y="32" font-size="3" font-family="system-ui, sans-serif" fill="#1f5f99" transform="rotate(90 28.5 32)" text-anchor="middle" dy="2.4">back</text>
+  <line x1="1.5" y1="55" x2="30.5" y2="55" stroke="#55606d" stroke-width="0.3"/>
+  <text x="16" y="60" font-size="3.4" text-anchor="middle" font-family="system-ui, sans-serif" fill="#1d232b">29 in across</text>
+  <line x1="36" y1="14" x2="36" y2="49.625" stroke="#55606d" stroke-width="0.3"/>
+  <text x="38" y="30" font-size="3.4" font-family="system-ui, sans-serif" fill="#1d232b">35 5/8 in</text>
+  <text x="38" y="34.5" font-size="3.4" font-family="system-ui, sans-serif" fill="#1d232b">along the path</text>
+  <line x1="16" y1="11.5" x2="16" y2="7" stroke="#b03a2e" stroke-width="0.7"/>
+  <polygon points="16,5.5 14.3,8.5 17.7,8.5" fill="#b03a2e"/>
+</svg>
+<figcaption>Top view, drawn to scale. The arrow is the direction of travel. The 29-inch depth goes across the 32-inch opening.</figcaption>
+</figure>
+</details>
+
+<h2>2. Tipping a tall cabinet upright</h2>
+
+<p>A tall pantry cabinet arrives lying on its back. It is 90 inches tall and 24 inches deep. These are made-up sizes for the example. The room has a ceiling height of 8 feet, which is 8 &times; 12 = 96 inches; this is also an example value. The International Residential Code (2021 edition), a model building code that states and cities adopt, sometimes with changes, sets a minimum ceiling height of 7 feet for habitable space, which includes kitchens <span class="cite">[3]</span>. Ceilings vary, so a real ceiling should be measured.</p>
+
+<p>Standing up, the cabinet is 90 inches tall, which is less than 96. To get it standing, though, the installers tip it up. The bottom back edge stays on the floor and the top end swings up. During the swing, the top front corner (the red dot in the figure) rises higher than 90 inches.</p>
+
+<div class="tool" id="tipTool">
+<label for="angle"><b>Tipping angle</b> (0&deg; = lying on its back, 90&deg; = standing up)</label>
+<input type="range" id="angle" min="0" max="90" step="0.5" value="30">
+<div class="readout">
+  <span>Angle: <b id="angOut">30.0&deg;</b></span>
+  <span>Highest point of the cabinet: <b id="topOut">65.8 in</b></span>
+  <span>Ceiling: <b>96 in</b></span>
+</div>
+<svg id="tipSvg" viewBox="-40 -112 150 124" role="img" aria-label="Side view of the cabinet being tipped up about its bottom back edge, under a 96-inch ceiling">
+  <line x1="-40" y1="0" x2="110" y2="0" stroke="#55606d" stroke-width="0.8"/>
+  <line x1="-40" y1="-96" x2="110" y2="-96" stroke="#b03a2e" stroke-width="0.8"/>
+  <text x="58" y="-98.5" font-size="6" fill="#b03a2e" font-family="system-ui, sans-serif">ceiling, 96 in</text>
+  <text x="62" y="8" font-size="6" fill="#55606d" font-family="system-ui, sans-serif">floor</text>
+  <line id="topLine" x1="-40" y1="-65.8" x2="110" y2="-65.8" stroke="#1f5f99" stroke-width="0.5" stroke-dasharray="2 1.5"/>
+  <path id="arc" d="" fill="none" stroke="#b03a2e" stroke-width="0.4" stroke-dasharray="1 1.2" opacity="0.7"/>
+  <polygon id="cab" points="" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.9"/>
+  <line id="diag" x1="0" y1="0" x2="0" y2="0" stroke="#1d232b" stroke-width="0.6" stroke-dasharray="2.5 1.5"/>
+  <text id="lblH" font-size="5" fill="#1f5f99" font-family="system-ui, sans-serif" text-anchor="middle">90 in</text>
+  <text id="lblD" font-size="5" fill="#1f5f99" font-family="system-ui, sans-serif" text-anchor="middle">24 in</text>
+  <circle id="corner" cx="0" cy="0" r="1.8" fill="#b03a2e"/>
+  <circle cx="0" cy="0" r="1.4" fill="#1d232b"/>
+  <text x="2" y="10" font-size="5.5" fill="#1d232b" font-family="system-ui, sans-serif">pivot edge</text>
+</svg>
+<p style="margin:4px 0 0;font-size:15px;color:#55606d">Red dot: top front corner. Dashed line: the diagonal, from the pivot edge to that corner. Dotted arc: the path of the corner as the cabinet tips.</p>
+</div>
+
+<div class="task">
+<p class="label">Task 2 (about 3 minutes, slider above)</p>
+<p>Move the slider slowly from 0&deg; to 90&deg;. Write down (a) the largest value of "highest point" you can find, to one decimal place, (b) the angle where it happens, and (c) whether the cabinet clears the 96-inch ceiling and by about how much.</p>
+</div>
+<details class="sol"><summary>Solution to Task 2</summary>
+<p>(a) The highest point reaches about 93.1 inches. (b) This happens near 75&deg;. After that it drops back to 90 inches when the cabinet stands straight. (c) The cabinet clears the ceiling, by a little under 3 inches. The slider's 93.1 is rounded; the exact gap is 96 &minus; 93.145… = 2.85… inches. Section 5 rounds the space needed up to 93.2 inches and so gives the spare room as 2.8 inches.</p>
+</details>
+
+<h3>Why the highest point is the diagonal</h3>
+<p>The dashed line in the figure runs from the pivot edge to the top front corner. It is the diagonal of the cabinet's side view. The cabinet does not bend, so the top front corner always stays the same distance from the pivot edge: the length of the diagonal. As the cabinet tips, that corner moves along a circle centered at the pivot edge (the dotted red arc). The highest point of that circle is directly above the pivot, and its height there equals the diagonal. Every other point of the cabinet is closer to the pivot, so nothing goes higher. So the height a cabinet needs for tipping up is the length of its diagonal.</p>
+<p>The slider answers this for one cabinet. For a cabinet of any size, we want to compute the diagonal from the height and the depth. That needs squares and square roots.</p>
+
+<h2>3. Squares and square roots</h2>
+
+<p>The <b>square</b> of a number is the number times itself. It is written with a small 2: 3<sup>2</sup> = 3 &times; 3 = 9, read "3 squared." The name comes from area: a square floor tile 3 inches on a side has area 3<sup>2</sup> = 9 square inches.</p>
+
+<p>The <b>square root</b> goes the other way. The square root of 9, written &radic;9, is the positive number whose square is 9, so &radic;9 = 3. In area terms, &radic;9 is the side length of a square whose area is 9.</p>
+
+<p>The numbers 1, 4, 9, 16, 25, … are the <b>perfect squares</b>: the squares of whole numbers. Their square roots are whole numbers.</p>
+
+<div class="scroll">
+<table>
+  <tr><th>n</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>
+  <tr><th>n<sup>2</sup></th><td>1</td><td>4</td><td>9</td><td>16</td><td>25</td><td>36</td><td>49</td><td>64</td><td>81</td><td>100</td><td>121</td><td>144</td><td>169</td><td>196</td><td>225</td></tr>
+</table>
+</div>
+
+<p>Most square roots are not whole numbers. &radic;2 lies between 1 and 2, because 1<sup>2</sup> = 1 and 2<sup>2</sup> = 4. A calculator gives &radic;2 = 1.41421…, and you can check it: 1.41<sup>2</sup> = 1.9881 and 1.42<sup>2</sup> = 2.0164, which are on either side of 2.</p>
+
+<h3>Estimating between perfect squares</h3>
+<p>To estimate &radic;8676, find the perfect squares on either side. 93<sup>2</sup> = 8649 and 94<sup>2</sup> = 8836. Since 8676 is between them, &radic;8676 is between 93 and 94. It is much closer to 8649 than to 8836, so the answer is just above 93.</p>
+<p>For one decimal place, see how far 8676 is along the way from 8649 to 8836. The gap between the two perfect squares is 8836 &minus; 8649 = 187, and 8676 is 8676 &minus; 8649 = 27 past the lower one. 27 &divide; 187 = 0.14, so the estimate is about 93.1. The calculator gives 93.145… The estimate can be off in the second decimal place.</p>
+
+<h3>Order of operations on a calculator</h3>
+<p>Squares come before addition. A square root applies to everything inside the parentheses after it. The steps for &radic;(90<sup>2</sup> + 24<sup>2</sup>) are 90<sup>2</sup> = 8100, 24<sup>2</sup> = 576, 8100 + 576 = 8676, &radic;8676 = 93.145…</p>
+<p>Calculators enter this in two different ways.</p>
+<ul>
+  <li>On a calculator that shows the whole expression as you type it (a graphing calculator, or a phone app that shows a line of input), type <b>&radic;( 90 x&sup2; + 24 x&sup2; )</b>, closing the parenthesis after the 24<sup>2</sup>.</li>
+  <li>On a calculator where the &radic; key acts at once on the number already showing (the basic phone calculator in its scientific view, for example), compute 90<sup>2</sup> + 24<sup>2</sup> = 8676 first, then press &radic;.</li>
+</ul>
+<p>Two mistakes give very different answers. Taking the square root of the 90<sup>2</sup> part only gives &radic;(90<sup>2</sup>) + 24<sup>2</sup> = 90 + 576 = 666. Taking square roots of each part separately gives 90 + 24 = 114. The square root of a sum is not the sum of the square roots. Estimating first catches both mistakes: the answer must be between 93 and 94.</p>
+<p>In a spreadsheet, the square root is the function SQRT, and squaring is <code>^2</code>. For example, <code>=SQRT(90^2+24^2)</code>.</p>
+
+<div class="task">
+<p class="label">Task 3 (about 4 minutes, calculator)</p>
+<p>(a) Without the &radic; key, find the two whole numbers that each of &radic;50, &radic;200 and &radic;3000 lies between. (b) Estimate each one to one decimal place, using how far the number is along the way between the two perfect squares. (c) Check your estimates with the &radic; key. (d) Enter &radic;(90<sup>2</sup> + 24<sup>2</sup>) on your own calculator in one sequence of keys and confirm you get 93.1 to one decimal place.</p>
+</div>
+<details class="sol"><summary>Solution to Task 3</summary>
+<div class="scroll">
+<table>
+  <tr><th>Number</th><th>Between</th><th>Estimate</th><th>Calculator</th></tr>
+  <tr><td>&radic;50</td><td>7 and 8</td><td>7.1</td><td>7.071…</td></tr>
+  <tr><td>&radic;200</td><td>14 and 15</td><td>14.1</td><td>14.142…</td></tr>
+  <tr><td>&radic;3000</td><td>54 and 55</td><td>54.8</td><td>54.772…</td></tr>
+</table>
+</div>
+<p>&radic;50: 7<sup>2</sup> = 49 and 8<sup>2</sup> = 64. 50 is 1 past 49, out of a gap of 15, and 1 &divide; 15 = 0.07, so about 7.1.</p>
+<p>&radic;200: 14<sup>2</sup> = 196 and 15<sup>2</sup> = 225. 200 is 4 past 196, out of a gap of 29, and 4 &divide; 29 = 0.14, so about 14.1.</p>
+<p>&radic;3000: 54<sup>2</sup> = 2916 and 55<sup>2</sup> = 3025. 3000 is 84 past 2916, out of a gap of 109, and 84 &divide; 109 = 0.77, so about 54.8.</p>
+<p>For (d), if you got 666 or 114, look at where your parentheses are. If you got 8676, your &radic; key acts on the number showing: press it once more, after the sum.</p>
+</details>
+
+<h2>4. The Pythagorean theorem</h2>
+
+<p>A <b>right triangle</b> has one square corner, called a right angle (90&deg;). The two sides that meet at the square corner are the <b>legs</b>. The side opposite the square corner is the longest side, called the <b>hypotenuse</b>. Call the legs <span class="m">a</span> and <span class="m">b</span> and the hypotenuse <span class="m">c</span>.</p>
+
+<p><b>Pythagorean theorem.</b> In every right triangle,</p>
+<span class="eq"><span class="m">a</span><sup>2</sup> + <span class="m">b</span><sup>2</sup> = <span class="m">c</span><sup>2</sup>.</span>
+<p>In words: the square on the hypotenuse has the same area as the squares on the two legs together. Taking square roots gives the length of the hypotenuse:</p>
+<span class="eq"><span class="m">c</span> = &radic;(<span class="m">a</span><sup>2</sup> + <span class="m">b</span><sup>2</sup>).</span>
+<p>Example: legs 3 and 4 give <span class="m">c</span> = &radic;(9 + 16) = &radic;25 = 5.</p>
+
+<h3>Why it is true: rearranging squares</h3>
+<p>Take four copies of the right triangle and a large square whose side is <span class="m">a</span> + <span class="m">b</span>. The four triangles fit inside the large square in two ways.</p>
+
+<div class="two">
+<div>
+<figure>
+<svg viewBox="-1 -1 9.2 9.2" role="img" aria-label="Large square with four triangles in the corners, leaving a tilted square with side c">
+  <rect x="0" y="0" width="7" height="7" fill="#ffffff" stroke="#1d232b" stroke-width="0.06"/>
+  <polygon points="3,7 7,4 4,0 0,3" fill="#f6d6a0" stroke="#1d232b" stroke-width="0.05"/>
+  <polygon points="0,7 3,7 0,3" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <polygon points="7,7 7,4 3,7" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <polygon points="7,0 4,0 7,4" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <polygon points="0,0 0,3 4,0" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <text x="3.5" y="3.75" font-size="0.75" text-anchor="middle" font-family="Georgia, serif" font-style="italic">c²</text>
+  <text x="4.55" y="5.05" font-size="0.6" text-anchor="middle" font-family="Georgia, serif" font-style="italic">c</text>
+  <text x="1.5" y="7.75" font-size="0.6" text-anchor="middle" font-family="Georgia, serif" font-style="italic">a</text>
+  <text x="5" y="7.75" font-size="0.6" text-anchor="middle" font-family="Georgia, serif" font-style="italic">b</text>
+  <text x="7.35" y="5.7" font-size="0.6" font-family="Georgia, serif" font-style="italic">a</text>
+  <text x="7.35" y="2.2" font-size="0.6" font-family="Georgia, serif" font-style="italic">b</text>
+</svg>
+<figcaption>Arrangement 1: the uncovered part is a tilted square with side <span class="m">c</span>, area <span class="m">c</span><sup>2</sup>.</figcaption>
+</figure>
+</div>
+<div>
+<figure>
+<svg viewBox="-1 -1 9.2 9.2" role="img" aria-label="Large square with the four triangles paired into two rectangles, leaving a square of side a and a square of side b">
+  <rect x="0" y="0" width="7" height="7" fill="#ffffff" stroke="#1d232b" stroke-width="0.06"/>
+  <rect x="0" y="4" width="3" height="3" fill="#f6d6a0" stroke="#1d232b" stroke-width="0.05"/>
+  <rect x="3" y="0" width="4" height="4" fill="#f6d6a0" stroke="#1d232b" stroke-width="0.05"/>
+  <polygon points="3,4 7,4 7,7" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <polygon points="3,4 3,7 7,7" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <polygon points="0,0 3,0 0,4" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <polygon points="3,0 3,4 0,4" fill="#d6e4f2" stroke="#1f5f99" stroke-width="0.05"/>
+  <text x="1.5" y="5.75" font-size="0.75" text-anchor="middle" font-family="Georgia, serif" font-style="italic">a²</text>
+  <text x="5" y="2.25" font-size="0.75" text-anchor="middle" font-family="Georgia, serif" font-style="italic">b²</text>
+  <text x="1.5" y="7.75" font-size="0.6" text-anchor="middle" font-family="Georgia, serif" font-style="italic">a</text>
+  <text x="5" y="7.75" font-size="0.6" text-anchor="middle" font-family="Georgia, serif" font-style="italic">b</text>
+  <text x="7.35" y="5.7" font-size="0.6" font-family="Georgia, serif" font-style="italic">a</text>
+  <text x="7.35" y="2.2" font-size="0.6" font-family="Georgia, serif" font-style="italic">b</text>
+</svg>
+<figcaption>Arrangement 2: the same four triangles, paired into two rectangles. The uncovered part is two squares, areas <span class="m">a</span><sup>2</sup> and <span class="m">b</span><sup>2</sup>.</figcaption>
+</figure>
+</div>
+</div>
+
+<p>Both large squares have the same area, and both contain the same four triangles. So the uncovered areas are equal: <span class="m">c</span><sup>2</sup> = <span class="m">a</span><sup>2</sup> + <span class="m">b</span><sup>2</sup>. The pictures are drawn with <span class="m">a</span> = 3 and <span class="m">b</span> = 4. Then the large square has area 7<sup>2</sup> = 49, the four triangles have area 4 &times; (3 &times; 4 &divide; 2) = 24, and the uncovered part is 49 &minus; 24 = 25 = 5<sup>2</sup> in both arrangements.</p>
+
+<h3>The converse: checking for a square corner</h3>
+<p>The theorem also works backwards. If a triangle has sides <span class="m">a</span>, <span class="m">b</span>, <span class="m">c</span> with <span class="m">a</span><sup>2</sup> + <span class="m">b</span><sup>2</sup> = <span class="m">c</span><sup>2</sup>, then the angle between sides <span class="m">a</span> and <span class="m">b</span> is exactly 90&deg;. This is called the <b>converse</b> of the theorem. It also tells which way a corner is off:</p>
+<ul>
+  <li>If <span class="m">c</span><sup>2</sup> is larger than <span class="m">a</span><sup>2</sup> + <span class="m">b</span><sup>2</sup>, the angle is wider than 90&deg;.</li>
+  <li>If <span class="m">c</span><sup>2</sup> is smaller than <span class="m">a</span><sup>2</sup> + <span class="m">b</span><sup>2</sup>, the angle is narrower than 90&deg;.</li>
+</ul>
+<p>Opening a pair of scissors with fixed blade lengths shows why: the wider the angle, the farther apart the tips. Section 7 uses the converse to check kitchen corners.</p>
+
+<h2>5. The diagonal of a rectangle</h2>
+
+<p>A diagonal cuts a rectangle into two right triangles. The width and height of the rectangle are the legs, and the diagonal is the hypotenuse. So for a rectangle of width <span class="m">w</span> and height <span class="m">h</span>,</p>
+<span class="eq">diagonal = &radic;(<span class="m">w</span><sup>2</sup> + <span class="m">h</span><sup>2</sup>).</span>
+
+<p>Back to the cabinet. Its side view is a rectangle 24 inches by 90 inches, so its diagonal is</p>
+<span class="eq">&radic;(24<sup>2</sup> + 90<sup>2</sup>) = &radic;(576 + 8100) = &radic;8676 = 93.145… inches.</span>
+<p>This matches the 93.1 inches from the slider in Task 2. As Section 2 explained, the top front corner swings on a circle whose radius is the diagonal, so the cabinet needs 93.145… inches of height to be tipped up.</p>
+
+<h3>Rounding up safely</h3>
+<p>When an answer is a clearance, round in the safe direction. Round the space <em>needed</em> up and the space <em>available</em> down. For the cabinet, the space needed is 93.145… inches. Rounded up to the next tenth, that is 93.2 inches; rounded up to the next whole inch, it is 94 inches. The ceiling is 96 inches, so the spare room is 96 &minus; 93.2 = 2.8 inches.</p>
+<p>Rounding to the nearest value can give the wrong answer when the numbers are close. A cabinet 93 inches tall and 24 inches deep has diagonal &radic;(8649 + 576) = &radic;9225 = 96.047… inches. Rounded to the nearest tenth, that is 96.0, which looks like an exact fit under a 96-inch ceiling. Rounded up, it is 96.1, which does not fit. The rounded-up answer gives the correct decision: the diagonal is about 0.05 inches more than the ceiling height, so this cabinet catches on the ceiling.</p>
+<p>This model is a simplification. It treats the cabinet as a perfect box and the floor and ceiling as perfectly level, and it assumes the pivot edge stays in place.</p>
+
+<h3>Back to the refrigerator</h3>
+<p>Inside the house, the delivery crew tips the refrigerator back onto a hand truck, pivoting on its bottom back edge, just like the cabinet. With the doors off, its side view is a rectangle 68 5/8 inches tall (height to top of case) and 29 inches deep <span class="cite">[1]</span>. Its diagonal is</p>
+<span class="eq">&radic;(68.625<sup>2</sup> + 29<sup>2</sup>) = &radic;(4709.39… + 841) = &radic;5550.39… = 74.50… inches,</span>
+<p>which rounds up to 74.6 inches. That leaves 96 &minus; 74.6 = 21.4 inches under the 96-inch ceiling, and it is even less than the 80-inch doorway height from Section 1, so the crew could tip it back under a door header. The hinges on top of the case reach 69 3/4 inches <span class="cite">[1]</span>; using that height instead gives a diagonal of 75.5 inches, still under 80.</p>
+
+<div class="task">
+<p class="label">Task 4 (about 5 minutes, calculator)</p>
+<p>Two more cabinets, each 24 inches deep (made-up sizes): one 84 inches tall and one 92 inches tall. For each, (a) find the two whole numbers the diagonal lies between, (b) compute the diagonal with the calculator, (c) round the space needed up to the next tenth of an inch, and (d) decide whether it can be tipped up under a 96-inch ceiling, and with how much spare room. Then (e) decide whether the 84-inch cabinet could be tipped up in a room with the code minimum ceiling of 7 feet <span class="cite">[3]</span>.</p>
+</div>
+<details class="sol"><summary>Solution to Task 4</summary>
+<div class="scroll">
+<table>
+  <tr><th>Cabinet</th><th>Diagonal</th><th>Needed</th><th>Under 96?</th></tr>
+  <tr><td>84 &times; 24</td><td>87.361…</td><td>87.4</td><td class="ok">yes, 8.6 spare</td></tr>
+  <tr><td>92 &times; 24</td><td>95.079…</td><td>95.1</td><td class="ok">yes, 0.9 spare</td></tr>
+</table>
+</div>
+<p>All values are in inches. The sums of squares are 84<sup>2</sup> + 24<sup>2</sup> = 7056 + 576 = 7632 and 92<sup>2</sup> + 24<sup>2</sup> = 8464 + 576 = 9040.</p>
+<p>For (a): 87<sup>2</sup> = 7569 and 88<sup>2</sup> = 7744, so the first diagonal is between 87 and 88. 95<sup>2</sup> = 9025 and 96<sup>2</sup> = 9216, so the second is between 95 and 96.</p>
+<p>(e) A 7-foot ceiling is 7 &times; 12 = 84 inches. The 84-inch cabinet needs 87.4 inches to tip up, so it cannot be tipped up in that room. Standing, it would touch the ceiling exactly, with no room to spare.</p>
+</details>
+
+<h2>6. Using a spreadsheet for several cabinets</h2>
+
+<p>When the store offers several cabinet sizes, a spreadsheet does the same computation for each row. Each row holds one cabinet and the ceiling height. The ceiling is typed in every row so that each formula refers only to cells in its own row.</p>
+
+<div class="scroll">
+<table>
+  <tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>
+  <tr><th>1</th><td>Height (in)</td><td>Depth (in)</td><td>Diagonal (in)</td><td>Needed, rounded up (in)</td><td>Ceiling (in)</td><td>Spare (in)</td></tr>
+  <tr><th>2</th><td>84</td><td>24</td><td>=SQRT(A2^2+B2^2)</td><td>=ROUNDUP(C2,1)</td><td>96</td><td>=E2-D2</td></tr>
+  <tr><th>3</th><td>90</td><td>24</td><td></td><td></td><td>96</td><td></td></tr>
+  <tr><th>4</th><td>92</td><td>24</td><td></td><td></td><td>96</td><td></td></tr>
+  <tr><th>5</th><td>93</td><td>24</td><td></td><td></td><td>96</td><td></td></tr>
+  <tr><th>6</th><td>96</td><td>12</td><td></td><td></td><td>96</td><td></td></tr>
+</table>
+</div>
+
+<p><code>ROUNDUP(C2,1)</code> rounds the value in C2 up to 1 decimal place. A negative number in column F means the cabinet does not fit. The formulas are in row 2 only. Copying them down to rows 3 to 6 changes the row numbers in them, as in lecture 1.3: C3 becomes <code>=SQRT(A3^2+B3^2)</code>.</p>
+
+<p>
+<button type="button" id="dlCsv">Download layout as CSV</button>
+<button type="button" id="copyTsv">Copy layout to clipboard</button>
+<span id="copyMsg" style="font-family:system-ui,sans-serif;font-size:15px;color:#55606d"></span>
+</p>
+<pre id="layoutText"></pre>
+<p style="font-size:16px">The copied layout is tab-separated, so pasting it into cell A1 fills the columns. The CSV file and the copied layout have the formulas in row 2 only, like the table above. They were not tested in Excel or Google Sheets.</p>
+
+<div class="task">
+<p class="label">Task 5 (about 5 minutes, spreadsheet)</p>
+<p>Build the sheet above, either by typing it or by pasting the layout into cell A1. Copy the formulas in C2, D2 and F2 down to row 6. Write down which cabinets can be tipped up under the 96-inch ceiling and the spare room for each.</p>
+</div>
+<details class="sol"><summary>Solution to Task 5</summary>
+<div class="scroll">
+<table>
+  <tr><th>Height</th><th>Depth</th><th>Diagonal</th><th>Needed</th><th>Spare</th></tr>
+  <tr><td>84</td><td>24</td><td>87.361</td><td>87.4</td><td>8.6</td></tr>
+  <tr><td>90</td><td>24</td><td>93.145</td><td>93.2</td><td>2.8</td></tr>
+  <tr><td>92</td><td>24</td><td>95.079</td><td>95.1</td><td>0.9</td></tr>
+  <tr><td>93</td><td>24</td><td>96.047</td><td>96.1</td><td>&minus;0.1</td></tr>
+  <tr><td>96</td><td>12</td><td>96.747</td><td>96.8</td><td>&minus;0.8</td></tr>
+</table>
+</div>
+<p>Column E (ceiling, 96 in every row) is left out of this table. The 84-, 90- and 92-inch cabinets can be tipped up. The &minus;0.1 for the 93-inch cabinet comes from the rounded-up 96.1; the actual overlap is about 0.05 inches, and either way it does not fit. The 96-by-12 cabinet is shallow, but it is already as tall as the ceiling, and any depth at all makes its diagonal longer than 96. A cabinet that does not fit when tipped up from its back can be tipped up on its side instead, if it is narrow enough, or assembled standing up.</p>
+<p>The spreadsheet may show the diagonal with more decimal places, and a spare value may appear as a long decimal such as 8.599999…. That is 8.6: the spreadsheet stores decimals with tiny rounding errors in the last digits.</p>
+</details>
+
+<h2>7. Checking that a corner is square: the 3-4-5 rule</h2>
+
+<p>Base cabinets and countertops are straight boxes, so they fit well only if the corner of the room is square (90&deg;). Carpenters check this with a tape measure, using the 3-4-5 rule. A carpentry guide describes it this way: "If the short side of the triangle is 3 feet, and the leg that extends from it 90 degrees is 4 feet, the hypotenuse, or longest leg, will be 5 feet" <span class="cite">[4]</span>.</p>
+
+<figure>
+<svg viewBox="-26 -6 140 112" style="max-width:440px" role="img" aria-label="Floor plan of a room corner with a mark 3 feet along one wall, a mark 4 feet along the other, and the 5-foot diagonal between the marks">
+  <line x1="0" y1="0" x2="0" y2="88" stroke="#1d232b" stroke-width="3"/>
+  <line x1="0" y1="88" x2="108" y2="88" stroke="#1d232b" stroke-width="3"/>
+  <line x1="0" y1="28" x2="80" y2="88" stroke="#1f5f99" stroke-width="1.4" stroke-dasharray="4 2"/>
+  <circle cx="0" cy="28" r="2.2" fill="#b03a2e"/>
+  <circle cx="80" cy="88" r="2.2" fill="#b03a2e"/>
+  <text x="-5" y="61" font-size="7" text-anchor="end" font-family="system-ui, sans-serif">3 ft</text>
+  <text x="40" y="100" font-size="7" text-anchor="middle" font-family="system-ui, sans-serif">4 ft</text>
+  <text x="44" y="52" font-size="7" font-family="system-ui, sans-serif" fill="#1f5f99">should be 5 ft</text>
+  <rect x="1.5" y="78.5" width="8" height="8" fill="none" stroke="#55606d" stroke-width="0.8"/>
+</svg>
+<figcaption>Mark 3 ft along one wall and 4 ft along the other, measured from the corner. Then measure between the marks.</figcaption>
+</figure>
+
+<p>The rule is the converse of the Pythagorean theorem: 3<sup>2</sup> + 4<sup>2</sup> = 9 + 16 = 25 = 5<sup>2</sup>, so if the marks are exactly 5 feet apart, the corner is exactly 90&deg;. Any multiple of 3, 4, 5 works too, because multiplying all three sides by the same number keeps the equation true. The same guide says larger multiples, such as 6-8-10 or 12-16-20, can be used for more accuracy on larger walls <span class="cite">[4]</span>: a small error in the tape reading matters less when the distances are longer. For 6-8-10: 36 + 64 = 100 = 10<sup>2</sup>.</p>
+
+<p>The marks do not have to be a nice triple. With marks at 5 feet and 7 feet, the diagonal should be &radic;(25 + 49) = &radic;74 = 8.602… feet. The 0.602… feet is 0.602… &times; 12 = 7.23 inches, close to 7 1/4 inches, so the tape should read about 8 feet 7 1/4 inches. Rounding to the nearest 1/8 inch is right here, because 8 feet 7 1/4 inches is a target reading for the tape. Nothing has to fit inside it.</p>
+
+<div class="task">
+<p class="label">Task 6 (about 5 minutes, calculator)</p>
+<p>A carpenter checks two kitchen corners with the 6-8-10 rule, marking 6 feet along one wall and 8 feet along the other. Work in inches: 6 ft = 72 in, 8 ft = 96 in. (a) What should the diagonal be, in inches? (b) At corner 1 the diagonal measures 10 feet 1/2 inch. At corner 2 it measures 9 feet 11 inches. For each corner, compare the square of the measured diagonal with 72<sup>2</sup> + 96<sup>2</sup>, and say whether the corner is square, wider than 90&deg;, or narrower than 90&deg;.</p>
+</div>
+<details class="sol"><summary>Solution to Task 6</summary>
+<p>(a) &radic;(72<sup>2</sup> + 96<sup>2</sup>) = &radic;(5184 + 9216) = &radic;14400 = 120 inches, which is 10 feet.</p>
+<p>(b) Corner 1: 10 ft 1/2 in = 120.5 in, and 120.5<sup>2</sup> = 14520.25. This is larger than 14400, so the corner is wider than 90&deg;. Corner 2: 9 ft 11 in = 119 in, and 119<sup>2</sup> = 14161. This is smaller than 14400, so the corner is narrower than 90&deg;. Comparing the diagonal with 120 inches directly gives the same answers, since a longer diagonal has a larger square.</p>
+</details>
+
+<h2>Sources</h2>
+<ol class="sources">
+  <li>GE Appliances, specification sheet "GNE27JGM/JMM/JSM GE ENERGY STAR 27.0 Cu. Ft. French-Door Refrigerator," revised March 2018 ("Specification Revised 3/18"). Figures quoted: height to top of door 69 7/8 in, height to top of hinge 69 3/4 in, height to top of case 68 5/8 in, width 35 5/8 in, case depth with door handle 36 3/8 in, case depth less door handle 33 7/8 in, case depth without door 29 in. <a href="https://assets.ajmadison.com/ajmadison/itemdocs/GNE27J-ge-specs.pdf">assets.ajmadison.com/ajmadison/itemdocs/GNE27J-ge-specs.pdf</a> (manufacturer's sheet hosted by a retailer), accessed October 4, 2026.</li>
+  <li>U.S. Access Board, "Guide to the ADA Accessibility Standards, Chapter 4: Entrances, Doors, and Gates," guide to section 404.2.3 of the 2010 ADA Standards for Accessible Design (page undated). Quoted: "32 inches minimum clear width" and "The clear width is measured from the stop to the face of doors or gates open 90⁰." <a href="https://www.access-board.gov/ada/guides/chapter-4-entrances-doors-and-gates/">access-board.gov/ada/guides/chapter-4-entrances-doors-and-gates/</a>, accessed October 4, 2026.</li>
+  <li>International Code Council, 2021 International Residential Code, Section R305.1, as reproduced in City of Boise handout "IRC Code Section R305 Ceiling Height" (January 2022). Quoted: "Habitable space, hallways and portions of basements containing these spaces shall have a ceiling height of not less than 7 feet (2134 mm)." <a href="https://www.cityofboise.org/media/3924/434-irc-code-section-r305-ceiling-height.pdf">cityofboise.org/media/3924/434-irc-code-section-r305-ceiling-height.pdf</a>, accessed October 4, 2026.</li>
+  <li>Robert Robillard, "The 3-4-5 Method For Squaring Corners," A Concord Carpenter, June 16, 2018 (updated May 11, 2020). Quoted: the 3 ft, 4 ft, 5 ft description in Section 7, the multiples "3-4-5, 6-8-10, 9-12-15, 12-16-20, 15-20-25," and "If the carpenter or builder needs to increase accuracy on larger walls or structures, any multiple of the 3-4-5 rule can be deployed." <a href="https://www.aconcordcarpenter.com/?p=472">aconcordcarpenter.com/?p=472</a>, accessed October 4, 2026.</li>
+</ol>
+
+</main>
+
+<script>
+(function () {
+  // Tipping cabinet: 90 in tall, 24 in deep, pivot at bottom back edge (origin).
+  var H = 90, D = 24;
+  var slider = document.getElementById('angle');
+  var cab = document.getElementById('cab');
+  var topLine = document.getElementById('topLine');
+  var angOut = document.getElementById('angOut');
+  var topOut = document.getElementById('topOut');
+  var diag = document.getElementById('diag'), corner = document.getElementById('corner');
+  var lblH = document.getElementById('lblH'), lblD = document.getElementById('lblD');
+  var R = Math.sqrt(H * H + D * D);
+  // Path of the top front corner from lying down (H, D) to standing (-D, H): an arc of radius R about the pivot.
+  document.getElementById('arc').setAttribute('d', 'M ' + H + ' ' + (-D) + ' A ' + R + ' ' + R + ' 0 0 0 ' + (-D) + ' ' + (-H));
+  function draw() {
+    var deg = parseFloat(slider.value), t = deg * Math.PI / 180;
+    var c = Math.cos(t), s = Math.sin(t);
+    // Corners while lying on its back: (0,0), (H,0), (H,D), (0,D); rotate about origin.
+    var pts = [[0, 0], [H, 0], [H, D], [0, D]].map(function (p) {
+      return [p[0] * c - p[1] * s, p[0] * s + p[1] * c];
+    });
+    cab.setAttribute('points', pts.map(function (p) { return p[0].toFixed(2) + ',' + (-p[1]).toFixed(2); }).join(' '));
+    var top = Math.max.apply(null, pts.map(function (p) { return p[1]; }));
+    function rot(x, y) { return [x * c - y * s, -(x * s + y * c)]; }
+    function place(el, x, y) { var q = rot(x, y); el.setAttribute('x', q[0].toFixed(2)); el.setAttribute('y', (q[1] + 1.8).toFixed(2)); }
+    var k = rot(H, D);
+    diag.setAttribute('x2', k[0].toFixed(2)); diag.setAttribute('y2', k[1].toFixed(2));
+    corner.setAttribute('cx', k[0].toFixed(2)); corner.setAttribute('cy', k[1].toFixed(2));
+    place(lblH, H / 2, -9);
+    place(lblD, H - 9, D / 2);
+    topLine.setAttribute('y1', (-top).toFixed(2));
+    topLine.setAttribute('y2', (-top).toFixed(2));
+    angOut.textContent = deg.toFixed(1) + '°';
+    topOut.textContent = top.toFixed(1) + ' in';
+  }
+  slider.addEventListener('input', draw);
+  draw();
+
+  // Spreadsheet layout
+  var rows = [
+    ['Height (in)', 'Depth (in)', 'Diagonal (in)', 'Needed, rounded up (in)', 'Ceiling (in)', 'Spare (in)']
+  ];
+  var data = [[84, 24], [90, 24], [92, 24], [93, 24], [96, 12]];
+  data.forEach(function (d, i) {
+    var r = i + 2;
+    if (r === 2) {
+      rows.push([String(d[0]), String(d[1]), '=SQRT(A2^2+B2^2)', '=ROUNDUP(C2,1)', '96', '=E2-D2']);
+    } else {
+      rows.push([String(d[0]), String(d[1]), '', '', '96', '']);
+    }
+  });
+  function csvCell(v) { return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  var csv = rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n') + '\r\n';
+  var tsv = rows.map(function (r) { return r.join('\t'); }).join('\n');
+  document.getElementById('layoutText').textContent = tsv;
+
+  document.getElementById('dlCsv').addEventListener('click', function () {
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cabinet-diagonals.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+
+  var msg = document.getElementById('copyMsg');
+  function fallbackCopy() {
+    var ta = document.createElement('textarea');
+    ta.value = tsv; document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    msg.textContent = ok ? 'Copied.' : 'Copy failed. Select the text below and copy it.';
+  }
+  document.getElementById('copyTsv').addEventListener('click', function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () { msg.textContent = 'Copied.'; }, fallbackCopy);
+    } else { fallbackCopy(); }
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-05/5-1-reading-a-shop-drawing/" style="color:inherit">&larr; 5.1 Reading a shop drawing</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-05/5-3-volume-and-surface-area/" style="color:inherit">5.3 Volume and surface area &rarr;</a></nav>
+</body>
+</html>

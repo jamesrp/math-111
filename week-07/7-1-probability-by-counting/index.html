@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probability by counting</title>
+<style>
+:root {
+  --bg: #ffffff; --text: #1c1c1c; --muted: #555; --line: #c9c9c9;
+  --task-bg: #f3f6fb; --task-border: #3a5f9e; --sol-bg: #ffffff;
+  --accent: #3a5f9e; --code-bg: #f1f1f1;
+  --c1: #3a5f9e; --c2: #c0762a; --c3: #2e8b57; --c4: #a83c6e; --c5: #6a5acd; --c6: #8a6d1e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181a; --text: #e8e8e8; --muted: #b0b0b0; --line: #4a4a4a;
+    --task-bg: #1f2633; --task-border: #7fa2e0; --sol-bg: #17181a;
+    --accent: #7fa2e0; --code-bg: #26282b;
+    --c1: #7fa2e0; --c2: #e0a060; --c3: #5cc08a; --c4: #e07aa8; --c5: #a99cf0; --c6: #d4b25a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181a; --text: #e8e8e8; --muted: #b0b0b0; --line: #4a4a4a;
+  --task-bg: #1f2633; --task-border: #7fa2e0; --sol-bg: #17181a;
+  --accent: #7fa2e0; --code-bg: #26282b;
+  --c1: #7fa2e0; --c2: #e0a060; --c3: #5cc08a; --c4: #e07aa8; --c5: #a99cf0; --c6: #d4b25a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 18px/1.55 Georgia, "Times New Roman", serif; }
+main { max-width: 820px; margin: 0 auto; padding: 20px 16px 60px; }
+.course { font: 15px/1.4 system-ui, sans-serif; color: var(--muted); margin: 0 0 6px; }
+h1 { font: 700 32px/1.2 system-ui, sans-serif; margin: 0 0 24px; }
+h2 { font: 700 23px/1.3 system-ui, sans-serif; margin: 40px 0 12px;
+  padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font: 700 18px/1.3 system-ui, sans-serif; margin: 0 0 8px; }
+p, li { max-width: 72ch; }
+table { border-collapse: collapse; margin: 12px 0; font-size: 16px; }
+th, td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); }
+.scroll { overflow-x: auto; max-width: 100%; }
+.task { background: var(--task-bg); border: 2px solid var(--task-border);
+  border-radius: 6px; padding: 14px 16px; margin: 22px 0 10px; }
+.task h3 { color: var(--accent); }
+details { border: 1px solid var(--line); border-radius: 6px; margin: 0 0 22px;
+  background: var(--sol-bg); }
+summary { cursor: pointer; padding: 10px 14px; font: 600 16px system-ui, sans-serif; }
+details > div { padding: 0 16px 10px; }
+.formula { display: block; margin: 12px 0; padding: 10px 14px; background: var(--code-bg);
+  border-radius: 4px; font-family: system-ui, sans-serif; overflow-x: auto; }
+.frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 3px; }
+.frac > span { display: block; padding: 0 4px; }
+.frac > span:first-child { border-bottom: 1px solid currentColor; }
+code, .mono { font-family: Consolas, Menlo, monospace; font-size: 15px;
+  background: var(--code-bg); padding: 1px 4px; border-radius: 3px; }
+button { font: 600 15px system-ui, sans-serif; padding: 8px 14px; margin: 4px 6px 4px 0;
+  border: 1px solid var(--accent); background: var(--bg); color: var(--accent);
+  border-radius: 4px; cursor: pointer; }
+button:hover { background: var(--task-bg); }
+.dice td, .dice th { text-align: center; min-width: 38px; }
+svg text { font-family: system-ui, sans-serif; }
+.small { font-size: 15px; color: var(--muted); }
+.sources li { margin-bottom: 8px; overflow-wrap: anywhere; }
+#copyMsg { font: 14px system-ui, sans-serif; color: var(--muted); }
+.venn-l { fill: var(--c1); stroke: var(--c1); }
+.venn-t { fill: var(--c2); stroke: var(--c2); }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-06/6-3-permutations-and-combinations/" style="color:inherit">&larr; 6.3 Permutations and combinations</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-07/7-2-independence-and-simulation/" style="color:inherit">7.2 Independence and simulation &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Probability and the stock market (week 7) · Lecture 1 of 3</p>
+<h1>Probability by counting</h1>
+
+<h2 id="s1">1. A drink picked at random from the menu</h2>
+
+<p>Lecture 6.1 counted drink orders on the Starbucks online menu. The hot coffee section of that menu lists 31 drinks in 9 groups [1]. These are the same 31 drinks as in lecture 6.1. The section also lists 2 Coffee Traveler items, which are boxes of brewed coffee for a group. Lecture 6.1 left them out, and so does this lecture.</p>
+
+<div class="scroll">
+<table>
+<tr><th>Group</th><th>Drinks</th><th>Count</th></tr>
+<tr><td>Brewed Coffee</td><td>Blonde Roast (Sunsera), Medium Roast (Pike Place Roast), Featured Dark Roast (1971 Roast), Half-Caff Pike Place Roast, Decaf Pike Place Roast, Caffè Misto</td><td>6</td></tr>
+<tr><td>Americano</td><td>Caffè Americano</td><td>1</td></tr>
+<tr><td>Latte</td><td>Caffè Latte, Pumpkin Spice Latte, Pecan Crunch Latte, Lavender Latte, Toasted Coconut Latte, Pistachio Latte, Vanilla Protein Latte, Sugar-Free Vanilla Protein Latte, Caramel Protein Latte, Cinnamon Dolce Latte, Sugar-Free Caramel Protein Latte, Blonde Vanilla Latte</td><td>12</td></tr>
+<tr><td>Cappuccino</td><td>Cappuccino</td><td>1</td></tr>
+<tr><td>Mocha</td><td>Caffè Mocha, White Chocolate Mocha</td><td>2</td></tr>
+<tr><td>Macchiato</td><td>Espresso Macchiato, Caramel Macchiato</td><td>2</td></tr>
+<tr><td>Flat White</td><td>Flat White</td><td>1</td></tr>
+<tr><td>Cortado</td><td>Cortado, Pecan Cortado, Pistachio Cortado, Brown Sugar Oatmilk Cortado</td><td>4</td></tr>
+<tr><td>Espresso Shot</td><td>Espresso, Espresso Con Panna</td><td>2</td></tr>
+<tr><th>Total</th><th></th><th>31</th></tr>
+</table>
+</div>
+
+<p>Suppose you let chance choose your drink. Number the 31 drinks from 1 to 31 and let a spreadsheet pick a number with <code>=RANDBETWEEN(1,31)</code>. Every drink has the same chance of being picked. Real customers do not order this way. The random pick is a simplification that makes the counting work.</p>
+
+<p>The pick lands on one of 31 equally likely drinks, and 12 of the 31 are lattes. We write the chance of a latte as the fraction 12/31. On a calculator, 12 ÷ 31 = 0.387…, which is about 38.7%.</p>
+
+<p>The question: what does a chance like 38.7% or 1/6 mean when you pick only once, and how do you find a chance when the outcomes are too many to list? Section 3 answers the first part and Section 7 the second.</p>
+
+<div class="task" id="task1">
+<h3>Task 1 (about 3 minutes, calculator)</h3>
+<p>A drink is picked at random from the 31 hot drinks. For each event below, write the chance as a fraction, as a decimal rounded to 3 places, and as a percentage rounded to 1 decimal place.</p>
+<ol type="a">
+<li>The drink is a cortado.</li>
+<li>The drink is from the Brewed Coffee group.</li>
+<li>The drink has “Pistachio” in its name.</li>
+</ol>
+</div>
+<details><summary>Solution to Task 1</summary><div>
+<ol type="a">
+<li>4 of the 31 drinks are cortados: 4/31 ≈ 0.129 = 12.9%.</li>
+<li>6 drinks are brewed coffee: 6/31 ≈ 0.194 = 19.4%.</li>
+<li>Two drinks have “Pistachio” in the name, Pistachio Latte and Pistachio Cortado: 2/31 ≈ 0.065 = 6.5%.</li>
+</ol>
+<p>To turn a decimal into a percentage, multiply by 100: 0.129 × 100 = 12.9%. The fraction, the decimal and the percentage are the same number written three ways.</p>
+</div></details>
+
+<h2 id="s2">2. Sample space, events and the counting formula</h2>
+
+<p>Task 1 used one calculation three times: count the drinks in the event, then divide by 31. In the set language of lecture 6.2:</p>
+
+<ul>
+<li>An <b>experiment</b> is something with an uncertain result: picking a drink at random, rolling a die, drawing a card. Each possible result is an <b>outcome</b>.</li>
+<li>The <b>sample space</b> is the set of all outcomes. It is the universal set for the experiment, so we write it U, as in lecture 6.2. For the random drink, U is the set of 31 drinks in Section 1, and |U| = 31. For one roll of a die, U = {1, 2, 3, 4, 5, 6} and |U| = 6.</li>
+<li>An <b>event</b> is a subset of U. The event “the drink is a cortado” is the set C = {Cortado, Pecan Cortado, Pistachio Cortado, Brown Sugar Oatmilk Cortado}, with |C| = 4. The event “the die shows an even number” is E = {2, 4, 6}, with |E| = 3.</li>
+</ul>
+
+<p>As in lecture 6.2, |A| is the number of elements of the set A. When every outcome in U is equally likely, the <b>probability</b> of an event A, written P(A), is</p>
+
+<span class="formula">P(A) = <span class="frac"><span>|A|</span><span>|U|</span></span></span>
+
+<p>In words: the number of outcomes in A divided by the number of outcomes in U. For the die, P(E) = 3/6 = 1/2 = 50%. For the drink, P(C) = 4/31 ≈ 12.9%.</p>
+
+<p>A probability is always between 0 and 1, or between 0% and 100%. The empty event ∅, such as “the die shows 7”, has probability 0. The event U itself has probability 1, because some outcome always happens.</p>
+
+<p>The formula needs the condition “equally likely”. Section 5 shows what goes wrong without it.</p>
+
+<h2 id="s3">3. What a probability means: the long run</h2>
+
+<p>A fair die has P(6) = 1/6. This does not mean that every 6 rolls contain exactly one six. Roll a die 6 times and you may get no sixes, or three. The probability describes what happens over many rolls: as the number of rolls grows, the fraction of rolls that show a six settles near 1/6 ≈ 0.167. The same reading applies to any probability. An event with probability 30% happens in about 30 of every 100 repetitions, when the experiment is repeated many times. This is the <b>long-run frequency</b> meaning of probability. For the random drink, about 38.7% of many random picks would be lattes.</p>
+
+<p>A spreadsheet can roll a die a thousand times in a second, so the long-run meaning can be tested in class.</p>
+
+<div class="task" id="task2">
+<h3>Task 2 (about 7 minutes, spreadsheet, or the simulator on a phone)</h3>
+<p>Roll a die 1000 times and follow the fraction of rolls that show a six.</p>
+<p><b>With a laptop:</b> download the CSV file with the first button below and open it. In Excel, open the downloaded file with File &gt; Open. In Google Sheets, choose File &gt; Import &gt; Upload, select the file, and choose “Insert new sheet(s)”. Each row is one roll; the file has rows 2 to 1001 filled in with the formulas of the layout below.</p>
+<p><b>With only a phone:</b> use the simulator further down. Each press of “Roll 1000 dice” is one run of 1000 rolls, drawn as one line, and the table under the graph lists the fraction of sixes after 10, 100 and 1000 rolls.</p>
+<ol type="a">
+<li>Write down the fraction of sixes after 10 rolls, after 100 rolls and after 1000 rolls. In the spreadsheet these are cells E11, E101 and E1001.</li>
+<li>Roll again, once. In Excel press F9 (Fn+F9 on a Mac); in Google Sheets type any number into an empty cell and press Enter; on the simulator press the button again. Write down the three new fractions.</li>
+<li>Which of the three fractions changed the most between your two tries? Which ones are closest to 1/6 ≈ 0.167? Compare with a neighbor.</li>
+</ol>
+
+<div class="scroll">
+<table>
+<tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+<tr><th>1</th><td>Roll</td><td>Die</td><td>Six? (1 = yes)</td><td>Sixes so far</td><td>Fraction of sixes</td></tr>
+<tr><th>2</th><td class="mono">1</td><td class="mono">=RANDBETWEEN(1,6)</td><td class="mono">=IF(B2=6,1,0)</td><td class="mono">=C2</td><td class="mono">=D2/A2</td></tr>
+<tr><th>3</th><td class="mono">=A2+1</td><td class="mono">=RANDBETWEEN(1,6)</td><td class="mono">=IF(B3=6,1,0)</td><td class="mono">=D2+C3</td><td class="mono">=D3/A3</td></tr>
+</table>
+</div>
+<p class="small"><code>=IF(B2=6,1,0)</code> puts 1 in the cell when B2 is 6 and 0 otherwise. Column D adds up the sixes so far, and column E divides by the number of rolls.</p>
+<p>
+<button type="button" id="csvBtn">Download the layout as CSV (1000 rolls)</button>
+<button type="button" id="copyBtn">Copy the layout (rows 1 to 3)</button>
+<span id="copyMsg"></span>
+</p>
+<p class="small">To build the sheet by hand instead, paste the copied rows into cell A1 (or type them), select A3 to E3 and copy them down to row 1001. A new Google Sheets sheet has only 1000 rows: first scroll to the bottom of the sheet and click Add to add more rows. These files and formulas have not been tested in Excel or Google Sheets.</p>
+
+<div id="sim">
+<p><button type="button" id="rollBtn">Roll 1000 dice</button><button type="button" id="clearBtn">Clear</button></p>
+<svg id="simSvg" viewBox="0 0 640 400" width="100%" role="img" aria-label="Fraction of sixes after each roll, for each run"></svg>
+<p class="small">Simulator. The horizontal axis is stretched so that 1, 10, 100 and 1000 rolls are equally far apart. The dashed line is at 1/6 ≈ 0.167. Fractions above 0.5, which happen only in the first few rolls, are drawn at the top edge.</p>
+<div class="scroll"><table id="simTable"><tr><th>Run</th><th>After 10 rolls</th><th>After 100 rolls</th><th>After 1000 rolls</th></tr></table></div>
+</div>
+</div>
+<details><summary>Solution to Task 2</summary><div>
+<p>Your numbers will differ from everyone else’s, because the rolls are random. The pattern is the same for everyone.</p>
+<ul>
+<li>After 10 rolls the fraction jumps around a lot. With only 10 rolls it can only be 0, 0.1, 0.2, 0.3 and so on, so it can never equal 0.167. Two tries can differ a lot, for example one at 0 and another at 0.3. No six at all in 10 rolls happens in about 16% of tries (a calculation beyond this course gives (5/6)<sup>10</sup> ≈ 0.162).</li>
+<li>After 100 rolls the fraction is usually between 0.10 and 0.23 (a calculation beyond this course gives about 94% of tries).</li>
+<li>After 1000 rolls the fraction is usually between 0.14 and 0.19 (about 97% of tries). It changes the least, and it stays closest to 0.167.</li>
+</ul>
+<p>On the simulator, the lines are far apart on the left of the graph and jump up and down. As the number of rolls grows, they settle and squeeze together around the dashed line at 1/6.</p>
+<p>The more rolls, the closer the fraction of sixes tends to be to 1/6. That is what P(6) = 1/6 means.</p>
+</div></details>
+
+<h2 id="s4">4. The complement rule</h2>
+
+<p>Lecture 6.2 defined the complement A′ (read “A prime” or “not A”): the set of elements of U that are not in A. It counted the complement by subtracting:</p>
+
+<span class="formula">|A′| = |U| − |A|</span>
+
+<p>Dividing both sides by |U| turns this count into the <b>complement rule</b> for probabilities:</p>
+
+<span class="formula">P(A′) = 1 − P(A)</span>
+
+<p>Example. Let L be the event “the drink is a latte”. The chance that the random drink is not a latte is P(L′) = 1 − 12/31 = 19/31 ≈ 61.3%. Counting directly gives the same: |L′| = 31 − 12 = 19 drinks are not lattes.</p>
+
+<p>For one drink, counting L′ directly is just as easy. The rule saves work when an event is hard to count and its complement is easy, as in Task 5.</p>
+
+<h2 id="s5">5. Equally likely outcomes: rolling two dice</h2>
+
+<p>Roll two dice and add the numbers. The sum can be any of the 11 numbers 2, 3, 4, …, 12. Using the counting formula on these 11 sums would give P(sum is 7) = 1/11 ≈ 9.1%. The formula needs equally likely outcomes, so first check whether the 11 sums are equally likely. Before reading on, decide whether a sum of 7 and a sum of 2 should come up equally often.</p>
+
+<p>A sample space with equally likely outcomes comes from looking at both dice. Think of them as a red die and a blue die. An outcome is a pair (red, blue), such as (3, 4). By the multiplication principle from lecture 6.1, the red die has 6 options and the blue die has 6 options whatever the red die shows, so there are 6 × 6 = 36 pairs. Each pair is equally likely, because each die is fair and what one die shows does not affect the other.</p>
+
+<div class="scroll">
+<table class="dice">
+<tr><th>red \ blue</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+<tr><th>1</th><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+<tr><th>2</th><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+<tr><th>3</th><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>
+<tr><th>4</th><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+<tr><th>5</th><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+<tr><th>6</th><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+</table>
+</div>
+<p class="small">Sum of the two dice for each of the 36 pairs (red, blue).</p>
+
+<div class="task" id="task3">
+<h3>Task 3 (about 4 minutes, calculator and the table above)</h3>
+<p>Two fair dice are rolled. Use the table of 36 pairs. Give each answer as a fraction and as a percentage rounded to 1 decimal place.</p>
+<ol type="a">
+<li>P(sum is 7).</li>
+<li>P(sum is 2).</li>
+<li>P(sum is not 7), using the complement rule.</li>
+<li>Is 1/11 the right answer to (a)? Explain in one sentence, using your counts from (a) and (b).</li>
+</ol>
+</div>
+<details><summary>Solution to Task 3</summary><div>
+<ol type="a">
+<li>The pairs with sum 7 run along a diagonal of the table: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1). That is 6 of 36 pairs: P(sum is 7) = 6/36 = 1/6 ≈ 16.7%.</li>
+<li>Only (1,1) has sum 2: P(sum is 2) = 1/36 ≈ 2.8%.</li>
+<li>P(sum is not 7) = 1 − 1/6 = 5/6 ≈ 83.3%. Check by counting: 36 − 6 = 30 pairs, and 30/36 = 5/6.</li>
+<li>No. The 11 sums are not equally likely: a sum of 7 comes from 6 pairs and a sum of 2 from only 1 pair, so the counting formula cannot be used on the list of sums.</li>
+</ol>
+<p>Rolling two dice many times and recording the sums would show 7 coming up about 6 times as often as 2. That is the long-run meaning from Section 3.</p>
+<p>The same mistake can happen with the menu. Suppose you pick one of the 9 groups at random, then a drink at random within that group. The Americano, alone in its group, is then picked 1 time in 9, a chance of 1/9 ≈ 11.1%. A particular latte needs the Latte group (1 time in 9) and then that latte out of 12, a chance of 1/9 × 1/12 = 1/108 ≈ 0.9%. Picking directly from the 31 drinks gives every drink the same chance, 1/31 ≈ 3.2%.</p>
+</div></details>
+
+<h2 id="s6">6. The probability of A or B</h2>
+
+<p>Lecture 6.2 counted a union with inclusion-exclusion. The union A ∪ B, read “A or B”, holds the outcomes in A or in B or in both. The intersection A ∩ B, read “A and B”, holds the outcomes in both. Adding |A| and |B| counts every outcome of A ∩ B twice, so it is subtracted once:</p>
+
+<span class="formula">|A ∪ B| = |A| + |B| − |A ∩ B|</span>
+
+<p>Dividing every term by |U| gives the same rule for probabilities:</p>
+
+<span class="formula">P(A ∪ B) = P(A) + P(B) − P(A ∩ B)</span>
+
+<p>Example. A drink is picked at random from the 31. Let L be “the drink is a latte” and T be “the name contains Pistachio”. Then |L| = 12 and |T| = 2, and one drink, the Pistachio Latte, is in both: |L ∩ T| = 1.</p>
+
+<svg viewBox="0 0 520 250" width="100%" style="max-width:520px" role="img" aria-label="Venn diagram: 11 lattes only, 1 drink in both, 1 pistachio drink only, 18 drinks in neither">
+  <rect x="2" y="2" width="516" height="246" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <text x="14" y="24" font-size="15" fill="currentColor">U: 31 hot drinks</text>
+  <circle class="venn-l" cx="200" cy="145" r="85" fill-opacity="0.18" stroke-width="2"/>
+  <circle class="venn-t" cx="310" cy="145" r="60" fill-opacity="0.18" stroke-width="2"/>
+  <text x="120" y="50" font-size="15" fill="currentColor">L: lattes (12)</text>
+  <text x="300" y="50" font-size="15" fill="currentColor">T: Pistachio (2)</text>
+  <text x="170" y="151" font-size="20" fill="currentColor" text-anchor="middle">11</text>
+  <text x="268" y="151" font-size="20" fill="currentColor" text-anchor="middle">1</text>
+  <text x="335" y="151" font-size="20" fill="currentColor" text-anchor="middle">1</text>
+  <text x="455" y="225" font-size="20" fill="currentColor" text-anchor="middle">18</text>
+</svg>
+
+<p>|L ∪ T| = 12 + 2 − 1 = 13, so P(L ∪ T) = 13/31 ≈ 41.9%. Adding without subtracting would give 14 and count the Pistachio Latte twice. Check with the diagram: 11 + 1 + 1 = 13 drinks inside the circles and 18 outside, for 31 in all.</p>
+
+<p>When two events have no outcomes in common, A ∩ B = ∅ and the rule is the addition principle of lecture 6.1. With C the cortados, L ∩ C = ∅, so P(L ∪ C) = 12/31 + 4/31 = 16/31 ≈ 51.6%.</p>
+
+<div class="task" id="task4">
+<h3>Task 4 (about 4 minutes, calculator)</h3>
+<p>A standard deck has 52 cards: 4 suits (hearts, diamonds, clubs, spades) of 13 cards each. Each suit has 3 face cards: jack, queen and king. One card is drawn at random. Let H be the event “the card is a heart” and F the event “the card is a face card”.</p>
+<ol type="a">
+<li>Find |H|, |F| and |H ∩ F|.</li>
+<li>Find P(H ∪ F) as a fraction and as a percentage rounded to 1 decimal place.</li>
+<li>Find the probability that the card is neither a heart nor a face card.</li>
+</ol>
+</div>
+<details><summary>Solution to Task 4</summary><div>
+<ol type="a">
+<li>|H| = 13. |F| = 4 × 3 = 12. The hearts that are face cards are the jack, queen and king of hearts, so |H ∩ F| = 3.</li>
+<li>|H ∪ F| = 13 + 12 − 3 = 22. P(H ∪ F) = 22/52 = 11/26 ≈ 42.3%.</li>
+<li>“Neither a heart nor a face card” is the complement (H ∪ F)′. P((H ∪ F)′) = 1 − 22/52 = 30/52 = 15/26 ≈ 57.7%.</li>
+</ol>
+</div></details>
+
+<h2 id="s7">7. Counting with combinations: random sets of three drinks</h2>
+
+<p>A group buys 3 different lattes, chosen at random from the 12 lattes in Section 1. What is the chance that the set of 3 drinks includes the Pumpkin Spice Latte?</p>
+
+<p>An outcome is a set of 3 lattes. Swapping two of the drinks gives the same set, so by the swap test of lecture 6.3 order does not matter, and the sets are counted with a combination. From lecture 6.3, C(n, k), read “n choose k”, is the number of ways to choose k different items from n when order does not matter:</p>
+
+<span class="formula">C(n, k) = <span class="frac"><span>P(n, k)</span><span>k!</span></span></span>
+
+<p>Here P(n, k) = n × (n − 1) × … is the product of k factors counting downward from n, and k! = k × (k − 1) × … × 1.</p>
+
+<p>Some scientific calculators have functions marked nPr and nCr. A phone calculator usually does not; type the product with the bottom in parentheses, as in lecture 6.3: 12 × 11 × 10 ÷ (3 × 2 × 1). In a spreadsheet, <code>=COMBIN(12,3)</code> gives the same number.</p>
+
+<p><b>Step 1: count the sample space.</b> The number of possible sets is C(12, 3) = (12 × 11 × 10)/(3 × 2 × 1) = 1320/6 = 220, the same count as the 220 sets of 3 fall drinks in lecture 6.3. That is too many to list. Each of the 220 sets is equally likely, because the drinks are chosen at random.</p>
+
+<p><b>Step 2: count the event.</b> A set that includes the Pumpkin Spice Latte has that drink plus 2 of the other 11 lattes. There are C(11, 2) = (11 × 10)/(2 × 1) = 55 such sets.</p>
+
+<p><b>Step 3: divide.</b> P(set includes Pumpkin Spice Latte) = 55/220 = 1/4 = 25%.</p>
+
+<p>The answer makes sense: the set holds 3 of the 12 lattes, and 3/12 = 1/4.</p>
+
+<p>Counting ordered lists gives the same answer, as long as the top and the bottom of the fraction both count ordered lists. Of the P(12, 3) = 12 × 11 × 10 = 1320 ordered lists of 3 lattes, 3 × 11 × 10 = 330 include the Pumpkin Spice Latte (it can be in any of the 3 places), and 330/1320 = 1/4.</p>
+
+<p>The complement rule gives a check. The sets that do <i>not</i> include the Pumpkin Spice Latte choose all 3 drinks from the other 11: C(11, 3) = 165. So P(no Pumpkin Spice Latte) = 165/220 = 3/4, and 1 − 3/4 = 1/4.</p>
+
+<div class="task" id="task5">
+<h3>Task 5 (about 5 minutes, calculator)</h3>
+<p>Now a set of 3 different drinks is chosen at random from all 31 hot drinks in Section 1.</p>
+<ol type="a">
+<li>How many different sets of 3 drinks are possible?</li>
+<li>What is the probability that the set includes the Caffè Latte? Give a fraction and a percentage rounded to 1 decimal place.</li>
+<li>What is the probability that the set contains <i>at least one</i> cortado? (Hint: the complement of “at least one cortado” is “no cortado”.)</li>
+</ol>
+</div>
+<details><summary>Solution to Task 5</summary><div>
+<ol type="a">
+<li>C(31, 3) = (31 × 30 × 29)/(3 × 2 × 1) = 26970/6 = 4495 sets.</li>
+<li>Sets with the Caffè Latte: the Caffè Latte plus 2 of the other 30 drinks, C(30, 2) = (30 × 29)/2 = 435. P = 435/4495 = 3/31 ≈ 9.7%. Check: the set holds 3 of the 31 drinks, and 3/31 ≈ 9.7%.</li>
+<li>There are 31 − 4 = 27 drinks that are not cortados. Sets with no cortado choose all 3 drinks from these 27: C(27, 3) = (27 × 26 × 25)/6 = 2925. P(no cortado) = 2925/4495 ≈ 0.651. By the complement rule, P(at least one cortado) = 1 − 2925/4495 = 1570/4495 ≈ 0.349 = 34.9%.</li>
+</ol>
+<p>Counting “at least one cortado” directly needs three separate counts: sets with exactly 1 cortado (4 × C(27, 2) = 4 × 351 = 1404), exactly 2 (C(4, 2) × 27 = 6 × 27 = 162) and exactly 3 (C(4, 3) = 4). These add to 1570, the same as the complement gives in one step.</p>
+<p>In the long-run meaning of Section 3: if many groups each bought 3 random hot drinks, about 35 of every 100 groups would get at least one cortado.</p>
+</div></details>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li>Starbucks, online menu, hot coffee drinks. https://www.starbucks.com/menu; data https://www.starbucks.com/apiproxy/v1/ordering/menu. Accessed 4 October 2026 (the same source as [3] in lecture 6.1). Figures used: 31 hot coffee drinks in the groups Brewed Coffee (6), Americano (1), Latte (12), Cappuccino (1), Mocha (2), Macchiato (2), Flat White (1), Cortado (4), Espresso Shot (2), not counting the 2 “Coffee Traveler” items; the drink names in the table of Section 1. Drink names are shortened slightly (trademark symbols, the “Starbucks” prefix and some dashes removed). The menu changes over time; the list is as it stood on the access date. A saved extract is in the folder src/ that accompanies this page.</li>
+</ol>
+
+</main>
+
+<script>
+(function () {
+  // ---------- Spreadsheet layout (Task 2) ----------
+  var header = ["Roll", "Die", "Six? (1 = yes)", "Sixes so far", "Fraction of sixes"];
+  function row(r) {
+    return [
+      r === 2 ? "1" : "=A" + (r - 1) + "+1",
+      "=RANDBETWEEN(1,6)",
+      "=IF(B" + r + "=6,1,0)",
+      r === 2 ? "=C2" : "=D" + (r - 1) + "+C" + r,
+      "=D" + r + "/A" + r
+    ];
+  }
+  function csvField(s) { return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  document.getElementById("csvBtn").addEventListener("click", function () {
+    var lines = [header.map(csvField).join(",")];
+    for (var r = 2; r <= 1001; r++) lines.push(row(r).map(csvField).join(","));
+    var blob = new Blob([lines.join("\r\n") + "\r\n"], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "dice-1000-rolls.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var text = [header, row(2), row(3)].map(function (x) { return x.join("\t"); }).join("\n");
+    var msg = document.getElementById("copyMsg");
+    function done() { msg.textContent = "Copied. Paste into cell A1."; }
+    function fallback() {
+      var t = document.createElement("textarea"); t.value = text;
+      document.body.appendChild(t); t.select();
+      try { document.execCommand("copy"); done(); } catch (e) { msg.textContent = "Copy failed; type the layout from the table."; }
+      t.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  });
+
+  // ---------- Dice simulator (Task 2) ----------
+  var svg = document.getElementById("simSvg");
+  var NS = "http://www.w3.org/2000/svg";
+  var W = 640, H = 400, L = 56, R = 22, T = 14, B = 46;
+  var colors = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)", "var(--c6)"];
+  var runs = [], runCount = 0;
+  function el(name, attrs, text) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    svg.appendChild(e); return e;
+  }
+  function x(n) { return L + (Math.log10(n) / 3) * (W - L - R); }
+  var YMAX = 0.5;
+  function y(f) { return T + (1 - f / YMAX) * (H - T - B); }
+  function draw() {
+    W = Math.max(300, Math.min(640, Math.round(svg.getBoundingClientRect().width) || 640));
+    H = W < 500 ? 320 : 400;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    [0, 0.1, 0.2, 0.3, 0.4, 0.5].forEach(function (f) {
+      el("line", { x1: L, x2: W - R, y1: y(f), y2: y(f), stroke: "currentColor", "stroke-opacity": 0.15 });
+      el("text", { x: L - 8, y: y(f) + 5, "font-size": 13, "text-anchor": "end", fill: "currentColor" }, f.toFixed(1));
+    });
+    [1, 10, 100, 1000].forEach(function (n) {
+      el("line", { x1: x(n), x2: x(n), y1: T, y2: H - B, stroke: "currentColor", "stroke-opacity": 0.15 });
+      el("text", { x: x(n), y: H - B + 20, "font-size": 13, "text-anchor": "middle", fill: "currentColor" }, String(n));
+    });
+    el("text", { x: (L + W - R) / 2, y: H - 6, "font-size": 14, "text-anchor": "middle", fill: "currentColor" }, "number of rolls");
+    el("text", { x: 14, y: (T + H - B) / 2, "font-size": 14, "text-anchor": "middle", fill: "currentColor",
+      transform: "rotate(-90 14 " + (T + H - B) / 2 + ")" }, "fraction of sixes");
+    el("line", { x1: L, x2: W - R, y1: y(1 / 6), y2: y(1 / 6), stroke: "currentColor", "stroke-width": 1.5, "stroke-dasharray": "6 4" });
+    runs.forEach(function (run) {
+      var pts = [];
+      for (var n = 1; n <= run.fr.length; n++) pts.push(x(n).toFixed(1) + "," + y(Math.min(run.fr[n - 1], YMAX)).toFixed(1));
+      el("polyline", { points: pts.join(" "), fill: "none", style: "stroke:" + colors[(run.id - 1) % colors.length], "stroke-width": 2 });
+    });
+  }
+  function table() {
+    var t = document.getElementById("simTable");
+    while (t.rows.length > 1) t.deleteRow(1);
+    runs.forEach(function (run) {
+      var r = t.insertRow();
+      var c0 = r.insertCell(); c0.textContent = "Run " + run.id;
+      c0.style.color = colors[(run.id - 1) % colors.length]; c0.style.fontWeight = "700"; c0.style.whiteSpace = "nowrap";
+      [10, 100, 1000].forEach(function (n) { r.insertCell().textContent = run.fr[n - 1].toFixed(3); });
+    });
+  }
+  document.getElementById("rollBtn").addEventListener("click", function () {
+    var sixes = 0, fr = [];
+    for (var n = 1; n <= 1000; n++) {
+      if (Math.floor(Math.random() * 6) + 1 === 6) sixes++;
+      fr.push(sixes / n);
+    }
+    runCount++;
+    runs.push({ id: runCount, fr: fr });
+    if (runs.length > 6) runs.shift();
+    draw(); table();
+  });
+  document.getElementById("clearBtn").addEventListener("click", function () { runs = []; runCount = 0; draw(); table(); });
+  window.addEventListener("resize", draw);
+  draw();
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-06/6-3-permutations-and-combinations/" style="color:inherit">&larr; 6.3 Permutations and combinations</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-07/7-2-independence-and-simulation/" style="color:inherit">7.2 Independence and simulation &rarr;</a></nav>
+</body>
+</html>
