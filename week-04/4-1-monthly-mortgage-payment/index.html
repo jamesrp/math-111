@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monthly Mortgage Payment</title>
+<style>
+:root {
+  --bg: #fbfaf7;
+  --paper: #ffffff;
+  --ink: #1d1d1f;
+  --muted: #5a5a60;
+  --line: #d9d6cf;
+  --accent: #2f5d8a;
+  --accent-soft: #e6eef6;
+  --task: #fff6e0;
+  --task-line: #d9a520;
+  --interest: #c0532b;
+  --principal: #2f5d8a;
+  --good: #2c7a3f;
+  --bad: #b0302a;
+}
+* { box-sizing: border-box; }
+html { font-size: 18px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.55;
+}
+main { max-width: 52rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+header.top { border-bottom: 2px solid var(--ink); margin-bottom: 1.5rem; padding-bottom: 0.75rem; }
+header.top .kicker { font-family: system-ui, sans-serif; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0.3rem 0 0; }
+h2 { font-size: 1.35rem; margin: 2.5rem 0 0.6rem; border-bottom: 1px solid var(--line); padding-bottom: 0.25rem; }
+h3 { font-size: 1.05rem; margin: 1.5rem 0 0.4rem; }
+p, li { max-width: 46rem; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.formula {
+  font-family: "Courier New", monospace;
+  background: var(--accent-soft);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.display {
+  background: var(--paper);
+  border-left: 4px solid var(--accent);
+  padding: 0.6rem 1rem;
+  margin: 1rem 0;
+  font-size: 1.05rem;
+}
+.task {
+  background: var(--task);
+  border: 1px solid var(--task-line);
+  border-left: 6px solid var(--task-line);
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  margin: 1.4rem 0;
+}
+.task h3 { margin-top: 0; font-family: system-ui, sans-serif; font-size: 1rem; }
+.task .time { font-weight: normal; color: var(--muted); font-size: 0.85rem; }
+details.solution {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  margin: 0.6rem 0 1.4rem;
+}
+details.solution summary {
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--accent);
+}
+details.solution[open] summary { margin-bottom: 0.5rem; }
+table { border-collapse: collapse; margin: 0.8rem 0; background: var(--paper); font-size: 0.92rem; }
+th, td { border: 1px solid var(--line); padding: 0.3rem 0.55rem; text-align: right; font-variant-numeric: tabular-nums; }
+th { background: #f0eee8; font-family: system-ui, sans-serif; font-size: 0.82rem; text-align: center; }
+td.l, th.l { text-align: left; }
+td.blank { min-width: 5.5rem; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+.scrollcue { display: none; font-family: system-ui, sans-serif; font-size: 0.8rem; color: var(--muted); margin: 0.2rem 0 -0.5rem; }
+.tablewrap.overflows + .scrollcue, .scrollcue.show { display: block; }
+.short { display: none; }
+.pair { white-space: nowrap; }
+#bracketTable td.l { white-space: nowrap; }
+table.sheet td, table.sheet th { font-family: "Courier New", monospace; font-size: 0.82rem; }
+table.sheet th.rowh, table.sheet td.rowh { background: #f0eee8; color: var(--muted); text-align: center; font-family: system-ui, sans-serif; }
+table.sheet td { text-align: left; }
+.neg { color: var(--bad); }
+.pos { color: var(--ink); }
+.widget {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1.2rem 0;
+  font-family: system-ui, sans-serif;
+  font-size: 0.92rem;
+}
+.widget label { font-weight: 600; }
+.controls { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: center; margin-bottom: 0.6rem; }
+.controls select, .controls input[type=number] {
+  font-size: 1rem; padding: 0.25rem 0.4rem; border: 1px solid var(--line); border-radius: 4px; background: #fff;
+}
+.controls input[type=number] { width: 8.5rem; }
+input[type=range] { width: 100%; margin: 0.4rem 0; }
+button {
+  font: inherit; font-size: 0.9rem; padding: 0.35rem 0.8rem; border-radius: 4px;
+  border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer;
+}
+button.ghost { background: #fff; color: var(--accent); }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid #f0b429; outline-offset: 2px; }
+.readout { font-size: 1.15rem; margin: 0.4rem 0 0.2rem; }
+.readout strong { font-variant-numeric: tabular-nums; }
+.small { font-size: 0.85rem; color: var(--muted); }
+svg { width: 100%; height: auto; display: block; }
+svg text { font-family: system-ui, sans-serif; }
+.legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.85rem; }
+.sw { display: inline-block; width: 1.4rem; height: 0.25rem; vertical-align: middle; margin-right: 0.35rem; }
+.sources li { margin-bottom: 0.5rem; font-size: 0.92rem; }
+.note { color: var(--muted); font-size: 0.9rem; }
+sup a { text-decoration: none; }
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  .long { display: none; }
+  .short { display: inline; }
+  table { font-size: 0.82rem; }
+  td.blank { min-width: 3.6rem; }
+  th, td { padding: 0.25rem 0.3rem; }
+  table.sheet td, table.sheet th { font-size: 0.64rem; padding: 0.25rem 0.2rem; white-space: nowrap; }
+  table.sheet td:nth-child(2) { white-space: normal; }
+}
+@media print {
+  .widget button { display: none; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-03/3-3-minimizing-cost/" style="color:inherit">&larr; 3.3 Minimizing cost</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-04/4-2-a-formula-for-the-monthly-payment/" style="color:inherit">4.2 A formula for the monthly payment &rarr;</a></nav>
+
+<main>
+
+<header class="top">
+  <div class="kicker">Math 111 &middot; Module: Buying a house &middot; Lecture 1 of 3</div>
+  <h1>What will the monthly payment be?</h1>
+</header>
+
+<!-- ================================================================ -->
+<h2 id="s1">1. Mortgages</h2>
+
+<p>In August 2026, the median sale price of homes and condominiums in King County was <span class="num">$845,000</span>.<sup><a href="#src1">[1]</a></sup> About half of the homes sold that month went for more, and about half for less.</p>
+
+<p>Most buyers pay part of the price up front and borrow the rest. The part paid up front is the <b>down payment</b>. Here the buyer puts down 20% of the price. Twenty percent is a common benchmark. It is not a requirement.</p>
+
+<p>The borrowed amount is a <b>mortgage</b>. It is repaid in equal monthly payments over 30 years, which is 360 payments. On October 1, 2026, the average interest rate on a 30-year fixed-rate mortgage was <span class="num">7.28%</span> per year.<sup><a href="#src2">[2]</a></sup></p>
+
+<p>A real monthly housing bill also includes property taxes, insurance, and fees. These are left out here, as a simplification, and only the loan payment is computed.</p>
+
+<div class="task">
+  <h3>Task 1 <span class="time">(about 3 minutes, calculator)</span></h3>
+  <p>Write down four numbers:</p>
+  <ol type="a">
+    <li>the down payment, 20% of <span class="num">$845,000</span>;</li>
+    <li>the amount borrowed;</li>
+    <li>the interest rate per month, as a decimal (the yearly rate is 7.28%);</li>
+    <li>the interest charged for the first month on the amount borrowed.</li>
+  </ol>
+</div>
+
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<p><b>(a)</b> A percent is a number of hundredths: 20% = 20/100 = 0.20. To take 20% of a number, multiply by 0.20.</p>
+<p class="display">Down payment = 0.20 &times; 845,000 = <span class="num">$169,000</span></p>
+<p><b>(b)</b> The buyer borrows the rest: 845,000 &minus; 169,000 = <span class="num">$676,000</span>. The same answer comes in one step from the 80% that is left: 0.80 &times; 845,000 = 676,000.</p>
+<p><b>(c)</b> Mortgage rates are quoted per year. For a fixed-rate mortgage like this one, the monthly rate is the yearly rate divided by 12.</p>
+<p class="display">Monthly rate as a percent: 7.28% &divide; 12 = 0.60667% per month<br>
+Monthly rate as a decimal: 0.0728 &divide; 12 = 0.0060667&hellip;</p>
+<p>The decimal goes on forever (0.006066666&hellip;), so 0.0060667 is rounded.</p>
+<p><b>(d)</b> Interest for a month is the balance times the monthly rate. Type the whole calculation in one go, so the calculator keeps every digit of the rate:</p>
+<p class="display"><span class="formula">676000 &times; 0.0728 &divide; 12</span> = 4,101.0667, so the first month's interest is <span class="num">$4,101.07</span></p>
+<p>Typing the rounded rate gives a different cent: 676,000 &times; 0.0060667 = 4,101.0892, or <span class="num">$4,101.09</span>. A rounded rate is multiplied by a large balance, so a small rounding error in the rate becomes cents in the answer.</p>
+</details>
+
+<p>The answer to (d) sets a floor. If the monthly payment were <span class="num">$4,101.07</span>, it would only cover the interest, and after a month the buyer would still owe <span class="num">$676,000</span>. The payment has to be larger than that. The question is how much larger.</p>
+
+<!-- ================================================================ -->
+<h2 id="s2">2. Small example</h2>
+
+<p>The real loan runs 360 months. To see how the balance changes, start with a short loan. <b>The numbers in this section are made up for practice.</b> Someone borrows <span class="num">$1,200</span> at 12% per year and repays it in 3 equal monthly payments. The monthly rate is 12% &divide; 12 = 1% = 0.01.</p>
+
+<p>The <b>balance</b> is the amount still owed. Each month, the lender adds interest to the balance and the borrower's payment is subtracted:</p>
+
+<p class="display">interest = old balance &times; monthly rate<br>
+new balance = old balance + interest &minus; payment</p>
+
+<p>The new balance becomes the old balance for the next month.</p>
+
+<div class="task">
+  <h3>Task 2 <span class="time">(about 4 minutes, calculator)</span></h3>
+  <p>The borrower pays <span class="num">$400</span> a month. Copy this table and fill it in, rounding to the cent. Is the loan paid off after month 3?</p>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Month</th><th>Old <span class="long">balance</span><span class="short">bal.</span></th><th>Interest <span class="long">(1%)</span><span class="short"></span></th><th>Pay<span class="long">ment</span><span class="short"></span></th><th>New <span class="long">balance</span><span class="short">bal.</span></th></tr>
+    <tr><td>1</td><td>1,200.00</td><td class="blank"></td><td>400.00</td><td class="blank"></td></tr>
+    <tr><td>2</td><td class="blank"></td><td class="blank"></td><td>400.00</td><td class="blank"></td></tr>
+    <tr><td>3</td><td class="blank"></td><td class="blank"></td><td>400.00</td><td class="blank"></td></tr>
+  </table>
+  </div>
+</div>
+
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<div class="tablewrap">
+<table>
+  <tr><th>Month</th><th>Old <span class="long">balance</span><span class="short">bal.</span></th><th>Interest <span class="long">(1%)</span><span class="short"></span></th><th>Pay<span class="long">ment</span><span class="short"></span></th><th>New <span class="long">balance</span><span class="short">bal.</span></th></tr>
+  <tr><td>1</td><td>1,200.00</td><td>12.00</td><td>400.00</td><td>812.00</td></tr>
+  <tr><td>2</td><td>812.00</td><td>8.12</td><td>400.00</td><td>420.12</td></tr>
+  <tr><td>3</td><td>420.12</td><td>4.20</td><td>400.00</td><td>24.32</td></tr>
+</table>
+</div>
+<p>Month 1: interest = 1,200 &times; 0.01 = 12.00, and new balance = 1,200 + 12 &minus; 400 = 812. Month 2 starts from 812. In month 3, 420.12 &times; 0.01 = 4.2012, which rounds to 4.20.</p>
+<p>After three payments the borrower still owes <span class="num">$24.32</span>, so <span class="num">$400</span> is too small. Three payments of <span class="num">$400</span> add up to exactly the <span class="num">$1,200</span> borrowed, and nothing is left over for the interest.</p>
+</details>
+
+<h3>A percentage as a multiplier</h3>
+
+<p>The interest step and the adding step can be done as one. Adding 1% interest to a balance is the same as multiplying it by 1.01, because</p>
+<p class="display">balance + 0.01 &times; balance = (1 + 0.01) &times; balance = 1.01 &times; balance</p>
+<p>So the rule for the small loan becomes</p>
+<p class="display">new balance = 1.01 &times; old balance &minus; payment</p>
+<p>Month 1 is 1.01 &times; 1,200 &minus; 400 = 812, as in the table. In general, adding a percentage to a number means multiplying by 1 plus that percentage as a decimal. The 1.01 is called the <b>growth factor</b> for one month.</p>
+<p>On a calculator, multiplication is done before subtraction, so <span class="formula">1.01 &times; 1200 &minus; 400</span> gives 812 typed in that order. A calculator that works strictly left to right would turn <span class="formula">1200 + 1200 &times; 0.01</span> into (1200 + 1200) &times; 0.01 = 24 in place of 1,212. Typing <span class="formula">1.01 &times; 1200</span> first, or using parentheses, gives the right result on either kind.</p>
+
+<div class="task">
+  <h3>Task 3 <span class="time">(about 4 minutes, calculator)</span></h3>
+  <p>Use new balance = 1.01 &times; old balance &minus; payment.</p>
+  <ol type="a">
+    <li>Find the balance after month 3 with a payment of <span class="num">$410</span>. Is <span class="num">$410</span> too small or too large?</li>
+    <li>Do the same for <span class="num">$405</span>, halfway between <span class="num">$400</span> and <span class="num">$410</span>.</li>
+  </ol>
+  <p>Write down the three balances after month 3, for <span class="num">$400</span>, <span class="num">$405</span> and <span class="num">$410</span>.</p>
+</div>
+
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<p><b>(a)</b> With <span class="num">$410</span>: 1.01 &times; 1,200 &minus; 410 = 802.00, then 1.01 &times; 802.00 &minus; 410 = 400.02, then 1.01 &times; 400.02 &minus; 410 = <span class="neg">&minus;5.98</span>. A negative balance means the borrower paid <span class="num">$5.98</span> too much. So <span class="num">$410</span> is too large, and the right payment is between <span class="num">$400</span> (owes <span class="num">$24.32</span>) and <span class="num">$410</span> (overpays <span class="num">$5.98</span>).</p>
+<p><b>(b)</b> With <span class="num">$405</span>: 1,200 &rarr; 807.00 &rarr; 410.07 &rarr; 9.17. The borrower still owes <span class="num">$9.17</span>, so <span class="num">$405</span> is too small, and the right payment is now between <span class="num">$405</span> and <span class="num">$410</span>. One halfway try cut the search range in half. Section 4 turns this into a method.</p>
+<p><b>Getting closer in one jump.</b> Going from <span class="num">$400</span> to <span class="num">$410</span>, ten dollars more per month, moved the final balance from 24.32 down to &minus;5.98, a change of 24.32 + 5.98 = 30.30. To remove the 24.32 still owed at <span class="num">$400</span>, the payment needs about this much more:</p>
+<p class="display">24.32 &divide; 30.30 &times; 10 = 8.03 dollars, so try 400 + 8.03 = <span class="num">$408.03</span></p>
+<div class="tablewrap">
+<table>
+  <tr><th>Payment tried</th><th>Balance after month 3</th><th class="l">Verdict</th></tr>
+  <tr><td>400.00</td><td>24.32</td><td class="l">too small (24.32 still owed)</td></tr>
+  <tr><td>410.00</td><td class="neg">&minus;5.98</td><td class="l">too large (5.98 overpaid)</td></tr>
+  <tr><td>405.00</td><td>9.17</td><td class="l">too small (9.17 still owed)</td></tr>
+  <tr><td>408.03</td><td class="neg">&minus;0.01</td><td class="l">too large (1 cent overpaid)</td></tr>
+  <tr><td>408.02</td><td>0.02</td><td class="l">too small (2 cents still owed)</td></tr>
+</table>
+</div>
+<p>A payment of <span class="num">$408.03</span> leaves the balance closest to zero. It pays off the loan, with the last payment one cent smaller. The borrower pays 3 &times; 408.03 = <span class="num">$1,224.09</span>, minus the one cent, for <span class="num">$1,224.08</span> in all. That is <span class="num">$24.08</span> of interest on a <span class="num">$1,200</span> loan.</p>
+</details>
+
+<p>Three rows by hand take a few minutes. The house loan needs 360 rows, and every guess for the payment needs all 360 again. That job belongs to a spreadsheet.</p>
+
+<!-- ================================================================ -->
+<h2 id="s3">3. Using a spreadsheet</h2>
+
+<p>The spreadsheet holds the loan facts in a few cells at the top and the month-by-month table below them. Each row of the table is one month and uses the same rule as the hand table.</p>
+
+<div class="tablewrap">
+<table class="sheet" id="sheetLayout">
+  <tr><th class="rowh"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+  <tr><td class="rowh">1</td><td>Loan amount</td><td>676000</td><td></td><td></td><td></td></tr>
+  <tr><td class="rowh">2</td><td>Annual rate</td><td>0.0728</td><td></td><td></td><td></td></tr>
+  <tr><td class="rowh">3</td><td>Monthly rate</td><td>=B2/12</td><td></td><td></td><td></td></tr>
+  <tr><td class="rowh">4</td><td>Monthly payment</td><td>4000</td><td></td><td></td><td></td></tr>
+  <tr><td class="rowh">5</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td class="rowh">6</td><td>Month</td><td>Old <span class="long">balance</span><span class="short">bal.</span></td><td>Interest</td><td>Payment</td><td>New <span class="long">balance</span><span class="short">bal.</span></td></tr>
+  <tr><td class="rowh">7</td><td>1</td><td>=B1</td><td>=B7*$B$3</td><td>=$B$4</td><td>=B7+C7-D7</td></tr>
+  <tr><td class="rowh">8</td><td>=A7+1</td><td>=E7</td><td>=B8*$B$3</td><td>=$B$4</td><td>=B8+C8-D8</td></tr>
+  <tr><td class="rowh">&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td></tr>
+  <tr><td class="rowh">366</td><td>=A365+1</td><td>=E365</td><td>=B366*$B$3</td><td>=$B$4</td><td>=B366+C366-D366</td></tr>
+</table>
+</div>
+
+<p>Row 7 is month 1. Its old balance is the loan amount (<span class="formula">=B1</span>). Row 8 is month 2. Its old balance is the new balance from the row above (<span class="formula">=E7</span>), and the month number is one more than the one above (<span class="formula">=A7+1</span>). Row 8 is then copied down to row 366, which is month 360. Cell E366 holds the balance after the last payment.</p>
+
+<p>The spreadsheet keeps every digit of the interest, while the hand table rounded it to the cent. For the small loan the two agree to the cent. All amounts on this page come from the unrounded calculation.</p>
+
+<p>The house loan follows the same rule with a different growth factor. Its monthly rate is 0.0728 &divide; 12, so each month the balance is multiplied by 1 + 0.0728 &divide; 12, about 1.0060667, and then the payment is subtracted. Columns C and E split that into two steps so the interest can be seen; <span class="formula">=B7*(1+$B$3)-D7</span> in E7 would give the same new balance.</p>
+
+<h3>Fixed cell references</h3>
+
+<p>When a formula is copied down one row, the spreadsheet shifts every cell reference in it down one row. That is what makes <span class="formula">=B7*$B$3</span> in row 7 turn into <span class="formula">=B8*$B$3</span> in row 8: each month uses its own old balance.</p>
+
+<p>The monthly rate should not shift. It lives in B3 and only in B3. A dollar sign in front of the column letter and the row number, as in <span class="formula">$B$3</span>, makes a <b>fixed cell reference</b>: it stays the same when the formula is copied. The payment <span class="formula">$B$4</span> is fixed for the same reason.</p>
+
+<p>Without the dollar signs, row 7 would hold <span class="formula">=B7*B3</span> and row 8 would get <span class="formula">=B8*B4</span>. B4 is the payment, so the month-2 interest would be the balance times 4,000, a number in the billions. A column of absurd numbers after copying is often a sign of a missing <span class="formula">$</span>.</p>
+
+<h3>Building it</h3>
+<ol>
+  <li>Type the labels and numbers in A1:B4 and the formula <span class="formula">=B2/12</span> in B3. Type the headings in row 6.</li>
+  <li>Type the five formulas of row 7, then the five formulas of row 8.</li>
+  <li>Select A8 through E366 and press Ctrl+D (Cmd+D on a Mac). This fills the row-8 formulas down. Dragging the small square at the corner of the selection down to row 366 does the same thing.</li>
+  <li>Click a cell in row 366 and check that A366 shows 360.</li>
+</ol>
+
+<div class="widget" id="sheetTools">
+  <p style="margin-top:0"><b>Skip the typing:</b> the file below has exactly this layout, with all 360 rows of formulas. Opened in Excel, or imported into Google Sheets, the formulas become live cells. The copy button puts the same layout on the clipboard so it can be pasted into cell A1 of an empty sheet.</p>
+  <div class="controls">
+    <button id="dlCsv" type="button">Download loan-table.csv</button>
+    <button id="copyTsv" class="ghost" type="button">Copy layout for pasting</button>
+    <span id="copyMsg" class="small" aria-live="polite"></span>
+  </div>
+  <p class="small" style="margin-bottom:0">If the formulas appear as text, or everything lands in column A, use the copy button and paste into cell A1 of an empty sheet.</p>
+</div>
+
+<div class="task">
+  <h3>Task 4 <span class="time">(about 10 minutes, spreadsheet)</span></h3>
+  <p>Download the file above and open it, unless you have already built the sheet. Then put each of these payments in B4 and record the balance after 360 months (cell E366):</p>
+  <p><span class="num">$4,000</span> &nbsp; <span class="num">$4,101.07</span> &nbsp; <span class="num">$4,500</span></p>
+  <p>For each one, say in a sentence what happened to the debt.</p>
+</div>
+
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<div class="tablewrap">
+<table>
+  <tr><th>Payment in B4</th><th>Balance after 360 months (E366)</th><th class="l">What happened</th></tr>
+  <tr><td>4,000.00</td><td>806,331.89</td><td class="l">The debt grew. Each payment was less than that month's interest.</td></tr>
+  <tr><td>4,101.07</td><td>675,995.70</td><td class="l">The debt barely moved. The payment only covered the interest.</td></tr>
+  <tr><td>4,500.00</td><td>161,550.11</td><td class="l">The debt shrank but was not paid off.</td></tr>
+</table>
+</div>
+<p>With <span class="num">$4,101.07</span> the balance drops by only <span class="num">$4.30</span> in 30 years. The exact first-month interest is <span class="num">$4,101.0667</span>, so this payment is a third of a cent above it, and the balance falls by a third of a cent in month 1. The drop grows a little each month, to about 3 cents in month 360.</p>
+<p>The month-1 row of the spreadsheet can be checked against Task 1: C7 should show 4101.07 (with the cell formatted to two decimals).</p>
+</details>
+
+<!-- ================================================================ -->
+<h2 id="s4">4. Finding the right monthly payment</h2>
+
+<p>The right payment is somewhere above <span class="num">$4,500</span>. Use the slider or the payment box to set a payment, and watch where the balance curve ends at month 360. The slider moves in whole dollars; the box and the buttons reach the cent.</p>
+
+<p>The second graph splits each payment into two parts. The <b>interest part</b> is that month's interest. The rest of the payment reduces the balance, and is called the <b>principal part</b>, or principal. With a payment of <span class="num">$4,625.28</span>, month 1 has an interest part of <span class="num">$4,101.07</span> and a principal part of 4,625.28 &minus; 4,101.07 = <span class="num">$524.21</span>.</p>
+
+<div class="widget" id="hunter">
+  <div class="controls">
+    <label for="loanMode">Loan:</label>
+    <select id="loanMode">
+      <option value="m30">$676,000, 30 years at 7.28%</option>
+      <option value="m15">$676,000, 15 years at 6.60%</option>
+      <option value="small">$1,200, 3 months at 12% (made up)</option>
+    </select>
+  </div>
+  <label for="paySlider">Monthly payment</label>
+  <input type="range" id="paySlider" min="4000" max="5500" step="1" value="4500">
+  <div class="controls">
+    <label for="payBox">Exact payment: $</label>
+    <input type="number" id="payBox" step="0.01" value="4500">
+    <button type="button" class="ghost" data-step="-1">&minus;$1</button>
+    <button type="button" class="ghost" data-step="1">+$1</button>
+    <button type="button" class="ghost" data-step="-0.01">&minus;1&cent;</button>
+    <button type="button" class="ghost" data-step="0.01">+1&cent;</button>
+  </div>
+  <p class="readout" id="readout" aria-live="polite"></p>
+  <p class="small" id="readout2"></p>
+  <svg id="balChart" viewBox="0 0 720 300" role="img" aria-label="Balance owed at the end of each month for the chosen payment"></svg>
+  <h3 style="font-family:system-ui,sans-serif;font-size:0.95rem;margin:1rem 0 0.2rem">Where each payment goes</h3>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--interest)"></span>interest part</span>
+    <span><span class="sw" style="background:var(--principal)"></span>part that reduces the balance (principal)</span>
+  </div>
+  <svg id="splitChart" viewBox="0 0 720 240" role="img" aria-label="Interest part and principal part of each monthly payment"></svg>
+</div>
+
+<div class="task">
+  <h3>Task 5 <span class="time">(about 5 minutes, payment box)</span></h3>
+  <p>With the 30-year loan selected, find the payment <b>to the cent</b> that leaves the balance after 360 months closest to zero. Use the payment box and the &minus;$1, +$1, &minus;1&cent; and +1&cent; buttons. Write each payment you try and the balance it leaves in a two-column list, and count your tries.</p>
+</div>
+
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<p>To the dollar: <span class="num">$4,625</span> leaves <span class="num">$354.67</span> owed, and <span class="num">$4,626</span> overpays by <span class="num">$934.90</span>. To the cent: <span class="num">$4,625.27</span> leaves <span class="num">$6.48</span> owed, and <span class="num">$4,625.28</span> overpays by <span class="num">$6.41</span>. The overpayment is the smaller of the two, so <span class="num">$4,625.28</span> is the answer.</p>
+<p>The number of tries depends on the path. Starting from <span class="num">$4,625.00</span> and pressing +1&cent; until the balance turns negative takes 28 presses.</p>
+</details>
+
+<h3>A systematic search: bracketing</h3>
+
+<p>Pressing +1&cent; until the balance changes sign is a search done by feel. The number of tries depends on where it starts, and in a spreadsheet every try means typing a new number in B4. <b>Bracketing</b> is a search with a fixed rule, and Task 3 already took one step of it.</p>
+
+<ol>
+  <li>Start with two payments: a <b>low</b> one that leaves money owed and a <b>high</b> one that overpays. The right payment lies between them.</li>
+  <li>Try the payment exactly halfway between low and high.</li>
+  <li>If it leaves money owed, it becomes the new low. If it overpays, it becomes the new high.</li>
+  <li>Repeat from step 2.</li>
+</ol>
+
+<p>The right payment always stays between low and high, and each step cuts the gap between them in half. Starting from <span class="num">$4,500</span> (owes <span class="num">$161,550.11</span>) and <span class="num">$5,000</span> (overpays), the first four steps are:</p>
+
+<div class="tablewrap">
+<table>
+  <tr><th>Step</th><th>Low</th><th>High</th><th>Try<span class="long"> (midpoint)</span><span class="short"></span></th><th>Balance<span class="long"> after 360 months</span><span class="short"></span></th><th class="l">Verdict</th></tr>
+  <tr><td>1</td><td>4,500.00</td><td>5,000.00</td><td>4,750.00</td><td class="neg">&minus;160,840.78</td><td class="l"><span class="long">overpays: </span>new high</td></tr>
+  <tr><td>2</td><td>4,500.00</td><td>4,750.00</td><td>4,625.00</td><td>354.67</td><td class="l"><span class="long">owes: </span>new low</td></tr>
+  <tr><td>3</td><td>4,625.00</td><td>4,750.00</td><td>4,687.50</td><td class="neg">&minus;80,243.06</td><td class="l"><span class="long">overpays: </span>new high</td></tr>
+  <tr><td>4</td><td>4,625.00</td><td>4,687.50</td><td>4,656.25</td><td class="neg">&minus;39,944.20</td><td class="l"><span class="long">overpays: </span>new high</td></tr>
+</table>
+</div>
+
+<p>The gap starts at <span class="num">$500</span>. After 10 steps it is 500 &divide; 2<sup>10</sup> = 500 &divide; 1,024, about 49 cents. After 16 steps it is 500 &divide; 65,536, about 0.8 cents, less than a cent. So 16 tries always pin the payment to within a cent, whatever the right payment turns out to be.</p>
+
+<div class="widget" id="bracket">
+  <p style="margin-top:0"><b>Bracketing helper.</b> It uses the loan chosen above the graph. Enter a low payment that leaves money owed and a high one that overpays, then press the button once per step. The search uses the exact midpoints; the table shows them to four decimals.</p>
+  <div class="controls">
+    <span class="pair"><label for="lowBox">Low $</label> <input type="number" id="lowBox" step="0.01" value="4500"></span>
+    <span class="pair"><label for="highBox">High $</label> <input type="number" id="highBox" step="0.01" value="5000"></span>
+    <button type="button" id="stepBtn">Try the midpoint</button>
+    <button type="button" class="ghost" id="resetBtn">Start over</button>
+  </div>
+  <p class="small" id="bracketMsg" aria-live="polite"></p>
+  <div class="tablewrap"><table id="bracketTable"><thead><tr><th>Step</th><th>Try</th><th>Balance at the end</th><th class="l">Verdict</th></tr></thead><tbody></tbody></table></div>
+</div>
+
+<p>Pressed 16 times from <span class="num">$4,500</span> and <span class="num">$5,000</span>, the helper ends with the payment between <span class="num">$4,625.2747</span> and <span class="num">$4,625.2823</span>. The whole-cent payments on either side are <span class="num">$4,625.27</span> and <span class="num">$4,625.28</span>, and Task 5 already checked both.</p>
+
+<h3>Goal Seek in Excel</h3>
+<p>Excel can search for the payment by itself. Choose Data &rarr; What-If Analysis &rarr; Goal Seek. Set cell: <span class="formula">E366</span>. To value: <span class="formula">0</span>. By changing cell: <span class="formula">B4</span>. Excel changes B4 until E366 is zero and reports about 4625.275. In Google Sheets, run the bracketing search by typing each midpoint in B4.</p>
+
+<h3>The answer</h3>
+<p class="display">Monthly payment on <span class="num">$676,000</span> at 7.28% for 30 years: <b class="num">$4,625.28</b></p>
+<p>Payments are made in whole cents. Here the payment is rounded to the cent, <span class="num">$4,625.28</span>, and the last payment is adjusted by the leftover. With <span class="num">$4,625.28</span> in B4, E366 shows <span class="neg">&minus;6.41</span>, so the very last payment is <span class="num">$6.41</span> smaller. With <span class="num">$4,625.27</span>, E366 shows 6.48 still owed.</p>
+
+<!-- ================================================================ -->
+<h2 id="s5">5. How much of the monthly payment is spent on principal vs interest?</h2>
+
+<p>Type 4625.28 in the payment box and look at the second graph. Early in the loan almost all of each payment is interest. The balance is large then, and interest is the balance times 0.0728 &divide; 12.</p>
+
+<div class="tablewrap">
+<table>
+  <tr><th>Month</th><th>Old balance</th><th>Interest</th><th>Principal <span class="long">(payment &minus; interest)</span></th><th><span class="long">Interest share of the payment</span><span class="short">Interest share</span></th></tr>
+  <tr><td>1</td><td>676,000.00</td><td>4,101.07</td><td>524.21</td><td>88.7%</td></tr>
+  <tr><td>2</td><td>675,475.79</td><td>4,097.89</td><td>527.39</td><td>88.6%</td></tr>
+  <tr><td>12</td><td>670,055.52</td><td>4,065.00</td><td>560.28</td><td>87.9%</td></tr>
+  <tr><td>60 (year 5)</td><td>638,945.81</td><td>3,876.27</td><td>749.01</td><td>83.8%</td></tr>
+  <tr><td>120 (year 10)</td><td>584,931.67</td><td>3,548.59</td><td>1,076.69</td><td>76.7%</td></tr>
+  <tr><td>180 (year 15)</td><td>507,286.75</td><td>3,077.54</td><td>1,547.74</td><td>66.5%</td></tr>
+  <tr><td>240 (year 20)</td><td>395,672.76</td><td>2,400.41</td><td>2,224.87</td><td>51.9%</td></tr>
+  <tr><td>300 (year 25)</td><td>235,228.48</td><td>1,427.05</td><td>3,198.23</td><td>30.9%</td></tr>
+  <tr><td>360 (year 30)</td><td>4,591.02</td><td>27.85</td><td>4,597.43</td><td>0.6%</td></tr>
+</table>
+</div>
+<p class="note">Payment <span class="num">$4,625.28</span>. Interest share = interest &divide; 4,625.28, as a percent. In month 360 the principal is larger than the balance; that is the <span class="num">$6.41</span> overpayment.</p>
+
+<p>Some things to read off the table and the graphs:</p>
+<ul>
+  <li>In the first year the buyer pays 12 &times; 4,625.28 = <span class="num">$55,503.36</span>. Of that, <span class="num">$48,998.60</span> is interest and only <span class="num">$6,504.76</span> reduces the debt.</li>
+  <li>The principal part first passes the interest part in month 247, in year 21. On the second graph, that is where the two lines cross.</li>
+  <li>The balance first drops below half the loan (<span class="num">$338,000</span>) after month 264, in year 22.</li>
+</ul>
+
+<h3>The total cost</h3>
+<p>The buyer makes 360 payments of <span class="num">$4,625.28</span>, with the last one <span class="num">$6.41</span> smaller:</p>
+<p class="display">Total paid = 360 &times; 4,625.28 &minus; 6.41 = <span class="num">$1,665,094.39</span><br>
+Total interest = 1,665,094.39 &minus; 676,000 = <span class="num">$989,094.39</span></p>
+<p>The total interest is also the sum of the interest column; in the spreadsheet, <span class="formula">=SUM(C7:C366)</span> gives 989,094.39 (with B4 set to 4625.28). The buyer repays about 2.46 times the amount borrowed. Interest is charged every month on whatever is still owed, and for most of 30 years a large amount is still owed.</p>
+
+
+
+<!-- ================================================================ -->
+<h2 id="s6">6. A formula</h2>
+
+<p>Bracketing reaches the payment to the cent in 16 tries, and each try runs through 360 months of the rule. A lender quoting payments all day, or a buyer comparing many prices and rates, needs something faster.</p>
+
+<p class="display">Is there a formula that takes the loan amount, the monthly rate, and the number of months, and gives the payment in one calculation?</p>
+
+<p>Here is where such a formula has to come from. Write <i>f</i> for the growth factor 1 + 0.0728 &divide; 12 (about 1.0060667) and <i>P</i> for the payment. The rule is new balance = <i>f</i> &times; old balance &minus; <i>P</i>, so</p>
+<p class="display">after month 1: <i>f</i> &times; 676,000 &minus; <i>P</i><br>
+after month 2: <i>f</i> &times; (<i>f</i> &times; 676,000 &minus; <i>P</i>) &minus; <i>P</i> = <i>f</i><sup>2</sup> &times; 676,000 &minus; <i>f</i> &times; <i>P</i> &minus; <i>P</i><br>
+after month 3: <i>f</i><sup>3</sup> &times; 676,000 &minus; <i>f</i><sup>2</sup> &times; <i>P</i> &minus; <i>f</i> &times; <i>P</i> &minus; <i>P</i></p>
+<p>Each month adds one more payment term, and each earlier term picks up one more factor of <i>f</i>. After 360 months the payment is multiplied by the sum 1 + <i>f</i> + <i>f</i><sup>2</sup> + &hellip; + <i>f</i><sup>359</sup>: 360 numbers, each <i>f</i> times the one before. Adding up numbers like these in one step is the subject of lecture 2. Whatever formula comes out must give <span class="num">$4,625.28</span> for this loan.</p>
+
+<h2 id="after">After class: the 15-year loan</h2>
+
+<div class="task">
+  <h3>Task 6 <span class="time">(after class)</span></h3>
+  <p>The same October 1, 2026 survey reports an average rate of 6.60% for a 15-year fixed-rate mortgage.<sup><a href="#src2">[2]</a></sup> For the same <span class="num">$676,000</span> loan repaid over 15 years (180 payments):</p>
+  <ol type="a">
+    <li>Find the monthly payment to the nearest dollar. Use the slider with the 15-year loan selected, or change B2 to 0.066 in the spreadsheet and read cell E186, the balance after month 180.</li>
+    <li>Estimate the total interest, using total paid = 180 &times; payment.</li>
+    <li>Compare with the 30-year loan: how much more per month, and how much less interest in total?</li>
+  </ol>
+</div>
+
+<details class="solution">
+<summary>Solution to Task 6</summary>
+<p><b>(a)</b> <span class="num">$5,900</span> leaves <span class="num">$7,933.40</span> owed and <span class="num">$6,000</span> overpays by <span class="num">$22,683.77</span>. Narrowing down gives <span class="num">$5,926</span> to the nearest dollar, and <span class="num">$5,925.91</span> to the cent. With <span class="num">$5,925.91</span>, E186 shows 0.49, so the last payment is 49 cents larger.</p>
+<p><b>(b)</b> Total paid = 180 &times; 5,925.91 + 0.49 = <span class="num">$1,066,664.29</span>. Total interest = 1,066,664.29 &minus; 676,000 = <span class="num">$390,664.29</span>. Using <span class="num">$5,926</span> and no cent adjustment gives about <span class="num">$390,680</span>, which is close enough for a comparison.</p>
+<p><b>(c)</b> The 15-year payment is 5,925.91 &minus; 4,625.28 = <span class="num">$1,300.63</span> more per month. The total interest is 989,094.39 &minus; 390,664.29 = <span class="num">$598,430.10</span> less. Two things cause the savings: the rate is lower, and the balance shrinks faster, so there is less to charge interest on. In month 1 of the 15-year loan, interest is 676,000 &times; 0.066 &divide; 12 = <span class="num">$3,718.00</span>, which is 62.7% of the payment, and the balance falls below half the loan after month 112.</p>
+</details>
+
+<!-- ================================================================ -->
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+  <li id="src1">Northwest Multiple Listing Service, &ldquo;Market Snapshot August 2026,&rdquo; published September 3, 2026. Median sales price for residential homes and condominiums sold in August 2026, King County: $845,000. https://www.nwmls.com/market-snapshot-august-2026/ (accessed October 4, 2026).</li>
+  <li id="src2">Freddie Mac, Primary Mortgage Market Survey, news release &ldquo;Mortgage Rates Average 7.28%,&rdquo; October 1, 2026. &ldquo;The 30-year FRM averaged 7.28% as of October 1, 2026&rdquo;; &ldquo;The 15-year FRM averaged 6.60%.&rdquo; https://freddiemac.gcs-web.com/news-releases/news-release-details/mortgage-rates-average-728; archive at https://www.freddiemac.com/pmms (accessed October 4, 2026).</li>
+</ol>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var MODES = {
+    m30:   { loan: 676000, rate: 0.0728, n: 360, min: 4000, max: 5500, step: 1,    start: 4500, low: 4500, high: 5000, label: "month 360" },
+    m15:   { loan: 676000, rate: 0.066,  n: 180, min: 3600, max: 7000, step: 1,    start: 5500, low: 5500, high: 6500, label: "month 180" },
+    small: { loan: 1200,   rate: 0.12,   n: 3,   min: 395,  max: 420,  step: 0.01, start: 400,  low: 400,  high: 410,  label: "month 3" }
+  };
+
+  // The month-by-month rule: new balance = old balance + interest - payment.
+  function schedule(loan, annualRate, n, payment) {
+    var r = annualRate / 12, b = loan, rows = [];
+    for (var m = 1; m <= n; m++) {
+      var interest = b * r;
+      var nb = b + interest - payment;
+      rows.push({ month: m, old: b, interest: interest, payment: payment, principal: payment - interest, end: nb });
+      b = nb;
+    }
+    return rows;
+  }
+  window.loanSchedule = schedule; // exposed for the check script
+
+  function money(x) {
+    var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (x < 0 ? "−$" : "$") + s;
+  }
+  function shortMoney(x) {
+    var a = Math.abs(x), s;
+    if (a >= 1e6) s = (a / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+    else if (a >= 1e4) s = Math.round(a / 1e3) + "k";
+    else s = Math.round(a).toLocaleString("en-US");
+    return (x < 0 ? "−$" : "$") + s;
+  }
+  function niceStep(span, target) {
+    var raw = span / target, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+    return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+  }
+
+  var NS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, text) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function drawChart(svg, opts) {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var cw = svg.getBoundingClientRect().width || 720;
+    var W = Math.round(Math.max(340, Math.min(720, cw)));
+    var H = W < 500 ? Math.round(opts.height * 0.8) : opts.height;
+    var L = 62, R = opts.right || 14, T = 12, B = 34;
+    if (W < 500 && R > 14) R = 100;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var x0 = opts.xmin, x1 = opts.xmax, y0 = opts.ymin, y1 = opts.ymax;
+    function X(v) { return L + (v - x0) / (x1 - x0) * (W - L - R); }
+    function Y(v) { return T + (y1 - v) / (y1 - y0) * (H - T - B); }
+    var ys = niceStep(y1 - y0, 5);
+    for (var v = Math.ceil(y0 / ys) * ys; v <= y1 + 1e-9; v += ys) {
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: Math.abs(v) < 1e-9 ? "#1d1d1f" : "#e4e1da", "stroke-width": Math.abs(v) < 1e-9 ? 1.5 : 1 }));
+      svg.appendChild(el("text", { x: L - 6, y: Y(v) + 4, "text-anchor": "end", "font-size": 12, fill: "#5a5a60" }, shortMoney(v)));
+    }
+    var xs = opts.xticks;
+    if (W < 500 && xs === 60) xs = 120;
+    for (var t = 0; t <= x1; t += xs) {
+      svg.appendChild(el("line", { x1: X(t), x2: X(t), y1: H - B, y2: H - B + 5, stroke: "#5a5a60" }));
+      svg.appendChild(el("text", { x: X(t), y: H - B + 18, "text-anchor": "middle", "font-size": 12, fill: "#5a5a60" }, String(t)));
+    }
+    svg.appendChild(el("text", { x: W - R, y: H - 2, "text-anchor": "end", "font-size": 12, fill: "#5a5a60" }, opts.xlabel));
+    opts.series.forEach(function (s) {
+      var d = s.points.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }).join("");
+      svg.appendChild(el("path", { d: d, fill: "none", stroke: s.color, "stroke-width": 2.5, "stroke-linejoin": "round" }));
+      if (s.dots) s.points.forEach(function (p) { svg.appendChild(el("circle", { cx: X(p[0]), cy: Y(p[1]), r: 4, fill: s.color })); });
+    });
+    (opts.marks || []).forEach(function (m) {
+      svg.appendChild(el("circle", { cx: X(m.x), cy: Y(m.y), r: 5, fill: "#fff", stroke: m.color, "stroke-width": 2.5 }));
+      var anchor = m.side || (X(m.x) > W - 140 ? "end" : "start");
+      var dx = m.dx != null ? m.dx : (anchor === "end" ? -12 : 10);
+      var attrs = { x: X(m.x) + dx, y: Y(m.y) + (m.dy == null ? -8 : m.dy), "text-anchor": anchor, "font-size": W < 500 ? 12 : 13, "font-weight": 600, fill: m.color };
+      if (m.halo) { attrs.stroke = "#fff"; attrs["stroke-width"] = 4; attrs["paint-order"] = "stroke"; }
+      svg.appendChild(el("text", attrs, m.text));
+    });
+  }
+
+  // ---------- payment hunter ----------
+  var modeSel = document.getElementById("loanMode");
+  var slider = document.getElementById("paySlider");
+  var box = document.getElementById("payBox");
+  var readout = document.getElementById("readout");
+  var readout2 = document.getElementById("readout2");
+
+  function mode() { return MODES[modeSel.value]; }
+
+  function update(p) {
+    var M = mode();
+    p = Math.round(p * 100) / 100;
+    var rows = schedule(M.loan, M.rate, M.n, p);
+    var last = rows[rows.length - 1].end;
+    if (Math.abs(last) < 0.005) last = 0;
+    if (last > 0) readout.innerHTML = "Balance after " + M.label + ": <strong>" + money(last) + "</strong> still owed. The payment is too small.";
+    else if (last < 0) readout.innerHTML = "Balance after " + M.label + ": <strong>" + money(last) + "</strong>. The borrower overpaid by " + money(-last) + ".";
+    else readout.innerHTML = "Balance after " + M.label + ": <strong>$0.00</strong>.";
+    var first = rows[0];
+    var totalInterest = rows.reduce(function (s, r) { return s + r.interest; }, 0);
+    var near = Math.abs(last) <= M.loan / 50000;
+    readout2.textContent = "Month 1: interest " + money(first.interest) + ", principal " + money(first.principal) + ". " +
+      (near ? "Total interest over the " + M.n + " months (sum of the interest column): " + money(totalInterest) + "."
+            : "Total interest is shown once the loan is paid off to within " + money(M.loan / 50000) + ".");
+
+    var pts = [[0, M.loan]].concat(rows.map(function (r) { return [r.month, r.end]; }));
+    var ys = pts.map(function (q) { return q[1]; });
+    var ymax = Math.max(M.loan, Math.max.apply(null, ys)), ymin = Math.min(0, Math.min.apply(null, ys));
+    var pad = (ymax - ymin) * 0.05;
+    var xt = M.n >= 300 ? 60 : M.n >= 100 ? 30 : 1;
+    drawChart(document.getElementById("balChart"), {
+      height: 300, right: 110, xmin: 0, xmax: M.n, ymin: ymin - (ymin < 0 ? pad : 0), ymax: ymax + pad,
+      xticks: xt, xlabel: "month",
+      series: [{ points: pts, color: "#2f5d8a", dots: M.n <= 12 }],
+      marks: [{ x: M.n, y: last, color: last > 0.005 ? "#b0302a" : (last < -0.005 ? "#b0302a" : "#2c7a3f"), text: money(last), side: "start", dy: 5 }]
+    });
+
+    var ip = rows.map(function (r) { return [r.month, r.interest]; });
+    var pp = rows.map(function (r) { return [r.month, r.principal]; });
+    var all = ip.concat(pp).map(function (q) { return q[1]; });
+    var smax = Math.max.apply(null, all), smin = Math.min(0, Math.min.apply(null, all));
+    var cross = null;
+    for (var i = 0; i < rows.length; i++) if (rows[i].principal > rows[i].interest) { cross = rows[i]; break; }
+    var marks = [];
+    if (cross && cross.month > 1) marks.push({ x: cross.month, y: cross.interest, color: "#1d1d1f", text: "month " + cross.month, side: "end", dy: -18, dx: -14, halo: true });
+    drawChart(document.getElementById("splitChart"), {
+      height: 240, right: 110, xmin: 0, xmax: M.n, ymin: smin, ymax: smax * 1.08,
+      xticks: xt, xlabel: "month",
+      series: [{ points: ip, color: "#c0532b", dots: M.n <= 12 }, { points: pp, color: "#2f5d8a", dots: M.n <= 12 }],
+      marks: marks
+    });
+  }
+
+  function setPayment(p, from) {
+    var M = mode();
+    p = Math.max(0, Math.round(p * 100) / 100);
+    if (from !== "slider") slider.value = Math.min(M.max, Math.max(M.min, p));
+    if (from !== "box") box.value = p.toFixed(2);
+    update(p);
+  }
+
+  function applyMode() {
+    var M = mode();
+    slider.min = M.min; slider.max = M.max; slider.step = M.step;
+    document.getElementById("lowBox").value = M.low;
+    document.getElementById("highBox").value = M.high;
+    resetBracket();
+    setPayment(M.start);
+  }
+
+  modeSel.addEventListener("change", applyMode);
+  slider.addEventListener("input", function () { setPayment(parseFloat(slider.value), "slider"); });
+  box.addEventListener("input", function () { var v = parseFloat(box.value); if (isFinite(v)) setPayment(v, "box"); });
+  Array.prototype.forEach.call(document.querySelectorAll("#hunter button[data-step]"), function (b) {
+    b.addEventListener("click", function () {
+      var v = parseFloat(box.value) || 0;
+      setPayment(v + parseFloat(b.getAttribute("data-step")));
+    });
+  });
+
+  // ---------- bracketing helper ----------
+  var tbody = document.querySelector("#bracketTable tbody");
+  var msg = document.getElementById("bracketMsg");
+  var stepNo = 0, cur = null; // cur holds the unrounded low/high and the text shown in the boxes
+  function show4(x) { return x.toFixed(4).replace(/\.?0+$/, ""); }
+  function money4(x) {
+    var s = Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    return (x < 0 ? "−$" : "$") + s;
+  }
+  function resetBracket() {
+    stepNo = 0; cur = null; tbody.innerHTML = ""; msg.textContent = "";
+  }
+  function finalBalance(p) {
+    var M = mode(), rows = schedule(M.loan, M.rate, M.n, p);
+    return rows[rows.length - 1].end;
+  }
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    var M = mode();
+    document.getElementById("lowBox").value = M.low;
+    document.getElementById("highBox").value = M.high;
+    resetBracket();
+  });
+  document.getElementById("stepBtn").addEventListener("click", function () {
+    var lowEl = document.getElementById("lowBox"), highEl = document.getElementById("highBox");
+    var lo = parseFloat(lowEl.value), hi = parseFloat(highEl.value);
+    // keep the unrounded endpoints unless the user has typed a new value
+    if (cur && lowEl.value === cur.loText) lo = cur.lo;
+    if (cur && highEl.value === cur.hiText) hi = cur.hi;
+    if (!isFinite(lo) || !isFinite(hi) || lo >= hi) { msg.textContent = "Low must be a number smaller than high."; return; }
+    if (finalBalance(lo) <= 0) { msg.textContent = "The low payment already pays off the loan. Choose a smaller low payment."; return; }
+    if (finalBalance(hi) > 0) { msg.textContent = "The high payment still leaves money owed. Choose a larger high payment."; return; }
+    var mid = (lo + hi) / 2, fb = finalBalance(mid), verdict;
+    stepNo++;
+    if (fb > 0) { verdict = '<span class="long">owes: </span>new low'; lo = mid; } else { verdict = '<span class="long">overpays: </span>new high'; hi = mid; }
+    cur = { lo: lo, hi: hi, loText: show4(lo), hiText: show4(hi) };
+    lowEl.value = cur.loText; highEl.value = cur.hiText;
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>" + stepNo + "</td><td>" + money4(mid) + "</td><td" + (fb < 0 ? ' class="neg"' : "") + ">" + money(fb) + "</td><td class=\"l\">" + verdict + "</td>";
+    tbody.appendChild(tr);
+    msg.textContent = "After step " + stepNo + " the payment is between " + money4(lo) + " and " + money4(hi) + ", a gap of " + money4(hi - lo) + ".";
+  });
+
+  // ---------- spreadsheet export ----------
+  function sheetRows() {
+    var rows = [
+      ["Loan amount", "676000", "", "", ""],
+      ["Annual rate", "0.0728", "", "", ""],
+      ["Monthly rate", "=B2/12", "", "", ""],
+      ["Monthly payment", "4000", "", "", ""],
+      ["", "", "", "", ""],
+      ["Month", "Old balance", "Interest", "Payment", "New balance"],
+      ["1", "=B1", "=B7*$B$3", "=$B$4", "=B7+C7-D7"]
+    ];
+    for (var r = 8; r <= 366; r++) {
+      rows.push(["=A" + (r - 1) + "+1", "=E" + (r - 1), "=B" + r + "*$B$3", "=$B$4", "=B" + r + "+C" + r + "-D" + r]);
+    }
+    return rows;
+  }
+  window.sheetRows = sheetRows; // exposed for the check script
+  document.getElementById("dlCsv").addEventListener("click", function () {
+    var csv = sheetRows().map(function (r) { return r.join(","); }).join("\r\n") + "\r\n";
+    var a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    a.download = "loan-table.csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+  document.getElementById("copyTsv").addEventListener("click", function () {
+    var tsv = sheetRows().map(function (r) { return r.join("\t"); }).join("\n");
+    var note = document.getElementById("copyMsg");
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = tsv; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      note.textContent = ok ? "Copied 366 rows. Click cell A1 of an empty sheet and paste." : "Copy was blocked by the browser. Use the download button.";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () {
+        note.textContent = "Copied 366 rows. Click cell A1 of an empty sheet and paste.";
+      }, fallback);
+    } else fallback();
+  });
+
+  // show a scroll cue under any table wider than its box
+  function markOverflow() {
+    Array.prototype.forEach.call(document.querySelectorAll(".tablewrap"), function (w) {
+      if (!w.nextElementSibling || !w.nextElementSibling.classList.contains("scrollcue")) {
+        var c = document.createElement("p"); c.className = "scrollcue"; c.textContent = "Scroll the table sideways to see every column.";
+        w.parentNode.insertBefore(c, w.nextSibling);
+      }
+      w.classList.toggle("overflows", w.scrollWidth > w.clientWidth + 1);
+    });
+  }
+  window.addEventListener("resize", markOverflow);
+  document.addEventListener("toggle", markOverflow, true);
+  document.getElementById("stepBtn").addEventListener("click", markOverflow);
+
+  var lastW = window.innerWidth;
+  window.addEventListener("resize", function () {
+    if (Math.abs(window.innerWidth - lastW) < 20) return;
+    lastW = window.innerWidth;
+    update(parseFloat(box.value) || mode().start);
+  });
+
+  applyMode();
+  markOverflow();
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-03/3-3-minimizing-cost/" style="color:inherit">&larr; 3.3 Minimizing cost</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-04/4-2-a-formula-for-the-monthly-payment/" style="color:inherit">4.2 A formula for the monthly payment &rarr;</a></nav>
+</body>
+</html>

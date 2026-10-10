@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stable Matchings</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1d1d1f;
+    --muted: #555a60;
+    --rule: #c9cdd2;
+    --task-bg: #f3f6fa;
+    --task-border: #2f5d8a;
+    --sol-bg: #f7f7f2;
+    --sol-border: #8a8a6a;
+    --hi: #fde7c4;
+    --bad: #a3271f;
+    --good: #1f6b33;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+  .course { color: var(--muted); font-size: 0.95em; margin: 0; }
+  h1 { font-size: 2em; margin: 0.2em 0 0.6em; }
+  h2 { font-size: 1.4em; margin: 2em 0 0.5em; border-bottom: 1px solid var(--rule); padding-bottom: 0.2em; }
+  h3 { font-size: 1.1em; margin: 1.4em 0 0.4em; }
+  p, ul, ol { margin: 0.6em 0; }
+  table { border-collapse: collapse; margin: 0.8em 0; }
+  th, td { border: 1px solid var(--rule); padding: 0.3em 0.7em; text-align: center; }
+  th { background: #eef0f3; font-weight: 600; }
+  td.left, th.left { text-align: left; }
+  .tables caption { white-space: nowrap; }
+  caption { caption-side: top; text-align: left; font-weight: 600; padding-bottom: 0.3em; }
+  .tables { display: flex; flex-wrap: wrap; gap: 0 28px; }
+  .scroll { overflow-x: auto; max-width: 100%; }
+  .num { font-variant-numeric: tabular-nums; }
+  td.mark { background: var(--hi); font-weight: 700; }
+  .task {
+    border: 2px solid var(--task-border);
+    background: var(--task-bg);
+    border-radius: 6px;
+    padding: 0.6em 1em 0.8em;
+    margin: 1.4em 0 0.4em;
+  }
+  .task .label { font-weight: 700; color: var(--task-border); margin: 0.2em 0 0.4em; }
+  details.solution {
+    border: 1px solid var(--sol-border);
+    background: var(--sol-bg);
+    border-radius: 6px;
+    padding: 0.4em 1em;
+    margin: 0 0 1.4em;
+  }
+  details.solution > summary { cursor: pointer; font-weight: 600; padding: 0.2em 0; }
+  details.solution[open] > summary { margin-bottom: 0.4em; }
+  .def { border-left: 4px solid var(--task-border); padding: 0.1em 0 0.1em 0.9em; margin: 0.9em 0; }
+  .yes { color: var(--bad); font-weight: 700; }
+  .no { color: var(--good); font-weight: 700; }
+  /* matching checker */
+  .checker { border: 1px solid var(--rule); border-radius: 6px; padding: 0.8em 1em; margin: 1em 0; }
+  .checker .picks { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 0.6em; }
+  .checker label { font-weight: 600; white-space: nowrap; }
+  .checker select { font-size: 1em; padding: 0.15em 0.3em; margin-left: 0.3em; }
+  .checker button, .sheet button {
+    font-size: 0.95em; padding: 0.35em 0.8em; border: 1px solid var(--task-border);
+    background: #fff; color: var(--task-border); border-radius: 4px; cursor: pointer; margin: 0.2em 0.4em 0.2em 0;
+  }
+  .verdict { font-weight: 700; margin: 0.5em 0; }
+  table.layout td, table.layout th { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; text-align: left; }
+  .sources li { margin-bottom: 0.6em; overflow-wrap: anywhere; }
+  .small { font-size: 0.9em; color: var(--muted); }
+  @media (max-width: 520px) {
+    body { font-size: 16px; }
+    h1 { font-size: 1.6em; }
+    th, td { padding: 0.25em 0.45em; }
+    table.compact { font-size: 0.85em; }
+    table.compact th, table.compact td { padding: 0.2em 0.3em; }
+  }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-08/8-3-misleading-graphs-and-analyses/" style="color:inherit">&larr; 8.3 Misleading graphs and analyses</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-09/9-2-the-deferred-acceptance-algorithm/" style="color:inherit">9.2 The deferred acceptance algorithm &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Stable matching (week 9) · Lecture 1 of 3</p>
+<h1>Stable matchings</h1>
+
+<!-- ============================================================ -->
+<h2>1. The residency Match</h2>
+
+<p>A new U.S. doctor finishes medical school and then trains for several more years as a <em>resident</em> in a hospital program. Applicants and programs are paired up by the National Resident Matching Program (NRMP). Each applicant sends a ranked list of programs, from most wanted to least wanted. Each program sends a ranked list of applicants. A computer program then turns all these lists into one assignment.</p>
+
+<p>The NRMP reported these figures for its 2026 Main Residency Match [1, 2].</p>
+
+<div class="scroll">
+<table>
+  <caption>2026 Main Residency Match [1, 2]</caption>
+  <tr><th class="left">Quantity</th><th>Number</th></tr>
+  <tr><td class="left">Applicants who registered</td><td class="num">53,373</td></tr>
+  <tr><td class="left">Active applicants (sent a ranked list)</td><td class="num">48,050</td></tr>
+  <tr><td class="left">Active applicants matched to a first-year (PGY-1) position</td><td class="num">38,354</td></tr>
+  <tr><td class="left">Positions offered (PGY-1 and PGY-2)</td><td class="num">44,344</td></tr>
+  <tr><td class="left">Positions filled (PGY-1 and PGY-2)</td><td class="num">41,482</td></tr>
+  <tr><td class="left">Program tracks taking part</td><td class="num">6,809</td></tr>
+</table>
+</div>
+
+<p>PGY-1 means post-graduate year 1, the first year of residency. Some specialties start in the second year (PGY-2) and require a one-year preliminary position first. One person can match to both: a PGY-1 preliminary position and a PGY-2 position that starts a year later. So the 41,482 filled positions count some people twice, and the number of people who matched is smaller than 41,482 [2]. Each person can hold at most one PGY-1 position, so the 38,354 PGY-1 matches are 38,354 different people [1].</p>
+
+<div class="task">
+<p class="label">Task 1 (about 3 minutes, calculator)</p>
+<p>Use the 2026 table. Write down four numbers.</p>
+<ol type="a">
+  <li>The percent of offered positions that were filled, to one decimal place.</li>
+  <li>The percent of active applicants who matched to a PGY-1 position, to one decimal place.</li>
+  <li>The number of positions left unfilled.</li>
+  <li>The number of active applicants who did not match to a PGY-1 position.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<ol type="a">
+  <li>41,482 ÷ 44,344 = 0.9355…, so about <strong>93.5%</strong> of positions were filled. The NRMP reports the same figure, 93.5 percent [1].</li>
+  <li>38,354 ÷ 48,050 = 0.7982…, so about <strong>79.8%</strong> of active applicants matched to a PGY-1 position.</li>
+  <li>44,344 − 41,482 = <strong>2,862</strong> positions unfilled. The NRMP reports the same number [1].</li>
+  <li>48,050 − 38,354 = <strong>9,696</strong> active applicants did not match to a PGY-1 position. A few of them may have matched to a PGY-2 position only, so this is not quite the number of people with no match at all.</li>
+</ol>
+<p>Both sides have some left over. There are more active applicants (48,050) than positions (44,344), so some applicants cannot get a position. Some positions stay empty as well, because an applicant can only match to a program that is on their list and that has them on its list.</p>
+</details>
+
+<p>With 41,482 positions filled by a computer, people need a reason to accept the result. One reason is this: after the assignment, no applicant and program should both want to drop their assigned partners and go with each other instead. An assignment with this property is called <em>stable</em>. Alvin Roth, who studied the Match in 1984, hypothesized that "the fundamental reason for the success of the NRMP was that it produced stable matches" [4]. The algorithm the NRMP uses today was designed around this idea [4, 5].</p>
+
+<p><strong>Simplifications in the small examples.</strong> The examples are made up. Applicants are named A, B, C, D and programs W, X, Y, Z. Each example has the same number of applicants and programs, each program has exactly one position, and everyone ranks everyone on the other side. In the real Match, programs have several positions, the two sides have different sizes, lists usually include only some of the other side, one person can match to a PGY-1 and a PGY-2 position, and couples can apply together [4]. The facts about stable matchings in this module are for the simple case without couples.</p>
+
+<!-- ============================================================ -->
+<h2>2. Preferences as ranked tables</h2>
+
+<p>Example 1 has three applicants (A, B, C) and three programs (X, Y, Z). The preferences are made up. Each row is one person's ranked list, with 1st choice on the left.</p>
+
+<div class="tables">
+<table>
+  <caption>Example 1: applicants' rankings</caption>
+  <tr><th>Applicant</th><th>1st</th><th>2nd</th><th>3rd</th></tr>
+  <tr><th>A</th><td>X</td><td>Y</td><td>Z</td></tr>
+  <tr><th>B</th><td>Z</td><td>X</td><td>Y</td></tr>
+  <tr><th>C</th><td>Y</td><td>Z</td><td>X</td></tr>
+</table>
+<table>
+  <caption>Example 1: programs' rankings</caption>
+  <tr><th>Program</th><th>1st</th><th>2nd</th><th>3rd</th></tr>
+  <tr><th>X</th><td>A</td><td>C</td><td>B</td></tr>
+  <tr><th>Y</th><td>C</td><td>B</td><td>A</td></tr>
+  <tr><th>Z</th><td>C</td><td>A</td><td>B</td></tr>
+</table>
+</div>
+
+<p>To read the tables, find a person's row and read left to right. Row B of the applicants' table says B wants Z most, then X, then Y. Row Y of the programs' table says program Y wants C most, then B, then A.</p>
+
+<p>A person <em>prefers</em> one choice to another when the first choice is further left in their row. B prefers X to Y because X is B's 2nd choice and Y is B's 3rd choice.</p>
+
+<div class="task">
+<p class="label">Task 2 (about 3 minutes, pencil and paper)</p>
+<p>Use the Example 1 tables. Suppose the assignment is: A goes to X, B goes to Y, C goes to Z. Find an applicant and a program who are not assigned to each other but who would both rather be together than with the partner they were given. Write down the applicant, the program, and the two table rows that show it.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<p><strong>C and Y.</strong> C was given Z. C's row is Y, Z, X, so C would rather have Y than Z. Y was given B. Y's row is C, B, A, so Y would rather have C than B.</p>
+<p>No other applicant and program work. A has X, A's 1st choice, so A wants no change. B would rather have Z or X than Y, but Z's row is C, A, B, so Z would rather keep C, and X's row is A, C, B, so X would rather keep A. The only program C would rather have than Z is Y.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2>3. Matchings and blocking pairs</h2>
+
+<div class="def">
+<p>A <strong>matching</strong> is a set of applicant–program pairs in which every applicant is in exactly one pair and every program is in exactly one pair. A person's <strong>partner</strong> is the one they are paired with.</p>
+</div>
+
+<p>We write a pair as (applicant, program) and give each matching a name. The assignment in Task 2 is the matching</p>
+<p style="text-align:center">M1 = {(A,&nbsp;X), (B,&nbsp;Y), (C,&nbsp;Z)}.</p>
+<p>In M1, A's partner is X, B's partner is Y and C's partner is Z. A got their 1st choice, B their 3rd choice and C their 2nd choice.</p>
+
+<p>In Task 2, C and Y both want to leave M1 to go together. If they were free to make their own deal, both would gain by ignoring M1. A pair like this has a name.</p>
+
+<div class="def">
+<p>An applicant and a program that are not paired with each other form a <strong>blocking pair</strong> when both of these hold:</p>
+<ol>
+  <li>the applicant prefers the program to the applicant's own partner, and</li>
+  <li>the program prefers the applicant to the program's own partner.</li>
+</ol>
+</div>
+
+<p>So (C,&nbsp;Y) is a blocking pair of M1. Both conditions are needed. Take B and Z in M1. B's row is Z, X, Y and B's partner is Y, so B prefers Z to Y. Condition 1 holds. Z's partner is C, and Z's row is C, A, B, so Z prefers C to B. Condition 2 fails. Z will not leave C for B, so (B,&nbsp;Z) is not a blocking pair.</p>
+
+<div class="task">
+<p class="label">Task 3 (about 4 minutes, pencil and paper)</p>
+<p>Use the Example 1 tables and this matching: A goes to Y, B goes to X, C goes to Z.</p>
+<ol type="a">
+  <li>Write this matching as a set of pairs. Call it M2.</li>
+  <li>For each of the pairs (A,&nbsp;X), (C,&nbsp;Y) and (B,&nbsp;Z), write the two comparisons from the definition and then write "blocking" or "not blocking".</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<p>(a) M2 = {(A,&nbsp;Y), (B,&nbsp;X), (C,&nbsp;Z)}.</p>
+<p>(b)</p>
+<ul>
+  <li>(A,&nbsp;X). A's partner is Y; A's row is X, Y, Z, so A prefers X to Y. X's partner is B; X's row is A, C, B, so X prefers A to B. Both hold: <span class="yes">blocking</span>.</li>
+  <li>(C,&nbsp;Y). C's partner is Z; C's row is Y, Z, X, so C prefers Y to Z. Y's partner is A; Y's row is C, B, A, so Y prefers C to A. Both hold: <span class="yes">blocking</span>.</li>
+  <li>(B,&nbsp;Z). B's partner is X; B's row is Z, X, Y, so B prefers Z to X. Z's partner is C; Z's row is C, A, B, so Z prefers C to B. Condition 2 fails: <span class="no">not blocking</span>.</li>
+</ul>
+</details>
+
+<!-- ============================================================ -->
+<h2>4. Stable matchings and how to check one</h2>
+
+<div class="def">
+<p>A matching is <strong>stable</strong> when it has no blocking pair. It is <strong>unstable</strong> when it has at least one blocking pair.</p>
+</div>
+
+<p>To show that a matching is unstable, one blocking pair is enough. To show that a matching is stable, we must rule out every applicant–program pair. A fixed order of work makes sure no pair is missed.</p>
+
+<h3>The checking method</h3>
+<p>Go through the applicants one at a time. For each applicant:</p>
+<ol>
+  <li>Find the applicant's partner in the applicant's row. Only the programs to the <em>left</em> of the partner can be in a blocking pair with this applicant, because condition 1 needs the applicant to prefer the program. Programs to the right are skipped.</li>
+  <li>For each program to the left of the partner, find that program's row. If the applicant is to the left of the program's current partner, the two form a blocking pair. If not, they do not.</li>
+</ol>
+<p>Each step 2 comparison is one <em>check</em>. An applicant who got their 1st choice needs no checks at all.</p>
+
+<h3>Worked example: checking M3</h3>
+<p>Take the matching A goes to Y, B goes to Z, C goes to X, with the Example 1 tables:</p>
+<p style="text-align:center">M3 = {(A,&nbsp;Y), (B,&nbsp;Z), (C,&nbsp;X)}.</p>
+<div class="scroll">
+<table>
+  <tr><th>Applicant (partner, rank)</th><th>Program to the left</th><th>That program's row and partner</th><th>Result</th></tr>
+  <tr><td>A (Y, 2nd)</td><td>X</td><td>X's row A, C, B; partner C. A is left of C.</td><td class="yes">(A,&nbsp;X) blocks</td></tr>
+  <tr><td>B (Z, 1st)</td><td>none</td><td>B has their 1st choice.</td><td class="no">0 checks</td></tr>
+  <tr><td>C (X, 3rd)</td><td>Y</td><td>Y's row C, B, A; partner A. C is left of A.</td><td class="yes">(C,&nbsp;Y) blocks</td></tr>
+  <tr><td>C (X, 3rd)</td><td>Z</td><td>Z's row C, A, B; partner B. C is left of B.</td><td class="yes">(C,&nbsp;Z) blocks</td></tr>
+</table>
+</div>
+<p>That is 3 checks, and they find 3 blocking pairs. Every other pair was skipped in step 1 for a reason, so there are no others. M3 is unstable.</p>
+
+<p>With 3 applicants, each applicant has at most 2 programs to the left of their partner, so a matching never needs more than 3 × 2 = 6 checks. With n applicants and n programs the limit is n × (n − 1) checks.</p>
+
+<h3>A stable matching for Example 1</h3>
+<p>Fix the blocking pair (C,&nbsp;Y) in M1 by putting C with Y. That leaves B with Z. The result is</p>
+<p style="text-align:center">M4 = {(A,&nbsp;X), (B,&nbsp;Z), (C,&nbsp;Y)}.</p>
+<p>Every applicant has their 1st choice in M4, so step 1 finds no program to the left of any partner. There are 0 checks and no blocking pair: M4 is stable. Program Z ends up with B, its 3rd choice. Z would like A or C instead, but each of them prefers their own partner, so Z cannot form a blocking pair.</p>
+<p>Here, fixing one blocking pair gave a stable matching in one step. That happened by luck in this example. With other tables, fixing one blocking pair can create a new one, and fixing pairs one at a time can go round in a circle without ever reaching a stable matching. The method of Gale and Shapley in Section 6 avoids this.</p>
+
+<!-- ============================================================ -->
+<h2>5. A matching that looks fair but is unstable</h2>
+
+<p>Example 2 has four applicants (A, B, C, D) and four programs (W, X, Y, Z). The preferences are made up.</p>
+
+<div class="tables">
+<table>
+  <caption>Example 2: applicants' rankings</caption>
+  <tr><th>Applicant</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr>
+  <tr><th>A</th><td>X</td><td>Y</td><td>Z</td><td>W</td></tr>
+  <tr><th>B</th><td>W</td><td>X</td><td>Z</td><td>Y</td></tr>
+  <tr><th>C</th><td>W</td><td>Z</td><td>X</td><td>Y</td></tr>
+  <tr><th>D</th><td>Z</td><td>W</td><td>X</td><td>Y</td></tr>
+</table>
+<table>
+  <caption>Example 2: programs' rankings</caption>
+  <tr><th>Program</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr>
+  <tr><th>W</th><td>D</td><td>A</td><td>B</td><td>C</td></tr>
+  <tr><th>X</th><td>C</td><td>A</td><td>D</td><td>B</td></tr>
+  <tr><th>Y</th><td>C</td><td>D</td><td>A</td><td>B</td></tr>
+  <tr><th>Z</th><td>D</td><td>A</td><td>B</td><td>C</td></tr>
+</table>
+</div>
+
+<p>Consider the matching</p>
+<p style="text-align:center">M5 = {(A,&nbsp;X), (B,&nbsp;W), (C,&nbsp;Y), (D,&nbsp;Z)}.</p>
+<p>Three of the four applicants get their 1st choice. One way to score a matching is its <strong>rank total</strong>: for each of the 8 people, write the rank they gave their partner (1 for 1st choice, 2 for 2nd, and so on), and add the 8 numbers. A lower total means people are, overall, closer to the top of their lists. Of all the matchings in Example 2, M5 has the lowest rank total. (This was found by computer, by listing every matching.)</p>
+
+<div class="task">
+<p class="label">Task 4 (about 6 minutes, pencil and paper)</p>
+<p>Use the Example 2 tables and M5 = {(A,&nbsp;X), (B,&nbsp;W), (C,&nbsp;Y), (D,&nbsp;Z)}.</p>
+<ol type="a">
+  <li>Write the rank each applicant gives their partner and the rank each program gives its partner. Add the 8 numbers to get the rank total of M5.</li>
+  <li>Use the checking method from Section 4 to list every blocking pair of M5. Write how many checks you made.</li>
+  <li>Is M5 stable?</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<p>(a)</p>
+<div class="scroll">
+<table>
+  <tr><th>Pair</th><th>Applicant's rank of partner</th><th>Program's rank of partner</th></tr>
+  <tr><td>(A,&nbsp;X)</td><td>1</td><td>2</td></tr>
+  <tr><td>(B,&nbsp;W)</td><td>1</td><td>3</td></tr>
+  <tr><td>(C,&nbsp;Y)</td><td>4</td><td>1</td></tr>
+  <tr><td>(D,&nbsp;Z)</td><td>1</td><td>1</td></tr>
+  <tr><th>Sum</th><th>7</th><th>7</th></tr>
+</table>
+</div>
+<p>Rank total = 7 + 7 = <strong>14</strong>.</p>
+<p>(b) A, B and D have their 1st choices, so they need no checks. C's partner is Y, which is C's 4th choice. The programs to its left are W, Z and X.</p>
+<div class="scroll">
+<table>
+  <tr><th>Program left of Y</th><th>Its partner</th><th>Its row</th><th>Prefers C?</th></tr>
+  <tr><td>W</td><td>B</td><td>D, A, B, C</td><td class="no">No</td></tr>
+  <tr><td>Z</td><td>D</td><td>D, A, B, C</td><td class="no">No</td></tr>
+  <tr><td>X</td><td>A</td><td>C, A, D, B</td><td class="yes">Yes</td></tr>
+</table>
+</div>
+<p>W and Z each rank C to the right of their partner, so they do not block. X ranks C to the left of its partner A. That is 3 checks, and exactly one blocking pair: <strong>(C,&nbsp;X)</strong>.</p>
+<p>(c) No. C prefers X (3rd choice) to Y (4th choice), and X prefers C (its 1st choice) to A (its 2nd choice). Both would leave M5 to go together, so M5 is unstable even though it has the lowest rank total.</p>
+</details>
+
+<p>M5 gives most people what they want, and still one applicant and one program both gain by leaving it. A low rank total does not make a matching stable.</p>
+
+<!-- ============================================================ -->
+<h2>6. Finding a stable matching for Example 2</h2>
+
+<p>Use this checker with the Example 2 tables. Pick a program for each applicant. Once every applicant has a program, the checker shows each person's rank for their partner, the rank total, and every blocking pair.</p>
+
+<div class="checker" id="checker">
+  <div class="picks" id="picks"></div>
+  <div>
+    <button type="button" id="clearPicks">Clear</button>
+  </div>
+  <div id="checkerOut" aria-live="polite"></div>
+</div>
+
+<div class="task">
+<p class="label">Task 5 (about 6 minutes, matching checker in this section, then pencil and paper)</p>
+<p>Start from M5 and its blocking pair in Task 4. Use the checker to find a matching for Example 2 that has no blocking pair. Then write down</p>
+<ol type="a">
+  <li>the stable matching as a set of pairs (call it M6),</li>
+  <li>a check of M6 by hand with the method from Section 4: each check you make, its result, and the number of checks,</li>
+  <li>the rank total of M6 and how many applicants get their 1st choice.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<p>(a) The blocking pair of M5 is (C,&nbsp;X). Put C with X. Then A has lost X, and the program C left, Y, is free, so put A with Y:</p>
+<p style="text-align:center">M6 = {(A,&nbsp;Y), (B,&nbsp;W), (C,&nbsp;X), (D,&nbsp;Z)}.</p>
+<p>The checker reports no blocking pair.</p>
+<p>(b) B and D have their 1st choices: 0 checks. A's partner Y is A's 2nd choice; X is to its left. X's partner is C, whom X ranks 1st, so X does not prefer A: no block. C's partner X is C's 3rd choice; W and Z are to its left. W's partner is B and W's row is D, A, B, C, so W prefers B to C: no block. Z's partner is D, Z's 1st choice: no block. That is <strong>3 checks</strong> and no blocking pair, so M6 is stable.</p>
+<p>(c) Applicants' ranks: A 2, B 1, C 3, D 1, sum 7. Programs' ranks: W ranks B 3rd, X ranks C 1st, Y ranks A 3rd, Z ranks D 1st, sum 8. Rank total = 7 + 8 = <strong>15</strong>. <strong>2</strong> applicants (B and D) get their 1st choice.</p>
+<p>A computer check of all the matchings in Example 2 finds that M6 is the only stable one. It has a higher rank total than M5 (15 against 14), and fewer applicants get their 1st choice (2 against 3). In this example, stability costs one point of rank total and one 1st choice. Fixing the one blocking pair happened to work in one step here, as in Example 1.</p>
+</details>
+
+<p>David Gale and Lloyd Shapley showed that tables like these always have at least one stable matching, and they gave a step-by-step method that always finds one [3]. Alvin Roth showed that the residency match had been using a closely related method, and starting in 1995 he and Elliott Peranson designed a new version, which the NRMP adopted in 1997 [4]. Shapley and Roth shared the 2012 Nobel Memorial Prize in Economic Sciences "for the theory of stable allocations and the practice of market design" [3]. The NRMP describes its algorithm as "applicant-proposing" [5].</p>
+
+<!-- ============================================================ -->
+<h2>7. Counting matchings</h2>
+
+<p>In Task 5 you could have tried every matching until you found a stable one. Whether that is practical depends on how many matchings there are.</p>
+
+<p>Count the matchings with n applicants and n programs by choosing partners in order. A has n programs to choose from. B then has n − 1 programs left, C has n − 2, and so on, until the last applicant has 1 program left. The number of matchings is</p>
+<p style="text-align:center">n × (n − 1) × (n − 2) × … × 2 × 1 = n!,</p>
+<p>the factorial from Lecture 6.3. Example 1 has 3! = 6 matchings and Example 2 has 4! = 24.</p>
+
+<div class="scroll">
+<table class="compact">
+  <caption>All 3! = 6 matchings of Example 1</caption>
+  <tr><th>Name</th><th>A's<br>partner</th><th>B's<br>partner</th><th>C's<br>partner</th><th>Blocking pairs</th><th>Stable?</th></tr>
+  <tr><td>M1</td><td>X</td><td>Y</td><td>Z</td><td>(C,&nbsp;Y)</td><td>No</td></tr>
+  <tr><td>M4</td><td>X</td><td>Z</td><td>Y</td><td>none</td><td><strong>Yes</strong></td></tr>
+  <tr><td>M2</td><td>Y</td><td>X</td><td>Z</td><td>(A,&nbsp;X), (C,&nbsp;Y)</td><td>No</td></tr>
+  <tr><td>M3</td><td>Y</td><td>Z</td><td>X</td><td>(A,&nbsp;X), (C,&nbsp;Y), (C,&nbsp;Z)</td><td>No</td></tr>
+  <tr><td></td><td>Z</td><td>X</td><td>Y</td><td>(A,&nbsp;X)</td><td>No</td></tr>
+  <tr><td></td><td>Z</td><td>Y</td><td>X</td><td>(A,&nbsp;X), (C,&nbsp;Y), (C,&nbsp;Z)</td><td>No</td></tr>
+</table>
+</div>
+
+<p>Only one of the 6 matchings of Example 1 is stable (M4). In Example 2, only one of the 24 is stable (M6).</p>
+
+<p>Checking 6 or 24 matchings is quick. For larger n, n! grows very fast. To measure how fast, suppose a computer can check one billion (1,000,000,000) matchings per second. That speed is a round number made up for this example.</p>
+
+<div class="task">
+<p class="label">Task 6 (about 5 minutes, spreadsheet)</p>
+<p>Build the table below in Excel or Google Sheets (download or copy the layout under this box). Column A holds n from 1 to 25. Column B is n!, column C is the number of seconds to check all n! matchings at one billion per second, and column D converts seconds to years (using 365-day years). Then answer:</p>
+<ol type="a">
+  <li>What is the smallest n for which checking all matchings takes more than one year?</li>
+  <li>How many years does it take for n = 20 and for n = 25? Round to 3 significant figures.</li>
+</ol>
+</div>
+
+<div class="sheet">
+<div class="scroll">
+<table class="layout">
+  <tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+  <tr><th>1</th><td>n</td><td>number of matchings (n!)</td><td>seconds at 1 billion per second</td><td>years</td></tr>
+  <tr><th>2</th><td>1</td><td>=FACT(A2)</td><td>=B2/1000000000</td><td>=C2/(60*60*24*365)</td></tr>
+  <tr><th>3</th><td>2</td><td>=FACT(A3)</td><td>=B3/1000000000</td><td>=C3/(60*60*24*365)</td></tr>
+  <tr><th>4</th><td>3</td><td>=FACT(A4)</td><td>=B4/1000000000</td><td>=C4/(60*60*24*365)</td></tr>
+  <tr><th>…</th><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+</table>
+</div>
+<p class="small">Row 2 holds the first formulas. Fill columns B, C and D down to row 26, and type n = 1 to 25 in column A (or put =A2+1 in A3 and fill down). The download and the copy button give all 25 rows. These formulas were not tested in Excel or Google Sheets.</p>
+<button type="button" id="dlCsv">Download CSV</button>
+<button type="button" id="copyLayout">Copy layout to clipboard</button>
+<span id="copyMsg" class="small" aria-live="polite"></span>
+</div>
+
+<details class="solution">
+<summary>Solution to Task 6</summary>
+<div class="scroll">
+<table class="num compact">
+  <tr><th>n</th><th>n!</th><th>Years</th></tr>
+  <tr><td>10</td><td>3,628,800</td><td>0.000 000 000 1</td></tr>
+  <tr><td>15</td><td>1,307,674,368,000</td><td>0.000 04</td></tr>
+  <tr><td>17</td><td>355,687,428,096,000</td><td>0.0113</td></tr>
+  <tr><td>18</td><td>6,402,373,705,728,000</td><td>0.203</td></tr>
+  <tr><td>19</td><td>121,645,100,408,832,000</td><td>3.86</td></tr>
+  <tr><td>20</td><td>2,432,902,008,176,640,000</td><td>77.1</td></tr>
+  <tr><td>25</td><td>about 1.55 × 10<sup>25</sup></td><td>492,000,000</td></tr>
+</table>
+</div>
+<p>(a) <strong>n = 19</strong>. For n = 18 the time is 6,402,374 seconds, or 0.203 years (about 74 days). For n = 19 it is 121,645,100 seconds, or 3.86 years.</p>
+<p>(b) n = 20: about <strong>77.1 years</strong>. n = 25: about <strong>492 million years</strong>. A spreadsheet may show these in scientific notation, for example 4.92E+08 for 492,000,000. A spreadsheet keeps only the first 15 digits of a number, so it shows 25! as 1.55112E+25 (or 15511210043331000000000000) and not the exact value 15,511,210,043,330,985,984,000,000.</p>
+<p>Going from n to n + 1 multiplies the count by n + 1, so each extra applicant makes the job many times longer. The 2026 Match filled 41,482 positions [2]. A made-up version with 41,482 applicants and 41,482 one-position programs would have 41,482! matchings, a number with 173,546 digits. Trying them all is out of the question. The NRMP does not search through matchings; its algorithm builds the matching directly from the ranked lists [4, 5].</p>
+</details>
+
+<!-- ============================================================ -->
+<h2>Data used in this module</h2>
+
+<p>The examples, names and figures from this lecture, collected for reuse in Lectures 2 and 3 of this module. Examples 1 and 2 are made up.</p>
+
+<h3>Notation</h3>
+<ul>
+  <li>A pair is written (applicant, program). A matching is a set of pairs, named M1, M2, and so on.</li>
+  <li>Rank: 1 for 1st choice, 2 for 2nd choice, and so on. Rank total: the sum of the ranks all people give their partners.</li>
+  <li>Blocking pair, stable, unstable: as defined in Sections 3 and 4. A check is one comparison in step 2 of the checking method.</li>
+</ul>
+
+<h3>Example 1 (3 applicants, 3 programs; lists best first)</h3>
+<div class="scroll">
+<table class="compact">
+  <tr><th>Applicant</th><th>List</th><th>Program</th><th>List</th></tr>
+  <tr><td>A</td><td>X, Y, Z</td><td>X</td><td>A, C, B</td></tr>
+  <tr><td>B</td><td>Z, X, Y</td><td>Y</td><td>C, B, A</td></tr>
+  <tr><td>C</td><td>Y, Z, X</td><td>Z</td><td>C, A, B</td></tr>
+</table>
+</div>
+<div class="scroll">
+<table class="compact">
+  <tr><th>Name</th><th>Matching</th><th>Blocking pairs</th></tr>
+  <tr><td>M1</td><td>{(A,&nbsp;X), (B,&nbsp;Y), (C,&nbsp;Z)}</td><td>(C,&nbsp;Y)</td></tr>
+  <tr><td>M2</td><td>{(A,&nbsp;Y), (B,&nbsp;X), (C,&nbsp;Z)}</td><td>(A,&nbsp;X), (C,&nbsp;Y)</td></tr>
+  <tr><td>M3</td><td>{(A,&nbsp;Y), (B,&nbsp;Z), (C,&nbsp;X)}</td><td>(A,&nbsp;X), (C,&nbsp;Y), (C,&nbsp;Z)</td></tr>
+  <tr><td>M4</td><td>{(A,&nbsp;X), (B,&nbsp;Z), (C,&nbsp;Y)}</td><td>none: the only stable matching</td></tr>
+</table>
+</div>
+
+<h3>Example 2 (4 applicants, 4 programs; lists best first)</h3>
+<div class="scroll">
+<table class="compact">
+  <tr><th>Applicant</th><th>List</th><th>Program</th><th>List</th></tr>
+  <tr><td>A</td><td>X, Y, Z, W</td><td>W</td><td>D, A, B, C</td></tr>
+  <tr><td>B</td><td>W, X, Z, Y</td><td>X</td><td>C, A, D, B</td></tr>
+  <tr><td>C</td><td>W, Z, X, Y</td><td>Y</td><td>C, D, A, B</td></tr>
+  <tr><td>D</td><td>Z, W, X, Y</td><td>Z</td><td>D, A, B, C</td></tr>
+</table>
+</div>
+<div class="scroll">
+<table class="compact">
+  <tr><th>Name</th><th>Matching</th><th>Rank total</th><th>Blocking pairs</th></tr>
+  <tr><td>M5</td><td>{(A,&nbsp;X), (B,&nbsp;W), (C,&nbsp;Y), (D,&nbsp;Z)}</td><td>14 (lowest)</td><td>(C,&nbsp;X)</td></tr>
+  <tr><td>M6</td><td>{(A,&nbsp;Y), (B,&nbsp;W), (C,&nbsp;X), (D,&nbsp;Z)}</td><td>15</td><td>none: the only stable matching</td></tr>
+</table>
+</div>
+
+<h3>NRMP 2026 Main Residency Match figures</h3>
+<div class="scroll">
+<table class="compact">
+  <tr><th class="left">Figure</th><th>Value</th><th>Source</th></tr>
+  <tr><td class="left">Applicants registered</td><td class="num">53,373</td><td>[1, 2]</td></tr>
+  <tr><td class="left">Active applicants (sent a ranked list)</td><td class="num">48,050</td><td>[1, 2]</td></tr>
+  <tr><td class="left">Active applicants matched to a PGY-1 position</td><td class="num">38,354</td><td>[1]</td></tr>
+  <tr><td class="left">Positions offered (PGY-1 and PGY-2)</td><td class="num">44,344</td><td>[1, 2]</td></tr>
+  <tr><td class="left">Positions filled (PGY-1 and PGY-2)</td><td class="num">41,482</td><td>[1, 2]</td></tr>
+  <tr><td class="left">Percent of positions filled</td><td class="num">93.5%</td><td>[1]</td></tr>
+  <tr><td class="left">Positions unfilled</td><td class="num">2,862</td><td>[1]</td></tr>
+  <tr><td class="left">Program tracks</td><td class="num">6,809</td><td>[1]</td></tr>
+  <tr><td class="left">Percent of active applicants matched to PGY-1 (computed)</td><td class="num">79.8%</td><td>Task 1</td></tr>
+</table>
+</div>
+<p>Made up: a computer that checks one billion matchings per second (Section 7).</p>
+
+<!-- ============================================================ -->
+<h2>Sources</h2>
+<ol class="sources">
+  <li>National Resident Matching Program. "NRMP Releases Results of the 2026 Main Residency Match for More Than 38,000 Future Residents." News release, March 20, 2026. Quoted: "Of the 53,373 applicants registered, 48,050 certified a rank order list"; "Among active applicants, 38,354 matched to a post graduate year-1 ("PGY-1") position"; "Of the 44,344 training positions offered, 93.5 percent (41,482) filled"; "Across both PGY-1 and PGY-2, the Match filled a total of 41,482 positions."; "2,862 positions across 941 programs remained unfilled"; "6,809 certified program tracks". https://www.nrmp.org/about/news/2026/03/nrmp-releases-results-of-the-2026-main-residency-match-for-more-than-38000-future-residents/ (accessed October 4, 2026).</li>
+  <li>National Resident Matching Program. <em>Results and Data: 2026 Main Residency Match.</em> May 2026. Quoted: "The 2026 Main Residency Match was the largest in NRMP history when measured by the number of PGY-1 and PGY-2 positions offered (44,344) and filled (41,482)." "There were 48,050 active applicants … An active applicant is one who submits a certified rank order list of programs." "Therefore, some individuals are counted multiple times, for example, if they matched to a PGY-1 and a PGY-2 position." https://www.nrmp.org/match-data/results-and-data-2026-main-residency-match/ (accessed October 4, 2026).</li>
+  <li>The Royal Swedish Academy of Sciences. "The Prize in Economic Sciences 2012." Press release, October 15, 2012. Quoted: "for the theory of stable allocations and the practice of market design"; "A key issue is to ensure that a matching is stable in the sense that two agents cannot be found who would prefer each other over their current counterparts."; the Gale-Shapley algorithm methods "always ensure a stable matching." https://www.nobelprize.org/prizes/economic-sciences/2012/press-release/ (accessed October 4, 2026).</li>
+  <li>The Royal Swedish Academy of Sciences. "Popular information on The Prize in Economic Sciences 2012." October 2012. Quoted: "In a paper from 1984, Alvin Roth studied the algorithm used by this clearinghouse and discovered that it was closely related to the Gale-Shapley algorithm." "He then hypothesized that the fundamental reason for the success of the NRMP was that it produced stable matches." "In 1995, Roth was asked to help design an improved algorithm … Along with Elliott Peranson, he formulated an algorithm, built on applicant proposals and designed to accommodate couples." "The new algorithm, adopted by the NRMP in 1997, has worked well." https://www.nobelprize.org/prizes/economic-sciences/2012/popular-information/ (accessed October 4, 2026).</li>
+  <li>National Resident Matching Program. "How It Works" (the matching algorithm). Undated web page. Quoted: "The NRMP uses a computerized mathematical algorithm, the 'matching algorithm,' to place applicants into the most preferred residency and fellowship positions at programs that also prefer them"; the process is "applicant-proposing." https://www.nrmp.org/intro-to-the-match/how-matching-algorithm-works/ (accessed October 4, 2026).</li>
+</ol>
+
+</main>
+
+<script>
+(function () {
+  // Example 2 preferences (made up), best first.
+  var APPS = ["A", "B", "C", "D"];
+  var PROGS = ["W", "X", "Y", "Z"];
+  var appPref = { A: ["X","Y","Z","W"], B: ["W","X","Z","Y"], C: ["W","Z","X","Y"], D: ["Z","W","X","Y"] };
+  var progPref = { W: ["D","A","B","C"], X: ["C","A","D","B"], Y: ["C","D","A","B"], Z: ["D","A","B","C"] };
+
+  var picks = document.getElementById("picks");
+  var out = document.getElementById("checkerOut");
+  var selects = {};
+
+  APPS.forEach(function (a) {
+    var label = document.createElement("label");
+    label.textContent = a + " goes to";
+    var sel = document.createElement("select");
+    sel.setAttribute("aria-label", "Program for applicant " + a);
+    var blank = document.createElement("option");
+    blank.value = ""; blank.textContent = "pick";
+    sel.appendChild(blank);
+    PROGS.forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p; o.textContent = p;
+      sel.appendChild(o);
+    });
+    sel.value = "";
+    sel.addEventListener("change", update);
+    label.appendChild(sel);
+    picks.appendChild(label);
+    selects[a] = sel;
+  });
+
+  document.getElementById("clearPicks").addEventListener("click", function () {
+    APPS.forEach(function (a) { selects[a].value = ""; });
+    update();
+  });
+
+  function rank(list, x) { return list.indexOf(x) + 1; }
+
+  function update() {
+    var m = {};
+    APPS.forEach(function (a) { m[a] = selects[a].value; });
+    var missing = APPS.filter(function (a) { return !m[a]; });
+    if (missing.length) {
+      out.innerHTML = '<p class="small">Pick a program for ' + missing.join(", ") + '.</p>';
+      return;
+    }
+    var used = {};
+    var dup = [];
+    APPS.forEach(function (a) {
+      if (used[m[a]]) { if (dup.indexOf(m[a]) < 0) dup.push(m[a]); }
+      used[m[a]] = true;
+    });
+    if (dup.length) {
+      out.innerHTML = '<p class="verdict yes">Not a matching: program ' + dup.join(", ") +
+        ' is chosen more than once. Each program must be in exactly one pair.</p>';
+      return;
+    }
+    var partnerOf = {};
+    APPS.forEach(function (a) { partnerOf[m[a]] = a; });
+
+    var html = '<div class="scroll"><table><tr><th>Pair</th><th>Applicant\'s rank of partner</th><th>Program\'s rank of partner</th></tr>';
+    var sumA = 0, sumP = 0;
+    APPS.forEach(function (a) {
+      var ra = rank(appPref[a], m[a]), rp = rank(progPref[m[a]], a);
+      sumA += ra; sumP += rp;
+      html += "<tr><td>(" + a + ", " + m[a] + ")</td><td>" + ra + "</td><td>" + rp + "</td></tr>";
+    });
+    html += "<tr><th>Sum</th><th>" + sumA + "</th><th>" + sumP + "</th></tr></table></div>";
+    html += "<p>Rank total: " + sumA + " + " + sumP + " = <strong>" + (sumA + sumP) + "</strong>. " +
+      "Applicants with their 1st choice: <strong>" +
+      APPS.filter(function (a) { return appPref[a][0] === m[a]; }).length + "</strong>.</p>";
+
+    var blocking = [];
+    APPS.forEach(function (a) {
+      var row = appPref[a];
+      row.slice(0, row.indexOf(m[a])).forEach(function (p) {
+        var cur = partnerOf[p];
+        if (progPref[p].indexOf(a) < progPref[p].indexOf(cur)) {
+          blocking.push("(" + a + ", " + p + "): " + a + " prefers " + p + " to " + m[a] +
+            ", and " + p + " prefers " + a + " to " + cur + ".");
+        }
+      });
+    });
+    if (blocking.length) {
+      html += '<p class="verdict yes">Unstable. Blocking pairs: ' + blocking.length + "</p><ul>" +
+        blocking.map(function (b) { return "<li>" + b + "</li>"; }).join("") + "</ul>";
+    } else {
+      html += '<p class="verdict no">No blocking pair. This matching is stable.</p>';
+    }
+    out.innerHTML = html;
+  }
+  update();
+
+  // Spreadsheet layout for Task 5
+  var header = ["n", "number of matchings (n!)", "seconds at 1 billion per second", "years"];
+  function rows() {
+    var r = [];
+    for (var n = 1; n <= 25; n++) {
+      var i = n + 1;
+      r.push([String(n), "=FACT(A" + i + ")", "=B" + i + "/1000000000", "=C" + i + "/(60*60*24*365)"]);
+    }
+    return r;
+  }
+  document.getElementById("dlCsv").addEventListener("click", function () {
+    var lines = [header.join(",")].concat(rows().map(function (r) { return r.join(","); }));
+    var blob = new Blob([lines.join("\r\n") + "\r\n"], { type: "text/csv" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url; link.download = "matchings-factorial.csv";
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+  document.getElementById("copyLayout").addEventListener("click", function () {
+    var text = [header.join("\t")].concat(rows().map(function (r) { return r.join("\t"); })).join("\n");
+    var msg = document.getElementById("copyMsg");
+    function done() { msg.textContent = "Copied. Paste into cell A1."; }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { msg.textContent = "Copy failed. Select the layout text by hand."; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-08/8-3-misleading-graphs-and-analyses/" style="color:inherit">&larr; 8.3 Misleading graphs and analyses</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-09/9-2-the-deferred-acceptance-algorithm/" style="color:inherit">9.2 The deferred acceptance algorithm &rarr;</a></nav>
+</body>
+</html>

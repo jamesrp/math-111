@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deferred Acceptance Algorithm</title>
+<!-- Built from checks/lecture.template.html by checks/tables.py; every number is computed in checks/lecture_numbers.py (output in checks/lecture_numbers.out). -->
+<style>
+:root {
+  --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #d8d5cc;
+  --accent: #2f5d8a; --task-bg: #eef3f8; --task-border: #2f5d8a;
+  --sol-bg: #f6f5f0; --new: #fde9b8; --card: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1c1e; --fg: #e9e7e1; --muted: #a9a69e; --rule: #3a3a3c;
+    --accent: #8db6e0; --task-bg: #1f2a36; --task-border: #8db6e0;
+    --sol-bg: #242426; --new: #5a4a1c; --card: #232325;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1c1e; --fg: #e9e7e1; --muted: #a9a69e; --rule: #3a3a3c;
+  --accent: #8db6e0; --task-bg: #1f2a36; --task-border: #8db6e0;
+  --sol-bg: #242426; --new: #5a4a1c; --card: #232325;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 18px/1.55 Georgia, "Times New Roman", serif;
+}
+main { max-width: 52rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+.course { font: 600 0.85rem/1.4 system-ui, sans-serif; color: var(--muted); letter-spacing: 0.02em; }
+h1 { font: 700 2rem/1.2 system-ui, sans-serif; margin: 0.3rem 0 1.5rem; }
+h2 { font: 700 1.35rem/1.3 system-ui, sans-serif; margin: 2.4rem 0 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--rule); }
+h3 { font: 700 1.05rem/1.3 system-ui, sans-serif; margin: 1.4rem 0 0.4rem; }
+a { color: var(--accent); }
+ol.steps > li { margin-bottom: 0.5rem; }
+.tw { overflow-x: auto; margin: 0.8rem 0; }
+table { border-collapse: collapse; font: 0.95rem/1.35 system-ui, sans-serif; }
+caption { text-align: left; font-weight: 600; padding-bottom: 0.3rem; color: var(--muted); }
+th, td { border: 1px solid var(--rule); padding: 0.35rem 0.6rem; text-align: center; }
+thead th { background: var(--sol-bg); }
+table.rounds td:nth-child(2) { text-align: left; white-space: nowrap; }
+table.rounds td.new { background: var(--new); font-weight: 700; }
+table.rounds tbody tr td { min-width: 2.6rem; height: 2rem; }
+table.wide td { text-align: left; }
+table.wide td:first-child { white-space: nowrap; }
+.pair { display: flex; flex-wrap: wrap; gap: 0 2rem; }
+.task {
+  border: 2px solid var(--task-border); background: var(--task-bg);
+  border-radius: 6px; padding: 0.8rem 1rem; margin: 1.4rem 0 0.4rem;
+}
+.task .label { font: 700 1rem/1.3 system-ui, sans-serif; color: var(--accent); margin-bottom: 0.4rem; }
+.task p:last-child, .task ol:last-child { margin-bottom: 0; }
+details {
+  border: 1px solid var(--rule); background: var(--sol-bg); border-radius: 6px;
+  padding: 0.5rem 1rem; margin: 0 0 1.4rem;
+}
+summary { cursor: pointer; font: 600 0.95rem/1.4 system-ui, sans-serif; color: var(--accent); }
+details[open] summary { margin-bottom: 0.5rem; }
+.key { font-family: system-ui, sans-serif; font-size: 0.85rem; color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.6rem; margin: 0.8rem 0; }
+.card { border: 1px dashed var(--muted); background: var(--card); padding: 0.6rem; font: 1rem/1.4 system-ui, sans-serif; border-radius: 4px; }
+.card.prog { border-style: solid; }
+.calc { font-family: system-ui, sans-serif; }
+ol.sources li { margin-bottom: 0.6rem; overflow-wrap: anywhere; }
+blockquote { margin: 0.6rem 0; padding-left: 1rem; border-left: 3px solid var(--rule); color: var(--muted); }
+.printbtn { font: 600 0.9rem/1.2 system-ui, sans-serif; color: var(--accent); background: var(--card); border: 1px solid var(--accent); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; }
+@media (min-width: 601px) {
+  caption { white-space: nowrap; }
+}
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  table.rounds td:nth-child(2) { white-space: normal; }
+  table.rounds tbody tr td { min-width: 1.3rem; }
+  table.rounds { font-size: 0.8rem; }
+  table.rounds th, table.rounds td { padding: 0.25rem 0.3rem; }
+  table.wide td:first-child { white-space: normal; }
+  .task, details { padding-left: 0.6rem; padding-right: 0.6rem; }
+  h1 { font-size: 1.6rem; }
+  table { font-size: 0.85rem; }
+  th, td { padding: 0.3rem 0.4rem; }
+}
+@media print {
+  .task, details { break-inside: avoid; }
+  .printbtn { display: none; }
+  body.print-cards main > :not(#cards) { display: none; }
+  body.print-cards .cards { grid-template-columns: 1fr 1fr; gap: 0.5cm; }
+  body.print-cards .card { font-size: 16pt; padding: 0.6cm; break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-09/9-1-stable-matchings/" style="color:inherit">&larr; 9.1 Stable matchings</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-09/9-3-why-the-algorithm-works/" style="color:inherit">9.3 Why the algorithm works &rarr;</a></nav>
+
+<main>
+
+<div class="course">Math 111 · Module: Stable matching (week 9) · Lecture 2 of 3</div>
+<h1>The deferred acceptance algorithm</h1>
+
+<h2>1. Checking every matching takes too long</h2>
+
+<p>Lecture 9.1 started from the 2026 Main Residency Match of the National Resident Matching Program (NRMP). Of the 48,050 active applicants, 38,354 matched to a first-year (PGY-1) position, which is 79.8% (Lecture 9.1, Task 1). In all, the Match filled 41,482 positions [1]. A computer turned the ranked lists of all these applicants and programs into one matching.</p>
+
+<p>The terms from Lecture 9.1: a <b>matching</b> pairs every applicant with exactly one program. A <b>blocking pair</b> is an applicant and a program, not paired with each other, where each prefers the other to their own partner. A matching is <b>stable</b> when it has no blocking pair. The checking method of Lecture 9.1 needs up to n × (n − 1) checks for one matching of n applicants and n programs, so up to 4 × 3 = 12 checks with 4 applicants. To find a stable matching by trying matchings one after another, we may have to check many of the n! matchings: 3! = 6 for Example 1 and 4! = 24 for Example 2.</p>
+
+<div class="task">
+<div class="label">Task 1 (about 3 minutes, calculator)</div>
+<p>Suppose it takes 1 minute to check one matching of 10 applicants and 10 programs for blocking pairs. (The 1 minute is made up.) Working without a break, how long does it take to check every matching?</p>
+<p>Produce: the number of matchings, and the time in years, rounded to one decimal place. Use 365 days in a year.</p>
+</div>
+<details>
+<summary>Solution to Task 1</summary>
+<p class="calc">Number of matchings: 10! = 10 × 9 × 8 × 7 × 6 × 5 × 4 × 3 × 2 × 1 = 3,628,800.<br>
+Minutes: 3,628,800.<br>
+Hours: 3,628,800 ÷ 60 = 60,480.<br>
+Days: 60,480 ÷ 24 = 2,520.<br>
+Years: 2,520 ÷ 365 ≈ 6.9.</p>
+<p>About 6.9 years for only 10 applicants. Lecture 9.1, Section 7 used a made-up version of the 2026 Match with 41,482 applicants and 41,482 programs with one position each. It has 41,482! matchings, a whole number with 173,546 digits.</p>
+</details>
+
+<p>Checking every matching is hopeless at that size. We need a procedure that builds a stable matching directly, step by step, and that a person could carry out by hand on a small example.</p>
+
+<h2>2. The deferred acceptance algorithm</h2>
+
+<p>An <b>algorithm</b> is a list of steps that can be followed exactly, without making any choices of your own. David Gale and Lloyd Shapley published the algorithm below in 1962 [2]. They called it the "deferred-acceptance" procedure.</p>
+
+<p>In it, applicants <b>propose</b> to programs. A program that receives a proposal does not accept it right away. It <b>holds</b> the applicant: it keeps that applicant for now, and drops them later if an applicant it ranks higher proposes. Gale and Shapley describe this as keeping the applicant "on a string to allow for the possibility that someone better may come along later" [2]. Acceptance is deferred until the very end. That is where the name comes from.</p>
+
+<p>Simplification, the same as in Lecture 9.1: there are the same number of applicants and programs, each program has one position, and everyone ranks everyone on the other side. Section 8 says how the real residency match differs.</p>
+
+<h3>The steps</h3>
+<ol class="steps">
+<li>Every applicant proposes to the first program on their list.</li>
+<li>Each program looks at the applicants who proposed to it this round, together with the applicant it is holding, if any. It holds the one it ranks highest and rejects all the others.</li>
+<li>If nobody was rejected in this round, stop. Each program is matched with the applicant it holds.</li>
+<li>Otherwise, every applicant rejected in this round proposes to the next program on their list, the highest one that has not yet rejected them. Go back to step 2.</li>
+</ol>
+
+<p>A <b>round</b> is one set of proposals (step 1 or step 4) followed by steps 2 and 3. We record the rounds in a <b>round table</b>, with one row per round. A row lists the proposals made in that round, the applicant each program holds at the end of the round, and who was rejected. Each program has a column headed by its letter. A shaded cell marks a program that holds a new applicant in that round, and a dash (–) means the program holds nobody yet.</p>
+
+<h2>3. Running the algorithm on the examples from Lecture 9.1</h2>
+
+<h3>Example 1</h3>
+
+<p>These are the lists of Example 1 from Lecture 9.1.</p>
+
+<div class="pair">
+<div class="tw"><table class="pref"><caption>Example 1: applicants' rankings</caption><thead><tr><th>Applicant</th><th>1st</th><th>2nd</th><th>3rd</th></tr></thead><tbody>
+<tr><th>A</th><td>X</td><td>Y</td><td>Z</td></tr>
+<tr><th>B</th><td>Z</td><td>X</td><td>Y</td></tr>
+<tr><th>C</th><td>Y</td><td>Z</td><td>X</td></tr>
+</tbody></table></div>
+<div class="tw"><table class="pref"><caption>Example 1: programs' rankings</caption><thead><tr><th>Program</th><th>1st</th><th>2nd</th><th>3rd</th></tr></thead><tbody>
+<tr><th>X</th><td>A</td><td>C</td><td>B</td></tr>
+<tr><th>Y</th><td>C</td><td>B</td><td>A</td></tr>
+<tr><th>Z</th><td>C</td><td>A</td><td>B</td></tr>
+</tbody></table></div></div>
+
+<p><b>Round 1.</b> A proposes to X, B to Z, C to Y. Each program receives exactly one proposal, so each holds that applicant and nobody is rejected. The algorithm stops after 1 round and 3 proposals.</p>
+
+<p>Result: A with X, B with Z, C with Y. This is M4 = {(A, X), (B, Z), (C, Y)}, which Lecture 9.1 found to be the only stable matching of Example 1. When every applicant has a different first choice, the algorithm stops in round 1.</p>
+
+<h3>Example 2</h3>
+
+<p>These are the lists of Example 2 from Lecture 9.1. In Lecture 9.1, Task 5, the stable matching M6 was found by trial with the matching checker.</p>
+
+<div class="pair">
+<div class="tw"><table class="pref"><caption>Example 2: applicants' rankings</caption><thead><tr><th>Applicant</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr></thead><tbody>
+<tr><th>A</th><td>X</td><td>Y</td><td>Z</td><td>W</td></tr>
+<tr><th>B</th><td>W</td><td>X</td><td>Z</td><td>Y</td></tr>
+<tr><th>C</th><td>W</td><td>Z</td><td>X</td><td>Y</td></tr>
+<tr><th>D</th><td>Z</td><td>W</td><td>X</td><td>Y</td></tr>
+</tbody></table></div>
+<div class="tw"><table class="pref"><caption>Example 2: programs' rankings</caption><thead><tr><th>Program</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr></thead><tbody>
+<tr><th>W</th><td>D</td><td>A</td><td>B</td><td>C</td></tr>
+<tr><th>X</th><td>C</td><td>A</td><td>D</td><td>B</td></tr>
+<tr><th>Y</th><td>C</td><td>D</td><td>A</td><td>B</td></tr>
+<tr><th>Z</th><td>D</td><td>A</td><td>B</td><td>C</td></tr>
+</tbody></table></div></div>
+
+<p><b>Round 1.</b> Each applicant proposes to their first choice: A to X, B to W, C to W, D to Z. Program X has only A, so X holds A. Program Z has only D, so Z holds D. Program W has B and C. W's list is D, A, B, C, so W ranks B above C. W holds B and rejects C. Y has no proposal.</p>
+
+<p><b>Round 2.</b> Only C was rejected, so only C proposes, to the second program on C's list, Z. Z compares C with D, whom it is holding. Z's list is D, A, B, C, so Z keeps D and rejects C.</p>
+
+<p><b>Round 3.</b> C proposes to the third program on C's list, X. X compares the new proposer C with A, whom it is holding. X's list is C, A, D, B, so X prefers C. X holds C and rejects A. A program can drop an applicant it was holding. This is the deferred acceptance.</p>
+
+<p><b>Round 4.</b> A proposes to the second program on A's list, Y. Y holds nobody, so it holds A. Nobody was rejected, so the algorithm stops.</p>
+
+<div class="tw"><table class="rounds"><caption>Example 2: round table</caption><thead><tr><th>Round</th><th>Proposals</th><th>W</th><th>X</th><th>Y</th><th>Z</th><th>Rejected</th></tr></thead><tbody>
+<tr><td>1</td><td>A&rarr;X, B&rarr;W, C&rarr;W, D&rarr;Z</td><td class="new">B</td><td class="new">A</td><td>&ndash;</td><td class="new">D</td><td>C</td></tr>
+<tr><td>2</td><td>C&rarr;Z</td><td>B</td><td>A</td><td>&ndash;</td><td>D</td><td>C</td></tr>
+<tr><td>3</td><td>C&rarr;X</td><td>B</td><td class="new">C</td><td>&ndash;</td><td>D</td><td>A</td></tr>
+<tr><td>4</td><td>A&rarr;Y</td><td>B</td><td>C</td><td class="new">A</td><td>D</td><td>nobody</td></tr>
+</tbody></table></div>
+
+<p>Result: A with Y, B with W, C with X, D with Z. This is M6 = {(A, Y), (B, W), (C, X), (D, Z)}, the only stable matching of Example 2. The algorithm reached it in 4 rounds and 7 proposals, with no trial and error.</p>
+
+<p>Two facts about the rounds. First, each applicant moves down their own list, one program at a time, and never goes back up: C went from W to Z to X, and A went from X to Y. Second, a program that holds someone always holds someone after that, and every change is to an applicant it ranks higher: X went from A to C. Sections 5 and 6 use these two facts.</p>
+
+<h2>4. Running the algorithm on a new example</h2>
+
+<p>Example 3 is new and made up for this lecture. It uses the same letters as Example 2, with different lists.</p>
+
+<div class="task">
+<div class="label">Task 2 (about 8 minutes, paper and pencil)</div>
+<p>Run the deferred acceptance algorithm on Example 3. Copy the empty round table (you may not need every row) and fill in one row per round.</p>
+<div class="pair">
+<div class="tw"><table class="pref"><caption>Example 3: applicants' rankings</caption><thead><tr><th>Applicant</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr></thead><tbody>
+<tr><th>A</th><td>X</td><td>Y</td><td>W</td><td>Z</td></tr>
+<tr><th>B</th><td>X</td><td>Y</td><td>Z</td><td>W</td></tr>
+<tr><th>C</th><td>Z</td><td>Y</td><td>X</td><td>W</td></tr>
+<tr><th>D</th><td>Z</td><td>X</td><td>Y</td><td>W</td></tr>
+</tbody></table></div>
+<div class="tw"><table class="pref"><caption>Example 3: programs' rankings</caption><thead><tr><th>Program</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr></thead><tbody>
+<tr><th>W</th><td>A</td><td>D</td><td>B</td><td>C</td></tr>
+<tr><th>X</th><td>D</td><td>C</td><td>A</td><td>B</td></tr>
+<tr><th>Y</th><td>C</td><td>B</td><td>D</td><td>A</td></tr>
+<tr><th>Z</th><td>A</td><td>B</td><td>D</td><td>C</td></tr>
+</tbody></table></div></div>
+<div class="tw"><table class="rounds"><caption>Example 3: round table to fill in</caption><thead><tr><th>Round</th><th>Proposals</th><th>W</th><th>X</th><th>Y</th><th>Z</th><th>Rejected</th></tr></thead><tbody>
+<tr><td>1</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>3</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>4</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>5</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>6</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>7</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</tbody></table></div>
+<p>Produce: the completed round table, the final matching, and the total number of proposals.</p>
+</div>
+<details>
+<summary>Solution to Task 2</summary>
+<div class="tw"><table class="rounds"><caption>Example 3: round table</caption><thead><tr><th>Round</th><th>Proposals</th><th>W</th><th>X</th><th>Y</th><th>Z</th><th>Rejected</th></tr></thead><tbody>
+<tr><td>1</td><td>A&rarr;X, B&rarr;X, C&rarr;Z, D&rarr;Z</td><td>&ndash;</td><td class="new">A</td><td>&ndash;</td><td class="new">D</td><td>B, C</td></tr>
+<tr><td>2</td><td>B&rarr;Y, C&rarr;Y</td><td>&ndash;</td><td>A</td><td class="new">C</td><td>D</td><td>B</td></tr>
+<tr><td>3</td><td>B&rarr;Z</td><td>&ndash;</td><td>A</td><td>C</td><td class="new">B</td><td>D</td></tr>
+<tr><td>4</td><td>D&rarr;X</td><td>&ndash;</td><td class="new">D</td><td>C</td><td>B</td><td>A</td></tr>
+<tr><td>5</td><td>A&rarr;Y</td><td>&ndash;</td><td>D</td><td>C</td><td>B</td><td>A</td></tr>
+<tr><td>6</td><td>A&rarr;W</td><td class="new">A</td><td>D</td><td>C</td><td>B</td><td>nobody</td></tr>
+</tbody></table></div>
+<p>Round 1: A and B both propose to X. X's list is D, C, A, B, so X holds A and rejects B. C and D both propose to Z. Z's list is A, B, D, C, so Z holds D and rejects C.</p>
+<p>Round 2: B and C both propose to their second choice, Y. Y's list is C, B, D, A, so Y holds C and rejects B.</p>
+<p>Round 3: B proposes to their third choice, Z. Z ranks B above D, whom it holds, so Z holds B and rejects D.</p>
+<p>Round 4: D proposes to their second choice, X. X ranks D above A, so X holds D and rejects A.</p>
+<p>Round 5: A proposes to their second choice, Y. Y ranks C above A, so Y keeps C and rejects A.</p>
+<p>Round 6: A proposes to their third choice, W. W holds nobody, so it holds A. Nobody was rejected. Stop.</p>
+<p>Final matching: M7 = {(A, W), (B, Z), (C, Y), (D, X)}. Total proposals: 4 + 2 + 1 + 1 + 1 + 1 = 10, in 6 rounds.</p>
+</details>
+
+<h2>5. Why the algorithm always stops</h2>
+
+<p>Each applicant goes down their own list and never proposes to the same program twice. An applicant has n programs on their list, so an applicant makes at most n proposals. There are n applicants, so the total number of proposals is at most</p>
+<p style="text-align:center">n × n = n<sup>2</sup>.</p>
+<p>Every round except the last has at least one rejection, and every rejection leads to a new proposal in the next round. So the algorithm cannot run forever: after at most n<sup>2</sup> proposals there is nothing left to propose. In the examples so far, Example 1 took 3 proposals, below 3<sup>2</sup> = 9. Example 2 took 7 and Example 3 took 10, both below 4<sup>2</sup> = 16.</p>
+
+<p>It remains to check that no applicant is rejected by every program and runs off the end of their list. Once a program receives a proposal, it holds someone from then on. If some applicant had been rejected by all n programs, then all n programs would be holding someone other than that applicant. That needs n other applicants, and there are only n − 1. So every applicant ends up held by a program, and since there are n of each, every program ends up with an applicant.</p>
+
+<div class="task">
+<div class="label">Task 3 (about 2 minutes, calculator)</div>
+<p>Use the made-up version of the 2026 Match from Lecture 9.1: 41,482 applicants and 41,482 programs with one position each. (41,482 is the number of positions filled in 2026 [1]. One position per program is a simplification: real programs have several.)</p>
+<p>Produce: n<sup>2</sup>, the largest number of proposals the algorithm could need, with its number of digits; and the number of seconds a computer needs for that many proposals at one billion (1,000,000,000) proposals per second. The speed is the made-up one from Lecture 9.1, Section 7.</p>
+</div>
+<details>
+<summary>Solution to Task 3</summary>
+<p class="calc">41,482<sup>2</sup> = 41,482 × 41,482 = 1,720,756,324, which has 10 digits.<br>
+1,720,756,324 ÷ 1,000,000,000 ≈ 1.7 seconds.</p>
+<p>The number of matchings, 41,482!, has 173,546 digits. The number of proposals has at most 10 digits, and at the same made-up speed they take under 2 seconds.</p>
+</details>
+
+<h2>6. Why the result has no blocking pair</h2>
+
+<p>The algorithm stops with a matching. That matching is stable. The argument uses the two facts from section 3, and follows Gale and Shapley [2].</p>
+
+<ul>
+<li><b>Fact 1: Applicants go down their lists.</b> An applicant proposes in order, starting from the top. So every program that an applicant ranks above their final program has already received a proposal from that applicant and rejected it.</li>
+<li><b>Fact 2: Programs only trade up.</b> A program drops the applicant it holds only for one it ranks higher. So the applicant a program ends with is ranked at least as high as every applicant it ever held or rejected.</li>
+</ul>
+
+<p>Now take any applicant and any program that are not matched to each other. Call them applicant <i>a</i> and program <i>P</i>.</p>
+<ul>
+<li>If <i>a</i> ranks their own final program above <i>P</i>, then <i>a</i> does not want to switch, and <i>a</i> and <i>P</i> are not a blocking pair.</li>
+<li>If <i>a</i> ranks <i>P</i> above their own final program, then by Fact 1, <i>a</i> proposed to <i>P</i> at some round and <i>P</i> rejected <i>a</i>. At that moment <i>P</i> held an applicant it ranked above <i>a</i>. By Fact 2, <i>P</i> ends with an applicant it ranks at least that high, so above <i>a</i>. Then <i>P</i> does not want to switch, and again <i>a</i> and <i>P</i> are not a blocking pair.</li>
+</ul>
+<p>Every pair falls in one of the two cases, so no pair blocks. The matching is stable. Since the algorithm always stops, a stable matching always exists. Gale and Shapley stated this as their Theorem 1: "There always exists a stable set of marriages" [2]. They wrote the problem as men and women marrying; the mathematics is the same for applicants and programs.</p>
+
+<h3>The argument on Example 2</h3>
+<p>The result for Example 2 was M6. B and D got their 1st choices, so they prefer no other program. A got Y, A's 2nd choice, and prefers only X. C got X, C's 3rd choice, and prefers W and Z. These are the same three checks as in Lecture 9.1, Task 5(b), now answered from the round table.</p>
+<div class="tw"><table class="wide">
+<caption>Example 2: pairs where the applicant prefers the program</caption>
+<thead><tr><th>Pair</th><th>Round the program rejected the applicant</th><th>Program's final partner</th><th>Program ranks its final partner above this applicant?</th></tr></thead>
+<tbody>
+<tr><td>A and X</td><td>3 (X held A from round 1, then took C)</td><td>C</td><td>Yes: X's list is C, A, D, B</td></tr>
+<tr><td>C and W</td><td>1</td><td>B</td><td>Yes: W's list is D, A, B, C</td></tr>
+<tr><td>C and Z</td><td>2</td><td>D</td><td>Yes: Z's list is D, A, B, C</td></tr>
+</tbody></table></div>
+<p>All other pairs have the applicant preferring their own program, so they cannot block.</p>
+
+<div class="task">
+<div class="label">Task 4 (about 5 minutes, paper and pencil)</div>
+<p>Use your round table from Task 2 and the final matching M7 = {(A, W), (B, Z), (C, Y), (D, X)} of Example 3.</p>
+<p>Produce: a table with one row for each pair (applicant, program) where the applicant ranks the program above their final program. Columns: pair; round the program rejected the applicant; the program's final partner; does the program rank its final partner above this applicant (yes or no).</p>
+</div>
+<details>
+<summary>Solution to Task 4</summary>
+<div class="tw"><table class="wide">
+<thead><tr><th>Pair</th><th>Round the program rejected the applicant</th><th>Program's final partner</th><th>Program ranks its final partner above this applicant?</th></tr></thead>
+<tbody>
+<tr><td>A and X</td><td>4</td><td>D</td><td>Yes: X's list is D, C, A, B</td></tr>
+<tr><td>A and Y</td><td>5</td><td>C</td><td>Yes: Y's list is C, B, D, A</td></tr>
+<tr><td>B and X</td><td>1</td><td>D</td><td>Yes: X's list is D, C, A, B</td></tr>
+<tr><td>B and Y</td><td>2</td><td>C</td><td>Yes: Y's list is C, B, D, A</td></tr>
+<tr><td>C and Z</td><td>1</td><td>B</td><td>Yes: Z's list is A, B, D, C</td></tr>
+<tr><td>D and Z</td><td>3</td><td>B</td><td>Yes: Z's list is A, B, D, C</td></tr>
+</tbody></table></div>
+<p>There are 6 rows. In every row the program prefers the applicant it ended with, so none of these pairs blocks. Every other pair has the applicant preferring their own program. M7 is stable.</p>
+<p>A rejection can come in a later round than the proposal. A proposed to X in round 1, and X rejected A in round 4, when D proposed. D proposed to Z in round 1, and Z rejected D in round 3, when B proposed.</p>
+</details>
+
+<h2>7. Playing the algorithm in class</h2>
+
+<p>Ten volunteers act out the algorithm on Example 4, which is new and made up: 5 applicants A to E and 5 programs V to Z. Each volunteer gets one card. Dashed cards are applicants, solid cards are programs. The sign &gt; means "ranked above".</p>
+
+<p>Before class, print the ten cards and cut them apart. The button prints only the cards, on one page. Choose the volunteers and hand out the cards while students work on Task 4.</p>
+<p><button class="printbtn" type="button" id="printcards">Print the 10 cards</button></p>
+
+<div class="cards" id="cards">
+<div class="card"><b>Applicant A</b><br>My list: W &gt; Z &gt; Y &gt; X &gt; V</div>
+<div class="card"><b>Applicant B</b><br>My list: Z &gt; V &gt; W &gt; X &gt; Y</div>
+<div class="card"><b>Applicant C</b><br>My list: W &gt; Y &gt; X &gt; Z &gt; V</div>
+<div class="card"><b>Applicant D</b><br>My list: W &gt; Z &gt; X &gt; V &gt; Y</div>
+<div class="card"><b>Applicant E</b><br>My list: V &gt; Z &gt; Y &gt; X &gt; W</div>
+<div class="card prog"><b>Program V</b><br>My list: A &gt; C &gt; B &gt; D &gt; E</div>
+<div class="card prog"><b>Program W</b><br>My list: D &gt; E &gt; A &gt; B &gt; C</div>
+<div class="card prog"><b>Program X</b><br>My list: A &gt; B &gt; D &gt; E &gt; C</div>
+<div class="card prog"><b>Program Y</b><br>My list: D &gt; C &gt; B &gt; E &gt; A</div>
+<div class="card prog"><b>Program Z</b><br>My list: E &gt; D &gt; C &gt; A &gt; B</div>
+</div>
+
+<p>How to play:</p>
+<ol class="steps">
+<li>Programs stand in a row at the front, each holding up their card. Applicants start at the side.</li>
+<li>Round 1: every applicant walks to the first program on their card.</li>
+<li>Each program reads its card, keeps the applicant it ranks highest standing next to it, and sends the others back to the side.</li>
+<li>Next round: every applicant who was just sent back walks to the next program on their card. Repeat until nobody is sent back.</li>
+</ol>
+
+<div class="task">
+<div class="label">Task 5 (about 8 minutes, printed cards, volunteers, paper and pencil)</div>
+<p>Volunteers act out the algorithm. Everyone else keeps the round table on paper while it happens, using the lists below. Then, using the argument of section 6, check the applicant who ends up lowest on their own list: for each program that applicant ranks higher, find the round it rejected them and who it ends with.</p>
+<div class="pair">
+<div class="tw"><table class="pref"><caption>Example 4: applicants' rankings</caption><thead><tr><th>Applicant</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th><th>5th</th></tr></thead><tbody>
+<tr><th>A</th><td>W</td><td>Z</td><td>Y</td><td>X</td><td>V</td></tr>
+<tr><th>B</th><td>Z</td><td>V</td><td>W</td><td>X</td><td>Y</td></tr>
+<tr><th>C</th><td>W</td><td>Y</td><td>X</td><td>Z</td><td>V</td></tr>
+<tr><th>D</th><td>W</td><td>Z</td><td>X</td><td>V</td><td>Y</td></tr>
+<tr><th>E</th><td>V</td><td>Z</td><td>Y</td><td>X</td><td>W</td></tr>
+</tbody></table></div>
+<div class="tw"><table class="pref"><caption>Example 4: programs' rankings</caption><thead><tr><th>Program</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th><th>5th</th></tr></thead><tbody>
+<tr><th>V</th><td>A</td><td>C</td><td>B</td><td>D</td><td>E</td></tr>
+<tr><th>W</th><td>D</td><td>E</td><td>A</td><td>B</td><td>C</td></tr>
+<tr><th>X</th><td>A</td><td>B</td><td>D</td><td>E</td><td>C</td></tr>
+<tr><th>Y</th><td>D</td><td>C</td><td>B</td><td>E</td><td>A</td></tr>
+<tr><th>Z</th><td>E</td><td>D</td><td>C</td><td>A</td><td>B</td></tr>
+</tbody></table></div></div>
+<div class="tw"><table class="rounds"><caption>Example 4: round table to fill in</caption><thead><tr><th>Round</th><th>Proposals</th><th>V</th><th>W</th><th>X</th><th>Y</th><th>Z</th><th>Rejected</th></tr></thead><tbody>
+<tr><td>1</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>3</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>6</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>7</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</tbody></table></div>
+<p>Produce: the completed round table, the final matching, the number of rounds and proposals, and the check for the applicant who ends lowest on their own list.</p>
+</div>
+<details>
+<summary>Solution to Task 5</summary>
+<div class="tw"><table class="rounds"><caption>Example 4: round table</caption><thead><tr><th>Round</th><th>Proposals</th><th>V</th><th>W</th><th>X</th><th>Y</th><th>Z</th><th>Rejected</th></tr></thead><tbody>
+<tr><td>1</td><td>A&rarr;W, B&rarr;Z, C&rarr;W, D&rarr;W, E&rarr;V</td><td class="new">E</td><td class="new">D</td><td>&ndash;</td><td>&ndash;</td><td class="new">B</td><td>A, C</td></tr>
+<tr><td>2</td><td>A&rarr;Z, C&rarr;Y</td><td>E</td><td>D</td><td>&ndash;</td><td class="new">C</td><td class="new">A</td><td>B</td></tr>
+<tr><td>3</td><td>B&rarr;V</td><td class="new">B</td><td>D</td><td>&ndash;</td><td>C</td><td>A</td><td>E</td></tr>
+<tr><td>4</td><td>E&rarr;Z</td><td>B</td><td>D</td><td>&ndash;</td><td>C</td><td class="new">E</td><td>A</td></tr>
+<tr><td>5</td><td>A&rarr;Y</td><td>B</td><td>D</td><td>&ndash;</td><td>C</td><td>E</td><td>A</td></tr>
+<tr><td>6</td><td>A&rarr;X</td><td>B</td><td>D</td><td class="new">A</td><td>C</td><td>E</td><td>nobody</td></tr>
+</tbody></table></div>
+<p>Final matching: M8 = {(A, X), (B, V), (C, Y), (D, W), (E, Z)}. It took 6 rounds and 5 + 2 + 1 + 1 + 1 + 1 = 11 proposals, well under n<sup>2</sup> = 25.</p>
+<p>A ends lowest: X is 4th on A's list. A ranks W, Z and Y above X.</p>
+<ul>
+<li>W rejected A in round 1 and ends with D. W's list is D, E, A, B, C, so W prefers D.</li>
+<li>Z held A from round 2 and rejected A in round 4, when E proposed. Z ends with E. Z's list is E, D, C, A, B, so Z prefers E.</li>
+<li>Y rejected A in round 5 and ends with C. Y's list is D, C, B, E, A, so Y prefers C.</li>
+</ul>
+<p>None of these three programs prefers A to its partner, so none of these pairs blocks.</p>
+</details>
+
+<h2>8. How the real residency match differs</h2>
+
+<p>The NRMP describes its algorithm as "applicant-proposing" [3]. An applicant is "tentatively matched" to a program, and the program can later replace that applicant with one it prefers. The replaced applicant then moves to "the next most preferred position" on their own list [3]. At the end "all tentative matches become final" [3]. This is the same idea as section 2: "tentatively matched" plays the role of our word "holds". The NRMP description places applicants one at a time instead of in rounds. In the simple case of this lecture, both ways end with the same matching.</p>
+
+<p>The real match is more complicated in several ways.</p>
+<ul>
+<li>Programs have several positions. Gale and Shapley already noted that extending the procedure to colleges with several places each "is straightforward" [2]: a program holds up to its number of positions instead of one.</li>
+<li>Applicants and programs can rank only some of the other side, so some applicants stay unmatched and some positions stay empty. A program considers an applicant only if it "ranks Applicant A on its rank order list" [3].</li>
+<li>Some applicants apply as couples, who "seek two positions close to one another" [4]. Roth and Peranson reported in 1999 that about 4 percent of applicants took part as couples [4]. Couples create what they call complementarities, and "in markets with complementarities, no stable matching may exist" [4]. The applicant-proposing algorithm they designed for the NRMP handles couples and other special cases [4].</li>
+<li>Before the change, the NRMP algorithm was "functionally equivalent to the program-proposing deferred-acceptance algorithm" [4]: programs proposed and applicants held. In May 1997 the NRMP decided to switch to the new applicant-proposing algorithm, and the first match using it was completed in March 1998 [4]. Lecture 9.3 compares the two sides.</li>
+</ul>
+
+<h2>Data used in this module</h2>
+
+<p>The examples, names and figures used in this lecture, collected for reuse in Lecture 9.3. Examples 1 and 2 are from Lecture 9.1, with their lists in the "Data used in this module" section of Lecture 9.1. Examples 3 and 4 are new and made up.</p>
+
+<h3>Notation added in this lecture</h3>
+<p>Propose, hold, reject, round and round table: as defined in section 2. Proposals are written A&rarr;X (A proposes to X). Matchings keep the names M1, M2, … from Lecture 9.1; this lecture adds M7 and M8.</p>
+
+<h3>Results of the algorithm (applicants propose)</h3>
+<div class="tw"><table class="wide">
+<thead><tr><th>Example</th><th>Result</th><th>Rounds</th><th>Proposals</th></tr></thead>
+<tbody>
+<tr><td>Example 1 (9.1)</td><td>M4 = {(A, X), (B, Z), (C, Y)}</td><td>1</td><td>3</td></tr>
+<tr><td>Example 2 (9.1)</td><td>M6 = {(A, Y), (B, W), (C, X), (D, Z)}</td><td>4</td><td>7</td></tr>
+<tr><td>Example 3 (new)</td><td>M7 = {(A, W), (B, Z), (C, Y), (D, X)}</td><td>6</td><td>10</td></tr>
+<tr><td>Example 4 (new)</td><td>M8 = {(A, X), (B, V), (C, Y), (D, W), (E, Z)}</td><td>6</td><td>11</td></tr>
+</tbody></table></div>
+<p>A computer check of all n! matchings found that each of the four examples has exactly one stable matching, the one in this table. So in these examples it makes no difference which side proposes. Comparing the two sides needs lists with more than one stable matching.</p>
+
+<div class="tw"><table class="wide"><caption>Example 3: 4 applicants, 4 programs (lists best first)</caption><thead><tr><th>Applicant</th><th>List</th><th>Program</th><th>List</th></tr></thead><tbody>
+<tr><td>A</td><td>X, Y, W, Z</td><td>W</td><td>A, D, B, C</td></tr>
+<tr><td>B</td><td>X, Y, Z, W</td><td>X</td><td>D, C, A, B</td></tr>
+<tr><td>C</td><td>Z, Y, X, W</td><td>Y</td><td>C, B, D, A</td></tr>
+<tr><td>D</td><td>Z, X, Y, W</td><td>Z</td><td>A, B, D, C</td></tr>
+</tbody></table></div>
+<div class="tw"><table class="wide"><caption>Example 4: 5 applicants, 5 programs (lists best first)</caption><thead><tr><th>Applicant</th><th>List</th><th>Program</th><th>List</th></tr></thead><tbody>
+<tr><td>A</td><td>W, Z, Y, X, V</td><td>V</td><td>A, C, B, D, E</td></tr>
+<tr><td>B</td><td>Z, V, W, X, Y</td><td>W</td><td>D, E, A, B, C</td></tr>
+<tr><td>C</td><td>W, Y, X, Z, V</td><td>X</td><td>A, B, D, E, C</td></tr>
+<tr><td>D</td><td>W, Z, X, V, Y</td><td>Y</td><td>D, C, B, E, A</td></tr>
+<tr><td>E</td><td>V, Z, Y, X, W</td><td>Z</td><td>E, D, C, A, B</td></tr>
+</tbody></table></div>
+
+<h3>Figures</h3>
+<div class="tw"><table class="wide">
+<thead><tr><th>Figure</th><th>Value</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Active applicants, 2026 Match</td><td>48,050</td><td>[1]</td></tr>
+<tr><td>Active applicants matched to a PGY-1 position, 2026</td><td>38,354</td><td>[1]</td></tr>
+<tr><td>Percent of active applicants matched to PGY-1 (computed)</td><td>79.8%</td><td>Lecture 9.1, Task 1</td></tr>
+<tr><td>Positions filled, 2026 (PGY-1 and PGY-2)</td><td>41,482</td><td>[1]</td></tr>
+<tr><td>Digits of 41,482!</td><td>173,546</td><td>Lecture 9.1, Section 7</td></tr>
+<tr><td>41,482<sup>2</sup></td><td>1,720,756,324</td><td>Task 3</td></tr>
+<tr><td>Couples, share of NRMP applicants (1999 report)</td><td>about 4 percent</td><td>[4]</td></tr>
+<tr><td>NRMP decided to switch to applicant-proposing</td><td>May 1997</td><td>[4]</td></tr>
+<tr><td>First match with the applicant-proposing algorithm</td><td>March 1998</td><td>[4]</td></tr>
+</tbody></table></div>
+<p>Made up: 1 minute to check one matching (Task 1); a computer that handles one billion matchings or proposals per second (Lecture 9.1, Section 7, and Task 3).</p>
+
+<h2>Sources</h2>
+<ol class="sources">
+<li>National Resident Matching Program. "NRMP Releases Results of the 2026 Main Residency Match for More Than 38,000 Future Residents." News release, March 20, 2026. Quoted: "Of the 53,373 applicants registered, 48,050 certified a rank order list"; "Among active applicants, 38,354 matched to a post graduate year-1 ("PGY-1") position"; "Across both PGY-1 and PGY-2, the Match filled a total of 41,482 positions." https://www.nrmp.org/about/news/2026/03/nrmp-releases-results-of-the-2026-main-residency-match-for-more-than-38000-future-residents/ (read October 4, 2026). Also source [1] of Lecture 9.1.</li>
+<li>D. Gale and L. S. Shapley, "College Admissions and the Stability of Marriage," <i>The American Mathematical Monthly</i> 69(1), January 1962, pages 9 to 15. Quoted: the procedure ("keeps him on a string to allow for the possibility that someone better may come along later"), Theorem 1 ("There always exists a stable set of marriages"), and that the extension of the "deferred-acceptance" procedure to college admissions "is straightforward". Read at www.math.utoronto.ca/mccann/assignments/477/GaleShapley62.pdf on October 4, 2026.</li>
+<li>National Resident Matching Program, "How the Matching Algorithm Works" (page titled "How It Works"), nrmp.org/intro-to-the-match/how-matching-algorithm-works/. No date on the page; read October 4, 2026. Quoted: the algorithm is "applicant-proposing"; applicants are "tentatively matched" if the program "ranks Applicant A on its rank order list"; a replaced applicant is tried at "the next most preferred position" on their list; "all tentative matches become final".</li>
+<li>A. E. Roth and E. Peranson, "The Redesign of the Matching Market for American Physicians: Some Engineering Aspects of Economic Design," <i>American Economic Review</i> 89(4), September 1999, pages 748 to 780. Quoted: "About 4 percent participate as couples"; couples "seek two positions close to one another"; "In markets with complementarities, no stable matching may exist"; the old algorithm was "functionally equivalent to the program-proposing deferred-acceptance algorithm"; "In May 1997, the NRMP Board of Directors decided to switch to the new algorithm, and the first match using the new algorithm was successfully completed in March 1998." Read at web.stanford.edu/~alroth/papers/rothperansonaer.PDF on October 4, 2026.</li>
+</ol>
+
+</main>
+<script>
+(function () {
+  var opened = [];
+  window.addEventListener('beforeprint', function () {
+    if (document.body.classList.contains('print-cards')) return;
+    document.querySelectorAll('details:not([open])').forEach(function (d) { d.open = true; opened.push(d); });
+  });
+  window.addEventListener('afterprint', function () {
+    opened.forEach(function (d) { d.open = false; });
+    opened = [];
+    document.body.classList.remove('print-cards');
+  });
+  document.getElementById('printcards').addEventListener('click', function () {
+    document.body.classList.add('print-cards');
+    window.print();
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-09/9-1-stable-matchings/" style="color:inherit">&larr; 9.1 Stable matchings</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-09/9-3-why-the-algorithm-works/" style="color:inherit">9.3 Why the algorithm works &rarr;</a></nav>
+</body>
+</html>

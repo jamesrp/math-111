@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphing Lines and Slope</title>
+<style>
+:root {
+  --bg: #fdfcf9; --text: #1d1d1b; --muted: #5b5b57; --rule: #d9d6cc;
+  --task-bg: #f3f0e6; --task-border: #b9ad84; --sol-bg: #ffffff;
+  --axis: #55554f; --grid: #e4e1d7; --line: #1f5fa8; --pt: #c2410c; --pt2: #15803d; --accent: #1f5fa8;
+  --code-bg: #efece3;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #18181a; --text: #e9e7e1; --muted: #a8a59c; --rule: #3a3936;
+    --task-bg: #24231f; --task-border: #7d7354; --sol-bg: #1d1d1f;
+    --axis: #b5b2a8; --grid: #2e2d2a; --line: #6aa7ee; --pt: #fb923c; --pt2: #4ade80; --accent: #6aa7ee;
+    --code-bg: #26252a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #18181a; --text: #e9e7e1; --muted: #a8a59c; --rule: #3a3936;
+  --task-bg: #24231f; --task-border: #7d7354; --sol-bg: #1d1d1f;
+  --axis: #b5b2a8; --grid: #2e2d2a; --line: #6aa7ee; --pt: #fb923c; --pt2: #4ade80; --accent: #6aa7ee;
+  --code-bg: #26252a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 18px/1.55 Georgia, "Times New Roman", serif;
+}
+main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+.course { font: 600 0.9rem/1.4 system-ui, sans-serif; color: var(--muted); margin: 0; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0.3rem 0 1.5rem; }
+h2 { font-size: 1.4rem; margin: 2.5rem 0 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+p, li { max-width: 42rem; }
+.math { white-space: nowrap; }
+.display { margin: 0.8rem 0 0.8rem 1.2rem; font-size: 1em; }
+.display div { margin: 0.2rem 0; }
+var { font-style: italic; }
+table { border-collapse: collapse; margin: 0.8rem 0; font: 0.95rem/1.4 system-ui, sans-serif; }
+th, td { border: 1px solid var(--rule); padding: 0.35rem 0.6rem; text-align: right; }
+th { background: var(--task-bg); text-align: center; font-weight: 600; }
+caption { caption-side: top; text-align: left; font-weight: 600; padding-bottom: 0.3rem; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+figure { margin: 1.2rem 0; }
+figcaption { font: 0.9rem/1.4 system-ui, sans-serif; color: var(--muted); margin-top: 0.3rem; }
+svg.plot { width: 100%; height: auto; display: block; max-width: 40rem; }
+#fig2 { touch-action: pan-y; }
+#fig2 .hit { touch-action: none; }
+svg.plot text { fill: var(--text); font: 13px system-ui, sans-serif; }
+svg.plot .axis { stroke: var(--axis); stroke-width: 1.5; }
+svg.plot .grid { stroke: var(--grid); stroke-width: 1; }
+svg.plot .ln { stroke: var(--line); stroke-width: 2.5; fill: none; }
+svg.plot .ln-dash { stroke: var(--line); stroke-width: 2; stroke-dasharray: 6 5; fill: none; opacity: 0.7; }
+svg.plot .pt { fill: var(--pt); }
+svg.plot .pt2 { fill: var(--pt2); }
+svg.plot .tri { stroke: var(--pt); stroke-width: 2; fill: none; }
+svg.plot .handle { fill: var(--pt); stroke: var(--bg); stroke-width: 3; cursor: grab; pointer-events: none; }
+svg.plot .hit { fill: transparent; cursor: grab; }
+.task {
+  background: var(--task-bg); border: 2px solid var(--task-border); border-radius: 6px;
+  padding: 0.8rem 1rem; margin: 1.5rem 0 0.5rem;
+}
+.task-label { font: 700 1rem/1.4 system-ui, sans-serif; margin: 0 0 0.4rem; }
+.task ol { padding-left: 1.4rem; margin: 0.4rem 0; }
+details.solution {
+  border: 1px solid var(--task-border); border-radius: 6px; background: var(--sol-bg);
+  padding: 0.5rem 1rem; margin: 0 0 1.5rem;
+}
+details.solution summary { font: 600 0.95rem/1.4 system-ui, sans-serif; cursor: pointer; color: var(--accent); }
+details.solution[open] summary { margin-bottom: 0.5rem; }
+.readout { font: 0.95rem/1.5 system-ui, sans-serif; padding: 0.5rem 0.7rem; background: var(--task-bg); border-radius: 4px; margin-top: 0.4rem; min-height: 3em; }
+.slider-row { display: flex; align-items: center; gap: 0.6rem; font: 0.95rem system-ui, sans-serif; margin-top: 0.5rem; }
+.slider-row input { flex: 1; min-width: 0; }
+code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85rem; }
+code { white-space: nowrap; }
+pre { background: var(--code-bg); padding: 0.6rem 0.8rem; overflow-x: auto; border-radius: 4px; }
+button {
+  font: 600 0.9rem system-ui, sans-serif; padding: 0.45rem 0.8rem; margin: 0.2rem 0.4rem 0.2rem 0;
+  border: 1px solid var(--task-border); background: var(--sol-bg); color: var(--text); border-radius: 4px; cursor: pointer;
+}
+.small { font-size: 0.9rem; color: var(--muted); }
+ol.sources li { margin-bottom: 0.6rem; }
+a { color: var(--accent); overflow-wrap: anywhere; }
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.6rem; }
+  .display { margin-left: 0.4rem; }
+  .math { white-space: normal; }
+  svg.plot text { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-02/2-1-linear-equations-from-a-nutrition-target/" style="color:inherit">&larr; 2.1 Linear equations from a nutrition target</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-02/2-3-two-equations-in-two-unknowns/" style="color:inherit">2.3 Two equations in two unknowns &rarr;</a></nav>
+
+<main>
+<p class="course">Math 111 · Module: What's for breakfast? (week 2) · Lecture 2 of 3</p>
+<h1>Graphing lines and slope</h1>
+
+<!-- ============================================================ -->
+<h2 id="s1">1. Protein from eggs and Greek yogurt</h2>
+
+<p>In lecture 2.1 you found combinations of rolled oats and Greek yogurt that give 30 g of protein, the breakfast target chosen in that lecture. This lecture pairs two foods from Table 1 of lecture 2.1 that were not combined there: large eggs and plain low-fat Greek yogurt. Counting eggs one at a time makes the pattern easy to see. Section 5 returns to the oats and yogurt table from lecture 2.1.</p>
+
+<p>The protein values are the ones in Table 1 of lecture 2.1, from USDA FoodData Central. Whole raw egg has 12.6 g of protein per 100 g, and a large egg weighs 50 g [1]. Plain low-fat Greek yogurt has 9.95 g of protein per 100 g [2]. As rates:</p>
+<div class="display">
+  <div>one large egg: 50 g × (12.6 g protein / 100 g) = 6.30 g protein</div>
+  <div>Greek yogurt: 9.95 g protein / 100 g = 0.0995 g protein per gram of yogurt</div>
+</div>
+<p>One 200 g (7 oz) container of the yogurt [2] has 200 × 0.0995 = 19.90 g of protein. Below, the egg value is written 6.3.</p>
+
+<p>Let <var>x</var> be the number of eggs and <var>y</var> the grams of yogurt. The protein target is the equation</p>
+<div class="display"><div class="math">6.3<var>x</var> + 0.0995<var>y</var> = 30.</div></div>
+<p>For each number of eggs, the amount of yogurt comes from solving for <var>y</var>, as in lecture 2.1. With 2 eggs, the eggs give 2 × 6.3 = 12.6 g of protein. The yogurt has to supply 30 − 12.6 = 17.4 g, so you need 17.4 ÷ 0.0995 = 174.9 g of yogurt.</p>
+
+<div class="tablewrap">
+<table>
+<caption>Table 1. Egg and yogurt combinations with 30 g of protein (yogurt rounded to 0.1 g)</caption>
+<thead><tr><th>Eggs</th><th>Protein from eggs (g)</th><th>Protein still needed (g)</th><th>Greek yogurt (g)</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0</td><td>30.0</td><td>301.5</td></tr>
+<tr><td>1</td><td>6.3</td><td>23.7</td><td>238.2</td></tr>
+<tr><td>2</td><td>12.6</td><td>17.4</td><td>174.9</td></tr>
+<tr><td>3</td><td>18.9</td><td>11.1</td><td>111.6</td></tr>
+<tr><td>4</td><td>25.2</td><td>4.8</td><td>48.2</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The USDA numbers are averages. The 12 egg samples behind the egg value ranged from 11.8 to 13.1 g of protein per 100 g [1], so a real breakfast will be close to 30 g, and rarely exactly 30 g.</p>
+
+<p>Each extra egg means less yogurt. Two questions follow from the table: how many grams of yogurt does one egg replace, and is that number the same for every egg? Plotting the table on a graph is the first step toward answering them.</p>
+
+<!-- ============================================================ -->
+<h2 id="s2">2. Coordinate pairs and plotting points</h2>
+
+<p>A graph uses two number lines at right angles. The horizontal number line is the <b><var>x</var>-axis</b>; here it counts eggs. The vertical number line is the <b><var>y</var>-axis</b>; here it measures grams of yogurt. The axes cross at 0 on both, a point called the <b>origin</b>. Negative numbers sit to the left of the origin on the <var>x</var>-axis and below it on the <var>y</var>-axis.</p>
+
+<p>A <b>coordinate pair</b> (<var>x</var>, <var>y</var>) names one point. The first number is always the <var>x</var> value. The pair (2, 174.9) means 2 eggs and 174.9 g of yogurt. To plot it, start at the origin, move 2 units right, then 174.9 units up. The order matters: (174.9, 2) would mean 174.9 eggs and 2 g of yogurt, a different point.</p>
+
+<figure>
+  <svg class="plot" id="fig1" viewBox="0 0 600 400" role="img" aria-label="The five combinations from Table 1 plotted as points, with eggs on the horizontal axis and grams of yogurt on the vertical axis."></svg>
+  <figcaption>Figure 1. The five rows of Table 1 as points (eggs, grams of yogurt).</figcaption>
+</figure>
+
+<div class="task">
+<p class="task-label">Task 1 (about 4 minutes, calculator and paper)</p>
+<p>Treat half an egg as possible: beat one egg and use half of it.</p>
+<ol>
+<li>Find the grams of yogurt that go with 0.5 eggs and with 2.5 eggs to make 30 g of protein. Round to 0.1 g.</li>
+<li>Write each combination as a coordinate pair.</li>
+<li>Mark your two new points on Figure 1, on a quick sketch of it or on the projected graph.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<p><b>0.5 eggs.</b> The eggs give 0.5 × 6.3 = 3.15 g of protein. The yogurt supplies 30 − 3.15 = 26.85 g, so you need 26.85 ÷ 0.0995 = 269.8 g of yogurt. The pair is (0.5, 269.8).</p>
+<p><b>2.5 eggs.</b> The eggs give 2.5 × 6.3 = 15.75 g. The yogurt supplies 30 − 15.75 = 14.25 g, so you need 14.25 ÷ 0.0995 = 143.2 g. The pair is (2.5, 143.2).</p>
+<p>Both new points land on the same straight path as the other five, each halfway between its two neighbours.</p>
+<figure>
+  <svg class="plot" id="fig1s" viewBox="0 0 600 400" role="img" aria-label="Seven points on one straight line: the five from Table 1 and the two new points at 0.5 and 2.5 eggs."></svg>
+  <figcaption>Table 1 points in orange; the Task 1 points in green.</figcaption>
+</figure>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="s3">3. The graph of a linear equation</h2>
+
+<p>A <b>solution</b> of 6.3<var>x</var> + 0.0995<var>y</var> = 30 is a pair (<var>x</var>, <var>y</var>) that makes the equation true. The <b>graph of the equation</b> is the set of all points whose coordinates are solutions.</p>
+
+<p>An equation in <var>x</var> and <var>y</var> is a <b>linear equation</b> if it has the form <span class="math">(number)<var>x</var> + (number)<var>y</var> = (number)</span>: each unknown is multiplied by a number, the two results are added, and the sum equals a number. Squares such as <var>x</var><sup>2</sup>, products such as <var>xy</var>, and unknowns in a denominator do not appear. The protein equation <span class="math">6.3<var>x</var> + 0.0995<var>y</var> = 30</span> is linear, and so is the oats and yogurt equation <span class="math">0.132<var>x</var> + 0.0995<var>y</var> = 30</span> from lecture 2.1. The graph of a linear equation is a straight line. Section 5 shows why this holds for the protein equation.</p>
+
+<p>Every point on the line is an egg and yogurt combination with exactly 30 g of protein. Every combination with 30 g of protein is a point on the line. Table 1 and Task 1 found seven of these points, rounded to 0.1 g. The line contains all of them, and all the combinations between them.</p>
+
+<p>To <b>check a point</b>, substitute its coordinates into the equation. For (2, 174.9):</p>
+<div class="display"><div class="math">6.3 × 2 + 0.0995 × 174.9 = 12.6 + 17.4 = 30.0.</div></div>
+<p>The left side equals 30 (to 0.1 g, since 174.9 is rounded), so (2, 174.9) is on the line.</p>
+
+<p>Drag the orange point in Figure 2 along the line, tap the graph, or use the slider, and read the amounts below the graph.</p>
+<figure>
+  <svg class="plot" id="fig2" viewBox="0 0 600 400" role="img" aria-label="Interactive graph: a draggable point on the line of egg and yogurt combinations."></svg>
+  <div class="slider-row"><label for="eggSlider">Eggs</label><input type="range" id="eggSlider" min="0" max="6" step="0.05" value="2"></div>
+  <div class="readout" id="readout" aria-live="polite"></div>
+  <figcaption>Figure 2. The graph of 6.3<var>x</var> + 0.0995<var>y</var> = 30. The point moves in steps of 0.05 eggs.</figcaption>
+</figure>
+
+<div class="task">
+<p class="task-label">Task 2 (about 4 minutes, Figure 2 on a phone or laptop, calculator)</p>
+<ol>
+<li>Move the point to 3.5 eggs. Write down the grams of yogurt.</li>
+<li>Check your pair by substituting it into 6.3<var>x</var> + 0.0995<var>y</var> = 30.</li>
+<li>Substitute (2, 200) into the left side of the equation. Is (2, 200) on the line? Say whether it lies above or below the line, and what that means for the protein in that breakfast.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<ol>
+<li>At 3.5 eggs the readout shows 79.9 g of yogurt. The pair is (3.5, 79.9).</li>
+<li>6.3 × 3.5 + 0.0995 × 79.9 = 22.05 + 7.95 = 30.0. The left side is 30.0 to 0.1 g. Since 79.9 is rounded, the pair is a solution to within rounding, and the point is on the line.</li>
+<li>6.3 × 2 + 0.0995 × 200 = 12.6 + 19.9 = 32.5. That is 32.5 g of protein, which is more than 30, so (2, 200) is not on the line. On the line, 2 eggs go with 174.9 g of yogurt. The point (2, 200) has more yogurt, so it sits above the line. Points above this line are breakfasts with more than 30 g of protein. Points below it have less: for example (3, 100) gives 18.9 + 9.95 = 28.85 g.</li>
+</ol>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="s4">4. Intercepts: breakfasts with only one food</h2>
+
+<p>The line crosses the two axes at two points, called the <b>intercepts</b>.</p>
+<ul>
+<li>The <b><var>y</var>-intercept</b> is where the line crosses the <var>y</var>-axis. Every point on the <var>y</var>-axis has <var>x</var> = 0, so you find it by setting <var>x</var> = 0 and solving for <var>y</var>.</li>
+<li>The <b><var>x</var>-intercept</b> is where the line crosses the <var>x</var>-axis. Every point on the <var>x</var>-axis has <var>y</var> = 0, so you find it by setting <var>y</var> = 0 and solving for <var>x</var>.</li>
+</ul>
+
+<div class="task">
+<p class="task-label">Task 3 (about 3 minutes, calculator)</p>
+<ol>
+<li>Find the <var>y</var>-intercept of 6.3<var>x</var> + 0.0995<var>y</var> = 30. Round to 0.1 g.</li>
+<li>Find the <var>x</var>-intercept. Round to 0.01 eggs.</li>
+<li>Write each intercept as a coordinate pair and as a breakfast in words.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<p><b><var>y</var>-intercept.</b> Set <var>x</var> = 0: 0.0995<var>y</var> = 30, so <var>y</var> = 30 ÷ 0.0995 = 301.5. The pair is (0, 301.5): no eggs and 301.5 g of Greek yogurt, about one and a half 200 g containers.</p>
+<p><b><var>x</var>-intercept.</b> Set <var>y</var> = 0: 6.3<var>x</var> = 30, so <var>x</var> = 30 ÷ 6.3 = 4.76. The pair is (4.76, 0): about 4.76 large eggs and no yogurt. Eggs come whole, so a real egg-only breakfast is 4 eggs (25.2 g, short of 30 g) or 5 eggs (31.5 g, over).</p>
+</details>
+
+<p><b>Past the intercepts.</b> The line keeps going. At 5 eggs the equation gives</p>
+<div class="display"><div class="math"><var>y</var> = (30 − 6.3 × 5) ÷ 0.0995 = (30 − 31.5) ÷ 0.0995 = −1.5 ÷ 0.0995 = −15.1.</div></div>
+<p>The point (5, −15.1) is a solution of the equation and lies below the <var>x</var>-axis. In the situation it makes no sense: five eggs already give 31.5 g of protein, and you cannot eat −15.1 g of yogurt. Move the point in Figure 2 past 4.76 eggs to see this. The breakfast question uses only the part of the line from (0, 301.5) to (4.76, 0), where both amounts are zero or positive.</p>
+
+<!-- ============================================================ -->
+<h2 id="s5">5. Slope: the trade-off between eggs and yogurt</h2>
+
+<p>In Table 1, going from 1 egg to 2 eggs, the yogurt goes from 238.2 g to 174.9 g. The change is 174.9 − 238.2 = −63.3 g. The minus sign says the yogurt went down.</p>
+
+<p>The <b>slope</b> of a line measures this kind of change. For two points (<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>) and (<var>x</var><sub>2</sub>, <var>y</var><sub>2</sub>) on the line,</p>
+<div class="display"><div class="math">slope = (change in <var>y</var>) ÷ (change in <var>x</var>) = (<var>y</var><sub>2</sub> − <var>y</var><sub>1</sub>) ÷ (<var>x</var><sub>2</sub> − <var>x</var><sub>1</sub>).</div></div>
+<p>The change in <var>y</var> is often called the <b>rise</b> and the change in <var>x</var> the <b>run</b>, so slope is "rise over run". With (1, 238.2) and (2, 174.9):</p>
+<div class="display"><div class="math">slope = (174.9 − 238.2) ÷ (2 − 1) = −63.3 ÷ 1 = −63.3 g of yogurt per egg.</div></div>
+
+<p><b>Units.</b> The rise is in grams of yogurt and the run is in eggs, so the slope is in grams of yogurt per egg. It is a rate, like the rates in week 1. Read it as: each extra egg replaces 63.3 g of yogurt.</p>
+
+<p><b>Negative slope.</b> The slope is negative because one amount goes up while the other goes down. On the graph, the line falls as you move to the right. A positive slope would mean both amounts rise together, and a line that climbs to the right.</p>
+
+<p><b>Why the slope is the same everywhere.</b> One more egg adds 6.3 g of protein. To stay at 30 g you remove 6.3 g of protein worth of yogurt. Converting with a fraction equal to 1, as in week 1:</p>
+<div class="display"><div class="math">6.3 g protein × (1 g yogurt / 0.0995 g protein) = 63.3 g yogurt.</div></div>
+<p>This does not depend on how many eggs you already have, so any two points on the line give the same slope. A constant slope is what makes the graph a straight line. Unrounded, the slope is −6.3 ÷ 0.0995 = −63.32. Because Table 1 is rounded to 0.1 g, a few pairs of rows give a slightly different slope, such as −63.4 for the rows with 3 and 4 eggs.</p>
+
+<figure>
+  <svg class="plot" id="fig3" viewBox="0 0 600 400" role="img" aria-label="The line with both intercepts marked, a slope triangle from 1 to 2 eggs with run 1 and rise minus 63.3, and a dashed continuation below the x-axis past 4.76 eggs."></svg>
+  <figcaption>Figure 3. The intercepts (0, 301.5) and (4.76, 0), a slope triangle from 1 egg to 2 eggs, and the dashed part of the line that has no meaning for breakfast.</figcaption>
+</figure>
+
+<div class="task">
+<p class="task-label">Task 4 (about 4 minutes, calculator)</p>
+<ol>
+<li>Compute the slope using the points (1, 238.2) and (3, 111.6).</li>
+<li>Compute it again with the points in the other order: (3, 111.6) first.</li>
+<li>Write one sentence, with units, that says what the slope means for breakfast.</li>
+<li>How many eggs replace one 200 g container of Greek yogurt? Round to 0.01 eggs.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<ol>
+<li>slope = (111.6 − 238.2) ÷ (3 − 1) = −126.6 ÷ 2 = −63.3 g of yogurt per egg.</li>
+<li>slope = (238.2 − 111.6) ÷ (1 − 3) = 126.6 ÷ (−2) = −63.3. Either order works as long as the change in <var>y</var> and the change in <var>x</var> subtract the points in the same order.</li>
+<li>Each extra egg in the breakfast lets you eat 63.3 g less Greek yogurt and keep 30 g of protein.</li>
+<li>Each egg replaces 63.3 g of yogurt, so 200 ÷ 63.3 = 3.16 eggs. Check with protein: a container has 19.9 g of protein, and 19.9 ÷ 6.3 = 3.16 eggs.</li>
+</ol>
+</details>
+
+<p><b>The oats and yogurt table from lecture 2.1.</b> In Task 4 of lecture 2.1, the yogurt column went down by 66.33 g for every 50 g of oats (66.34 g once, from rounding). That constant drop is a slope. With the rows (0, 301.51) and (50, 235.18), where <var>x</var> is grams of oats and <var>y</var> is grams of yogurt:</p>
+<div class="display"><div class="math">slope = (235.18 − 301.51) ÷ (50 − 0) = −66.33 ÷ 50 = −1.33 g of yogurt per gram of oats.</div></div>
+<p>The reasoning in "Why the slope is the same everywhere" gives it directly: one more gram of oats adds 0.132 g of protein, and 0.132 ÷ 0.0995 = 1.33 g of yogurt carries that much protein. The slope is the same between any two rows, so the oats and yogurt combinations from lecture 2.1 also lie on a straight line, the graph of 0.132<var>x</var> + 0.0995<var>y</var> = 30.</p>
+
+
+<!-- ============================================================ -->
+<h2 id="s6">6. Slope-intercept form <var>y</var> = <var>m</var><var>x</var> + <var>b</var></h2>
+
+<h3>From the situation</h3>
+<p>To fill Table 1, each row repeated the same two steps: subtract the egg protein from 30, then divide by 0.0995. Sections 4 and 5 found two numbers that do the same job in one step. With no eggs you need 301.5 g of yogurt, and each egg takes away 63.3 g. So for any number of eggs <var>x</var>,</p>
+<div class="display"><div class="math">yogurt = 301.5 − 63.3 × (number of eggs).</div></div>
+<p>The same formula comes from solving the protein equation for <var>y</var> once, for every <var>x</var> at the same time. Subtract 6.3<var>x</var> from both sides, then divide both sides by 0.0995:</p>
+<div class="display">
+  <div class="math">0.0995<var>y</var> = 30 − 6.3<var>x</var></div>
+  <div class="math"><var>y</var> = 30 ÷ 0.0995 − (6.3 ÷ 0.0995)<var>x</var></div>
+  <div class="math"><var>y</var> = 301.5 − 63.3<var>x</var></div>
+  <div class="math"><var>y</var> = −63.3<var>x</var> + 301.5</div>
+</div>
+<p>The last line only puts the term with <var>x</var> first: −63.3<var>x</var> + 301.5 and 301.5 − 63.3<var>x</var> are the same number for every <var>x</var>.</p>
+<p>An equation written as <b><var>y</var> = <var>m</var><var>x</var> + <var>b</var></b> is in <b>slope-intercept form</b>. The number <var>m</var> is the slope and <var>b</var> is the <var>y</var>-intercept. Here <var>m</var> = −63.3 and <var>b</var> = 301.5, the same numbers as in sections 4 and 5. In breakfast terms: start from 301.5 g of yogurt with no eggs, and take away 63.3 g for each egg. For any number of eggs, the yogurt is now one multiplication and one addition.</p>
+<p>For 3 eggs: <span class="math"><var>y</var> = −63.3 × 3 + 301.5 = −189.9 + 301.5 = 111.6 g</span>, which matches Table 1.</p>
+<p>Since −63.3 and 301.5 are rounded, this form can differ from the protein equation by about 0.1 g. At 4 eggs it gives 48.3 g, and Table 1 has 48.2 g.</p>
+
+<h3>From two points</h3>
+<p>When you know two points on a line, the method has four steps.</p>
+<ol>
+<li>Compute the slope <var>m</var> from the two points.</li>
+<li>Substitute <var>m</var> and one of the points into <var>y</var> = <var>m</var><var>x</var> + <var>b</var>, and solve for <var>b</var>.</li>
+<li>Write the equation <var>y</var> = <var>m</var><var>x</var> + <var>b</var> with the numbers in place.</li>
+<li>Check it by substituting the other point.</li>
+</ol>
+<p>For the eggs and yogurt line, the points (1, 238.2) and (3, 111.6) give back <var>m</var> = −63.3 and <var>b</var> = 301.5. Task 5 uses the four steps on a new pair of foods, and its solution works through each one.</p>
+
+<p><b>A second pair of foods.</b> Take two more foods from Table 1 of lecture 2.1: rolled oats and peanut butter. Dry rolled oats have 13.2 g of protein per 100 g, and 1 cup weighs 81 g [3], so half a cup (40.5 g) has 40.5 × 0.132 = 5.346 g of protein. Smooth peanut butter has 22.2 g of protein per 100 g, and 2 tablespoons weigh 32 g [4], so 1 tablespoon (16 g) has 16 × 0.222 = 3.552 g of protein. Let <var>x</var> be half-cups of dry oats and <var>y</var> tablespoons of peanut butter. Solving the protein equation as in lecture 2.1 gives <var>y</var> = (30 − 5.346<var>x</var>) ÷ 3.552. With 1 half-cup, <var>y</var> = 24.654 ÷ 3.552 = 6.94; with 3 half-cups, <var>y</var> = 13.962 ÷ 3.552 = 3.93. So two breakfasts with 30 g of protein are (1, 6.94) and (3, 3.93), rounded to 0.01 tablespoon.</p>
+
+<div class="task">
+<p class="task-label">Task 5 (about 6 minutes, calculator)</p>
+<p>Use the points (1, 6.94) and (3, 3.93) for oats and peanut butter.</p>
+<ol>
+<li>Compute the slope. Give its units and say in one sentence what it means.</li>
+<li>Find <var>b</var> and write the equation in slope-intercept form.</li>
+<li>Check the point (5, 0.92) by substituting it into your equation.</li>
+<li>Find both intercepts. Say what each one means as a breakfast.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<ol>
+<li>slope = (3.93 − 6.94) ÷ (3 − 1) = −3.01 ÷ 2 = −1.505 tablespoons of peanut butter per half-cup of oats. Each extra half-cup of oats replaces about 1.5 tablespoons of peanut butter.</li>
+<li>Substitute (1, 6.94): 6.94 = −1.505 × 1 + <var>b</var>, so <var>b</var> = 6.94 + 1.505 = 8.445. The equation is <var>y</var> = −1.505<var>x</var> + 8.445.</li>
+<li>−1.505 × 5 + 8.445 = −7.525 + 8.445 = 0.92. The point is on the line. As a protein check: 5 × 5.346 + 0.92 × 3.552 = 26.73 + 3.27 = 30.0 g.</li>
+<li>The <var>y</var>-intercept is (0, 8.445): no oats and about 8.4 tablespoons (135 g) of peanut butter. For the <var>x</var>-intercept set <var>y</var> = 0: 0 = −1.505<var>x</var> + 8.445, so <var>x</var> = 8.445 ÷ 1.505 = 5.61. The pair (5.61, 0) is about 5.6 half-cups, or 2.8 cups (227 g), of dry oats with no peanut butter. Neither is a breakfast anyone eats: the intercepts mark the two ends of the line, where one food supplies all 30 g.</li>
+</ol>
+<figure>
+  <svg class="plot" id="fig5" viewBox="0 0 600 400" role="img" aria-label="Line for oats and peanut butter with the points (1, 6.94), (3, 3.93), (5, 0.92) and both intercepts."></svg>
+  <figcaption>The oats and peanut butter line <var>y</var> = −1.505<var>x</var> + 8.445. Orange: the points (1, 6.94), (3, 3.93) and (5, 0.92) from Task 5. Green: the two intercepts.</figcaption>
+</figure>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="s7">7. Building the line in a spreadsheet</h2>
+
+<p>A spreadsheet can produce Table 1 for many egg counts at once and show the slope as the change from row to row. Column B uses the protein equation, column C uses the slope-intercept form, and column D subtracts each yogurt amount from the one below it.</p>
+
+<div class="tablewrap">
+<table>
+<caption>Spreadsheet layout (row 1 is the header row)</caption>
+<thead><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
+<tbody>
+<tr><th>1</th><td style="text-align:left">Eggs</td><td style="text-align:left">Yogurt from protein equation (g)</td><td style="text-align:left">Yogurt from y = mx + b (g)</td><td style="text-align:left">Change in yogurt (g)</td></tr>
+<tr><th>2</th><td>0</td><td style="text-align:left"><code>=(30-6.3*A2)/0.0995</code></td><td style="text-align:left"><code>=-63.3*A2+301.5</code></td><td></td></tr>
+<tr><th>3</th><td>1</td><td style="text-align:left"><code>=(30-6.3*A3)/0.0995</code></td><td style="text-align:left"><code>=-63.3*A3+301.5</code></td><td style="text-align:left"><code>=B3-B2</code></td></tr>
+<tr><th>4 to 8</th><td>2 to 6</td><td colspan="3" style="text-align:left">copy cells B3:D3 down to row 8</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  <button type="button" id="dlCsv">Download layout as CSV</button>
+  <button type="button" id="copyTsv">Copy layout to clipboard</button>
+  <span class="small" id="copyMsg" aria-live="polite"></span>
+</p>
+<p class="small">The CSV file and the copied layout contain the formulas for rows 1 to 8. They have not been tested in Excel or Google Sheets. If a formula shows up as text, retype it starting with the = sign.</p>
+
+<div class="task">
+<p class="task-label">Task 6 (about 5 minutes, Excel or Google Sheets)</p>
+<ol>
+<li>Build the layout above: type the header row, the eggs 0 to 6 in column A, and the formulas in rows 2 and 3, then copy cells B3:D3 down to row 8. (Or paste the copied layout into cell A1.)</li>
+<li>What number appears all the way down column D, and what is its name on the graph?</li>
+<li>What do the rows for 5 and 6 eggs say, and does that breakfast exist?</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 6</summary>
+<div class="tablewrap">
+<table>
+<caption>Values the spreadsheet should show (rounded to 0.01)</caption>
+<thead><tr><th>Eggs</th><th>B</th><th>C</th><th>D</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>301.51</td><td>301.50</td><td></td></tr>
+<tr><td>1</td><td>238.19</td><td>238.20</td><td>−63.32</td></tr>
+<tr><td>2</td><td>174.87</td><td>174.90</td><td>−63.32</td></tr>
+<tr><td>3</td><td>111.56</td><td>111.60</td><td>−63.32</td></tr>
+<tr><td>4</td><td>48.24</td><td>48.30</td><td>−63.32</td></tr>
+<tr><td>5</td><td>−15.08</td><td>−15.00</td><td>−63.32</td></tr>
+<tr><td>6</td><td>−78.39</td><td>−78.30</td><td>−63.32</td></tr>
+</tbody>
+</table>
+</div>
+<ol>
+<li>Columns B and C differ by less than 0.1 g in every row, because column C uses the rounded slope and intercept (section 6).</li>
+<li>Column D shows −63.32 (the spreadsheet may show more digits, such as −63.31658) in every row. It is the slope: grams of yogurt per egg. The same number in every row says the slope is constant, so the points lie on a straight line.</li>
+<li>The yogurt is negative: about −15 g at 5 eggs and about −78 g at 6 eggs. Five or six eggs already give more than 30 g of protein (31.5 g and 37.8 g), and a negative amount of yogurt cannot be eaten. These rows are points of the line past the <var>x</var>-intercept at 4.76 eggs.</li>
+</ol>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li>U.S. Department of Agriculture, Agricultural Research Service. FoodData Central, SR Legacy: "Egg, whole, raw, fresh", FDC ID 171287. Published April 1, 2019; accessed October 4, 2026. Figures quoted: protein 12.6 g per 100 g (12 samples, range 11.8 to 13.1 g); 1 large egg = 50 g. <a href="https://fdc.nal.usda.gov/food-details/171287/nutrients">fdc.nal.usda.gov/food-details/171287/nutrients</a></li>
+<li>U.S. Department of Agriculture, Agricultural Research Service. FoodData Central, SR Legacy: "Yogurt, Greek, plain, lowfat", FDC ID 170903. Published April 1, 2019; accessed October 4, 2026. Figures quoted: protein 9.95 g per 100 g; 1 container (7 oz) = 200 g. <a href="https://fdc.nal.usda.gov/food-details/170903/nutrients">fdc.nal.usda.gov/food-details/170903/nutrients</a></li>
+<li>U.S. Department of Agriculture, Agricultural Research Service. FoodData Central, SR Legacy: "Cereals, oats, regular and quick, not fortified, dry", FDC ID 173904. Published April 1, 2019; accessed October 4, 2026. Figures quoted: protein 13.2 g per 100 g; 1 cup = 81 g. <a href="https://fdc.nal.usda.gov/food-details/173904/nutrients">fdc.nal.usda.gov/food-details/173904/nutrients</a></li>
+<li>U.S. Department of Agriculture, Agricultural Research Service. FoodData Central, SR Legacy: "Peanut butter, smooth style, without salt", FDC ID 172470. Published April 1, 2019; accessed October 4, 2026. Figures quoted: protein 22.2 g per 100 g; 2 tablespoons = 32 g. <a href="https://fdc.nal.usda.gov/food-details/172470/nutrients">fdc.nal.usda.gov/food-details/172470/nutrients</a></li>
+</ol>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var EGG = 6.3, YOG = 0.0995, TARGET = 30;
+  function yogFor(x) { return (TARGET - EGG * x) / YOG; }
+
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, s, anchor, extra) {
+    var t = el("text", Object.assign({ x: x, y: y, "text-anchor": anchor || "middle" }, extra || {}), parent);
+    t.textContent = s;
+    return t;
+  }
+  function fmt(v, d) {
+    var s = v.toFixed(d);
+    if (s.charAt(0) === "-") s = "−" + s.slice(1);
+    return s;
+  }
+
+  // A plot frame: data ranges -> SVG coordinates (viewBox 600 x 400)
+  function frame(svg, o) {
+    var L = 82, R = 582, T = 20, B = 340;
+    var sx = function (x) { return L + (x - o.x0) / (o.x1 - o.x0) * (R - L); };
+    var sy = function (y) { return B - (y - o.y0) / (o.y1 - o.y0) * (B - T); };
+    var g = el("g", {}, svg);
+    for (var x = o.x0; x <= o.x1 + 1e-9; x += o.dx) {
+      el("line", { x1: sx(x), y1: T, x2: sx(x), y2: B, "class": "grid" }, g);
+      txt(g, sx(x), B + 20, fmt(x, 0));
+    }
+    for (var y = o.y0; y <= o.y1 + 1e-9; y += o.dy) {
+      el("line", { x1: L, y1: sy(y), x2: R, y2: sy(y), "class": "grid" }, g);
+      txt(g, sx(0) - 8, sy(y) + 4, fmt(y, o.yd || 0), "end");
+    }
+    el("line", { x1: L, y1: sy(0), x2: R, y2: sy(0), "class": "axis" }, g);
+    el("line", { x1: sx(0), y1: T, x2: sx(0), y2: B, "class": "axis" }, g);
+    txt(g, (L + R) / 2, 385, o.xlabel);
+    txt(g, 0, 0, o.ylabel, "middle", { transform: "translate(16," + ((T + B) / 2) + ") rotate(-90)" });
+    return { sx: sx, sy: sy, g: g };
+  }
+
+  function lineSeg(f, x0, y0, x1, y1, cls) {
+    return el("line", { x1: f.sx(x0), y1: f.sy(y0), x2: f.sx(x1), y2: f.sy(y1), "class": cls }, f.g);
+  }
+  function dot(f, x, y, cls, r) {
+    return el("circle", { cx: f.sx(x), cy: f.sy(y), r: r || 6, "class": cls }, f.g);
+  }
+
+  var eggAxes = { x0: 0, x1: 6, dx: 1, y0: -100, y1: 350, dy: 50,
+    xlabel: "Eggs (x)", ylabel: "Greek yogurt in grams (y)" };
+  var XINT = TARGET / EGG;
+  var table = [[0, 301.5], [1, 238.2], [2, 174.9], [3, 111.6], [4, 48.2]];
+
+  // Figure 1: points only
+  (function () {
+    var svg = document.getElementById("fig1");
+    var f = frame(svg, eggAxes);
+    table.forEach(function (p) {
+      dot(f, p[0], p[1], "pt");
+      txt(f.g, f.sx(p[0]) + 8, f.sy(p[1]) - 10, "(" + p[0] + ", " + p[1] + ")", "start");
+    });
+  })();
+
+  // Task 1 solution figure
+  (function () {
+    var svg = document.getElementById("fig1s");
+    var f = frame(svg, eggAxes);
+    lineSeg(f, 0, yogFor(0), XINT, 0, "ln-dash");
+    table.forEach(function (p) { dot(f, p[0], p[1], "pt"); });
+    [[0.5, 269.8], [2.5, 143.2]].forEach(function (p) {
+      dot(f, p[0], p[1], "pt2");
+      txt(f.g, f.sx(p[0]) + 9, f.sy(p[1]) - 9, "(" + p[0] + ", " + p[1] + ")", "start");
+    });
+  })();
+
+  // Figure 2: interactive
+  (function () {
+    var svg = document.getElementById("fig2");
+    var f = frame(svg, eggAxes);
+    lineSeg(f, 0, yogFor(0), XINT, 0, "ln");
+    lineSeg(f, XINT, 0, 6, yogFor(6), "ln-dash");
+    var guideV = el("line", { "class": "tri", "stroke-dasharray": "3 4", opacity: 0.6 }, f.g);
+    var guideH = el("line", { "class": "tri", "stroke-dasharray": "3 4", opacity: 0.6 }, f.g);
+    var handle = el("circle", { r: 11, "class": "handle" }, f.g);
+    var hit = el("circle", { r: 34, "class": "hit" }, f.g);
+    var slider = document.getElementById("eggSlider");
+    var out = document.getElementById("readout");
+
+    function set(x) {
+      x = Math.max(0, Math.min(6, Math.round(x / 0.05) * 0.05));
+      var y = yogFor(x);
+      var yr = Math.round(y * 10) / 10;
+      handle.setAttribute("cx", f.sx(x)); handle.setAttribute("cy", f.sy(y));
+      hit.setAttribute("cx", f.sx(x)); hit.setAttribute("cy", f.sy(y));
+      guideV.setAttribute("x1", f.sx(x)); guideV.setAttribute("x2", f.sx(x));
+      guideV.setAttribute("y1", f.sy(0)); guideV.setAttribute("y2", f.sy(y));
+      guideH.setAttribute("x1", f.sx(0)); guideH.setAttribute("x2", f.sx(x));
+      guideH.setAttribute("y1", f.sy(y)); guideH.setAttribute("y2", f.sy(y));
+      slider.value = x.toFixed(2);
+      var pe = EGG * x, py = YOG * yr;
+      var s = "<b>Eggs:</b> " + fmt(x, 2) + " &nbsp; <b>Greek yogurt:</b> " + fmt(yr, 1) + " g<br>" +
+        "Protein: " + fmt(pe, 2) + " g from eggs " + (py < 0 ? "\u2212 " + fmt(-py, 2) : "+ " + fmt(py, 2)) + " g from yogurt = " + fmt(pe + py, 1) + " g";
+      if (yr < 0) s += "<br>A negative amount of yogurt cannot be eaten; this point is past the x-intercept.";
+      out.innerHTML = s;
+    }
+    function toData(evt) {
+      var pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      return (p.x - f.sx(0)) / (f.sx(1) - f.sx(0));
+    }
+    // Touch: dragging the point moves it; a swipe elsewhere on the graph scrolls the page
+    // (touch-action: pan-y), and a tap there moves the point when the finger lifts.
+    var dragging = false, pending = false;
+    svg.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "touch" && e.target !== hit) { pending = true; return; }
+      dragging = true; svg.setPointerCapture(e.pointerId); set(toData(e)); e.preventDefault();
+    });
+    svg.addEventListener("pointermove", function (e) { if (dragging) set(toData(e)); });
+    svg.addEventListener("pointerup", function (e) {
+      if (pending) set(toData(e));
+      dragging = false; pending = false;
+    });
+    svg.addEventListener("pointercancel", function () { dragging = false; pending = false; });
+    slider.addEventListener("input", function () { set(parseFloat(slider.value)); });
+    set(2);
+  })();
+
+  // Figure 3: intercepts, slope triangle, continuation
+  (function () {
+    var svg = document.getElementById("fig3");
+    var f = frame(svg, eggAxes);
+    lineSeg(f, 0, yogFor(0), XINT, 0, "ln");
+    lineSeg(f, XINT, 0, 6, yogFor(6), "ln-dash");
+    // slope triangle from (1,238.2) to (2,174.9)
+    lineSeg(f, 1, 238.2, 2, 238.2, "tri");
+    lineSeg(f, 2, 238.2, 2, 174.9, "tri");
+    txt(f.g, f.sx(1.5), f.sy(238.2) - 8, "run = 1 egg");
+    txt(f.g, f.sx(2) + 8, f.sy(206.5) + 4, "rise = −63.3 g", "start");
+    dot(f, 0, 301.5, "pt");
+    txt(f.g, f.sx(0) + 10, f.sy(301.5) - 8, "(0, 301.5)", "start");
+    dot(f, XINT, 0, "pt");
+    txt(f.g, f.sx(XINT) + 6, f.sy(0) - 12, "(4.76, 0)", "start");
+    dot(f, 5, yogFor(5), "pt", 5);
+    txt(f.g, f.sx(5) - 10, f.sy(yogFor(5)) + 24, "(5, −15.1)", "end");
+  })();
+
+  // Task 5 figure: oats and peanut butter
+  (function () {
+    var svg = document.getElementById("fig5");
+    var f = frame(svg, { x0: 0, x1: 7, dx: 1, y0: 0, y1: 10, dy: 1,
+      xlabel: "Dry rolled oats in half-cups (x)", ylabel: "Peanut butter in tablespoons (y)" });
+    var m = -1.505, b = 8.445, xi = b / 1.505;
+    lineSeg(f, 0, b, xi, 0, "ln");
+    [[1, 6.94], [3, 3.93], [5, 0.92]].forEach(function (p) {
+      dot(f, p[0], p[1], "pt");
+      txt(f.g, f.sx(p[0]) + 8, f.sy(p[1]) - 10, "(" + p[0] + ", " + p[1] + ")", "start");
+    });
+    dot(f, 0, b, "pt2"); txt(f.g, f.sx(0) + 10, f.sy(b) - 8, "(0, 8.445)", "start");
+    dot(f, xi, 0, "pt2"); txt(f.g, f.sx(xi) + 10, f.sy(0) - 10, "(5.61, 0)", "start");
+  })();
+
+  // Spreadsheet layout
+  var header = ["Eggs", "Yogurt from protein equation (g)", "Yogurt from y = mx + b (g)", "Change in yogurt (g)"];
+  var rows = [header];
+  for (var i = 0; i <= 6; i++) {
+    var r = i + 2;
+    rows.push([String(i), "=(30-6.3*A" + r + ")/0.0995", "=-63.3*A" + r + "+301.5", i === 0 ? "" : "=B" + r + "-B" + (r - 1)]);
+  }
+  function csvCell(c) { return /[",\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }
+  var csv = rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (r) { return r.join("\t"); }).join("\n");
+  document.getElementById("dlCsv").addEventListener("click", function () {
+    var blob = new Blob([csv], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "eggs-yogurt-line.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  var msg = document.getElementById("copyMsg");
+  document.getElementById("copyTsv").addEventListener("click", function () {
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = tsv; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      ta.remove();
+      msg.textContent = ok ? "Copied. Paste into cell A1." : "Copy failed; type the layout from the table.";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () { msg.textContent = "Copied. Paste into cell A1."; }, fallback);
+    } else { fallback(); }
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-02/2-1-linear-equations-from-a-nutrition-target/" style="color:inherit">&larr; 2.1 Linear equations from a nutrition target</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-02/2-3-two-equations-in-two-unknowns/" style="color:inherit">2.3 Two equations in two unknowns &rarr;</a></nav>
+</body>
+</html>

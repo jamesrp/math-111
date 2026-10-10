@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sets and subsets</title>
+<style>
+:root {
+  --bg: #fdfcf9; --fg: #1d1d1b; --muted: #5b5b57; --rule: #d9d6cc;
+  --accent: #00704a; --task-bg: #eef6f1; --task-border: #00704a;
+  --sol-bg: #f5f3ec; --code-bg: #f0eee7;
+  --setA: rgba(0,112,74,0.16); --setA-line: #00704a;
+  --setB: rgba(176,96,20,0.16); --setB-line: #a05a12;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161715; --fg: #ebe9e3; --muted: #a9a7a0; --rule: #3a3a36;
+    --accent: #5cc49a; --task-bg: #1b2a23; --task-border: #5cc49a;
+    --sol-bg: #22221f; --code-bg: #262622;
+    --setA: rgba(92,196,154,0.18); --setA-line: #5cc49a;
+    --setB: rgba(230,160,90,0.18); --setB-line: #e0a060;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161715; --fg: #ebe9e3; --muted: #a9a7a0; --rule: #3a3a36;
+  --accent: #5cc49a; --task-bg: #1b2a23; --task-border: #5cc49a;
+  --sol-bg: #22221f; --code-bg: #262622;
+  --setA: rgba(92,196,154,0.18); --setA-line: #5cc49a;
+  --setB: rgba(230,160,90,0.18); --setB-line: #e0a060;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: Georgia, "Times New Roman", serif; font-size: 19px; line-height: 1.55;
+}
+main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+.header-line { font-family: system-ui, sans-serif; font-size: 0.85rem; color: var(--muted); margin: 0; }
+h1 { font-size: 2rem; margin: 0.3rem 0 1.5rem; line-height: 1.2; }
+h2 { font-size: 1.35rem; margin: 2.4rem 0 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+p, ul, ol { margin: 0.6rem 0; }
+.math { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; white-space: nowrap; }
+.math.wrap, .display { white-space: normal; overflow-wrap: anywhere; }
+.display { text-align: center; margin: 0.9rem 0; font-size: 1.1rem; }
+table { border-collapse: collapse; margin: 0.8rem 0; width: 100%; font-size: 0.95rem; }
+th, td { border: 1px solid var(--rule); padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); font-family: system-ui, sans-serif; font-size: 0.85rem; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.ab { font-family: system-ui, sans-serif; font-weight: 600; white-space: nowrap; }
+.table-wrap { overflow-x: auto; }
+.task {
+  background: var(--task-bg); border: 2px solid var(--task-border); border-radius: 6px;
+  padding: 0.8rem 1rem; margin: 1.4rem 0 0.4rem;
+}
+.task-label { font-family: system-ui, sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--accent); margin: 0 0 0.4rem; }
+details.solution {
+  background: var(--sol-bg); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 0.5rem 1rem; margin: 0 0 1.4rem;
+}
+details.solution summary { cursor: pointer; font-family: system-ui, sans-serif; font-weight: 600; font-size: 0.95rem; }
+details.solution[open] summary { margin-bottom: 0.5rem; }
+figure { margin: 1.2rem 0; }
+figure svg { width: 100%; height: auto; display: block; max-width: 34rem; }
+figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 0.4rem; }
+svg text { fill: var(--fg); font-family: system-ui, sans-serif; }
+svg .edge { stroke: var(--muted); stroke-width: 1.4; }
+svg .node { fill: var(--fg); }
+svg .elab { font-size: 16px; fill: var(--muted); text-anchor: end; }
+svg .leaf { font-size: 20px; }
+svg .urect { fill: none; stroke: var(--fg); stroke-width: 1.5; }
+svg .cA { fill: var(--setA); stroke: var(--setA-line); stroke-width: 2; }
+svg .cB { fill: var(--setB); stroke: var(--setB-line); stroke-width: 2; }
+svg .lab { font-size: 19px; font-weight: 700; }
+svg .item { font-size: 21px; font-weight: 600; text-anchor: middle; }
+svg .count { font-size: 28px; font-weight: 700; text-anchor: middle; }
+svg .mid { text-anchor: middle; }
+code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88em; }
+.small { font-size: 0.88rem; color: var(--muted); }
+ol.sources li { margin-bottom: 0.6rem; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+@media (max-width: 480px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.6rem; }
+  th, td { padding: 0.3rem 0.35rem; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-06/6-1-counting-drink-orders/" style="color:inherit">&larr; 6.1 Counting drink orders</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-06/6-3-permutations-and-combinations/" style="color:inherit">6.3 Permutations and combinations &rarr;</a></nav>
+
+<main>
+
+<p class="header-line">Math 111 · Module: Ordering at Starbucks (week 6) · Lecture 2 of 3</p>
+<h1>Sets and subsets</h1>
+
+<h2 id="s1">1. Toppings on a Caffè Latte</h2>
+
+<p>Lecture 6.1 counted orders of a hot Caffè Latte from the Starbucks online menu: 4 sizes (Short, Tall, Grande, Venti), 12 milks and 14 syrups [1]. With each syrup in or out, it found 4 × 12 × 2<sup>14</sup> = 786,432 orders. That count left out the toppings.</p>
+
+<p>The same menu page lists 11 toppings for the hot Caffè Latte, in four groups [1]. The short names in the last column are used in the figures and tasks below.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Group on the menu</th><th>Topping</th><th>Short name</th></tr></thead>
+<tbody>
+<tr><td>Powders</td><td>Cinnamon Powder</td><td class="ab">CP</td></tr>
+<tr><td rowspan="7">Topping Options</td><td>Caramel Crunch Topping</td><td class="ab">CC</td></tr>
+<tr><td>Cinnamon Dolce Sprinkles</td><td class="ab">DS</td></tr>
+<tr><td>Toasted Coconut Flakes</td><td class="ab">TC</td></tr>
+<tr><td>Cookie Crumble Topping</td><td class="ab">CK</td></tr>
+<tr><td>Pecan Crunch Topping</td><td class="ab">PC</td></tr>
+<tr><td>Pumpkin Spice Topping</td><td class="ab">PS</td></tr>
+<tr><td>Salted Brown-Buttery Topping</td><td class="ab">SB</td></tr>
+<tr><td rowspan="2">Drizzle</td><td>Caramel Drizzle</td><td class="ab">CD</td></tr>
+<tr><td>Mocha Drizzle</td><td class="ab">MD</td></tr>
+<tr><td>Whipped Cream</td><td>Whipped Cream</td><td class="ab">WC</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The latte comes with no topping unless you ask for one [1]. This is the online menu on 4 October 2026. Several toppings, such as Pumpkin Spice Topping, are seasonal, so the list changes during the year, and a store may not carry every item.</p>
+
+<p>The question: how many different ways are there to top the drink, from no topping to all 11? And when a store counts its orders, how do you count the orders that had one option or another?</p>
+
+<p><strong>Simplifications.</strong> The menu offers each topping as light, regular or extra [1]. We ignore amounts and treat each topping as on the drink or not. The menu data sets no limit on how many toppings one drink can have [1], so we assume any combination can be ordered, including all 11 at once.</p>
+
+<div class="task" id="task1">
+<p class="task-label">Task 1 (about 5 minutes, paper)</p>
+<p>Use only three toppings: Whipped Cream, Caramel Drizzle and Mocha Drizzle.</p>
+<ol type="a">
+<li>List every different way to top the drink using only these three. Include the drink with no topping. Write the number of ways.</li>
+<li>In lecture 6.1 each syrup was a separate in-or-out choice. Use the same idea to predict the number of ways when all 11 toppings are allowed. Write the calculation you would do.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<p>(a) Sort the list by how many toppings are on the drink. That way nothing is missed and nothing is listed twice.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Number of toppings</th><th>Ways</th><th class="num">Count</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>no topping</td><td class="num">1</td></tr>
+<tr><td>1</td><td>Whipped Cream; Caramel Drizzle; Mocha Drizzle</td><td class="num">3</td></tr>
+<tr><td>2</td><td>Whipped Cream and Caramel Drizzle; Whipped Cream and Mocha Drizzle; Caramel Drizzle and Mocha Drizzle</td><td class="num">3</td></tr>
+<tr><td>3</td><td>all three</td><td class="num">1</td></tr>
+<tr><th colspan="2">Total</th><th class="num">8</th></tr>
+</tbody>
+</table>
+</div>
+<p>There are 8 ways. Putting Mocha Drizzle on before Caramel Drizzle gives the same drink, so order does not matter, and each pair is listed once.</p>
+<p>(b) Each topping is in or out: 2 options for each of 11 toppings. The multiplication principle gives 2 × 2 × ⋯ × 2 with eleven 2s, which is 2<sup>11</sup> = 2048. Section 4 explains why this count is right.</p>
+</details>
+
+<h2 id="s2">2. Sets and set notation</h2>
+
+<p>In lecture 6.1 the result of the 14 in-or-out syrup choices was a collection of syrups, such as “Vanilla and Hazelnut”. Task 1 also produced a list of collections, this time of toppings. Mathematics has a name and a notation for a collection.</p>
+
+<p>A <strong>set</strong> is a collection of different objects. The objects are the <strong>elements</strong> of the set. To write a set, list its elements between braces <span class="math">{ }</span>, separated by commas. Sets are usually named with capital letters. The two drizzles form a set:</p>
+<p class="display math">D = {Caramel Drizzle, Mocha Drizzle}</p>
+
+<p>Two rules for writing sets:</p>
+<ul>
+<li>Order does not matter. <span class="math wrap">{Mocha Drizzle, Caramel Drizzle}</span> is the same set as <span class="math">D</span>.</li>
+<li>Each element is listed once. Writing Caramel Drizzle twice does not make a different set.</li>
+</ul>
+
+<p>The symbol <span class="math">∈</span> means “is an element of”, and <span class="math">∉</span> means “is not an element of”:</p>
+<p class="display math">Mocha Drizzle ∈ D &nbsp;&nbsp;&nbsp; Whipped Cream ∉ D</p>
+
+<p>The number of elements in a set <span class="math">A</span> is written <span class="math">|A|</span>. For the drizzles, <span class="math">|D| = 2</span>.</p>
+
+<p>The sizes from lecture 6.1 form a set too: <span class="math wrap">S = {Short, Tall, Grande, Venti}</span>, with <span class="math">|S| = 4</span>.</p>
+
+<p>In a problem, the set of everything under discussion is called the <strong>universal set</strong>, written <span class="math">U</span>. In this lecture <span class="math">U</span> is the set of all 11 toppings in the table in Section 1, so <span class="math">|U| = 11</span>. With the short names,</p>
+<p class="display math">U = {CP, CC, DS, TC, CK, PC, PS, SB, CD, MD, WC}</p>
+
+<p>A set can also be described by a rule instead of a list. Let <span class="math">C</span> be the set of toppings in <span class="math">U</span> whose name contains the word “Caramel”. Checking each name in the table gives</p>
+<p class="display math">C = {Caramel Crunch Topping, Caramel Drizzle} = {CC, CD}, &nbsp; |C| = 2.</p>
+
+<h2 id="s3">3. Subsets and the empty set</h2>
+
+<p>A set <span class="math">A</span> is a <strong>subset</strong> of a set <span class="math">B</span> when every element of <span class="math">A</span> is also an element of <span class="math">B</span>. This is written <span class="math">A ⊆ B</span>. For example:</p>
+<ul>
+<li><span class="math">D ⊆ U</span>, because both drizzles are toppings.</li>
+<li><span class="math">{Whipped Cream} ⊆ U</span>. A set with one element is still a set.</li>
+<li><span class="math">U ⊆ U</span>. Every set is a subset of itself.</li>
+<li><span class="math wrap">{Whipped Cream, Oatmilk}</span> is not a subset of <span class="math">U</span>, because Oatmilk is a milk, not a topping.</li>
+</ul>
+
+<p>Each way to top the drink is a subset of <span class="math">U</span>: the toppings a customer picks form a set, and each of them is in <span class="math">U</span>. A latte with whipped cream and caramel drizzle has the toppings <span class="math">{WC, CD}</span>.</p>
+
+<p>The latte as it comes, with no topping, matches the set with no elements. It is called the <strong>empty set</strong> and is written <span class="math">{ }</span> or <span class="math">∅</span>. Its size is <span class="math">|∅| = 0</span>. The empty set is a subset of every set, since it has no element that could fail to be in the other set.</p>
+
+<p>The first question from Section 1 now has a precise form: how many subsets does <span class="math">U</span> have? Task 1 answered a smaller version. The set <span class="math wrap">{Whipped Cream, Caramel Drizzle, Mocha Drizzle}</span> has 8 subsets, and one of them is <span class="math">∅</span>.</p>
+
+<h2 id="s4">4. Counting subsets: a set with n elements has 2<sup>n</sup> subsets</h2>
+
+<p>Lecture 6.1 counted sets of syrups by making one in-or-out choice for each syrup. The same argument counts the subsets of any set. Build a subset one element at a time: for each element, put it in or leave it out. For the three toppings WC, CD and MD, follow any path from left to right in Figure 1 and read off the subset at its end.</p>
+
+<figure>
+<svg viewBox="0 0 500 356" role="img" aria-label="Tree diagram: for each of WC, CD, MD choose in or out; 8 paths end in the 8 subsets" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo4MmQ3MzllZS1jYjJmLTRlMGYtOTkwOS01OWJmZjJjODU4ZjMAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaP8ORrzymWDqG97gTmxqmx8AAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDo2Mjg0NzQyMy03YTJlLTRhOTItODE5NC0zZGY4M2I1NGNiN2ZscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoYLSI26ZM1PWEwD4FsEC09gAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggW3Ps9ueIT3nOWA1So//Jc0H7BA74SaCHwz4AdMXi7nSkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaIdCQejxnyT9fiVxmVE03gsAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCDp5Qjuxn0eXkkJuaDE+RJW60XdOmq0veURl1ZXdmSZiGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBjGZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjgyZDczOWVlLWNiMmYtNGUwZi05OTA5LTU5YmZmMmM4NThmMy9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjQ1MTQ5MTJmLTY3ODItNDRmYy1hNDkxLTAxMDhhNDlmYmJmZnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBbc+z254hPec5YDVKj/8lzQfsEDvhJoIfDPgB0xeLudKJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggesuQgPzMgPaO0P9vwVAYfwSoqjlZAe/l9Sq9Gs3sRuWiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggzQgsuGn0wdVXoAStr8mjz3mN2+POnk4QLuzflsT4MeJ0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQPip/HVzv5d5PC4bk9c4QtG0OmQoNRWdNnXuGVGq+8FHgo2pBOkkg6CmBPx1q3FfyhrbrtoJ1maKNlF5ETAyQNg=</c2pa:manifest></metadata><circle cx="14" cy="178.0" r="4" class="node"/><line x1="14" y1="178.0" x2="124" y2="92.0" class="edge"/><text x="65" y="128" class="elab">WC in</text><circle cx="124" cy="92.0" r="4" class="node"/><line x1="124" y1="92.0" x2="234" y2="49.0" class="edge"/><text x="175" y="64" class="elab">CD in</text><circle cx="234" cy="49.0" r="4" class="node"/><line x1="234" y1="49.0" x2="344" y2="27.5" class="edge"/><text x="285" y="31" class="elab">MD in</text><circle cx="344" cy="27.5" r="4" class="node"/><text x="354" y="33.5" class="leaf">{WC, CD, MD}</text><line x1="234" y1="49.0" x2="344" y2="70.5" class="edge"/><text x="285" y="79" class="elab">MD out</text><circle cx="344" cy="70.5" r="4" class="node"/><text x="354" y="76.5" class="leaf">{WC, CD}</text><line x1="124" y1="92.0" x2="234" y2="135.0" class="edge"/><text x="175" y="132" class="elab">CD out</text><circle cx="234" cy="135.0" r="4" class="node"/><line x1="234" y1="135.0" x2="344" y2="113.5" class="edge"/><text x="285" y="117" class="elab">MD in</text><circle cx="344" cy="113.5" r="4" class="node"/><text x="354" y="119.5" class="leaf">{WC, MD}</text><line x1="234" y1="135.0" x2="344" y2="156.5" class="edge"/><text x="285" y="165" class="elab">MD out</text><circle cx="344" cy="156.5" r="4" class="node"/><text x="354" y="162.5" class="leaf">{WC}</text><line x1="14" y1="178.0" x2="124" y2="264.0" class="edge"/><text x="65" y="240" class="elab">WC out</text><circle cx="124" cy="264.0" r="4" class="node"/><line x1="124" y1="264.0" x2="234" y2="221.0" class="edge"/><text x="175" y="236" class="elab">CD in</text><circle cx="234" cy="221.0" r="4" class="node"/><line x1="234" y1="221.0" x2="344" y2="199.5" class="edge"/><text x="285" y="203" class="elab">MD in</text><circle cx="344" cy="199.5" r="4" class="node"/><text x="354" y="205.5" class="leaf">{CD, MD}</text><line x1="234" y1="221.0" x2="344" y2="242.5" class="edge"/><text x="285" y="251" class="elab">MD out</text><circle cx="344" cy="242.5" r="4" class="node"/><text x="354" y="248.5" class="leaf">{CD}</text><line x1="124" y1="264.0" x2="234" y2="307.0" class="edge"/><text x="175" y="304" class="elab">CD out</text><circle cx="234" cy="307.0" r="4" class="node"/><line x1="234" y1="307.0" x2="344" y2="285.5" class="edge"/><text x="285" y="289" class="elab">MD in</text><circle cx="344" cy="285.5" r="4" class="node"/><text x="354" y="291.5" class="leaf">{MD}</text><line x1="234" y1="307.0" x2="344" y2="328.5" class="edge"/><text x="285" y="337" class="elab">MD out</text><circle cx="344" cy="328.5" r="4" class="node"/><text x="354" y="334.5" class="leaf">{ }</text></svg>
+<figcaption>Figure 1. Tree diagram for the toppings WC, CD and MD. Each branch point is one in-or-out decision; the 8 paths end in the 8 subsets from Task 1.</figcaption>
+</figure>
+
+<p>By the multiplication principle from lecture 6.1, the number of paths is</p>
+<p class="display math">2 × 2 × 2 = 8.</p>
+<p>Different paths give different subsets, and every subset comes from exactly one path. So there are as many subsets as paths. All three “out” gives <span class="math">∅</span>; all three “in” gives the whole set.</p>
+
+<p>The same reasoning works for any number of elements. A set with <span class="math">n</span> elements gives <span class="math">n</span> in-or-out decisions, each with 2 options:</p>
+<p class="display math">number of subsets = <span class="math">2 × 2 × ⋯ × 2 (n factors)</span> <span class="math">= 2<sup>n</sup></span></p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th class="num">Elements n</th><th class="num">0</th><th class="num">1</th><th class="num">2</th><th class="num">3</th><th class="num">4</th><th class="num">5</th></tr></thead>
+<tbody><tr><th class="num">Subsets 2<sup>n</sup></th><td class="num">1</td><td class="num">2</td><td class="num">4</td><td class="num">8</td><td class="num">16</td><td class="num">32</td></tr></tbody>
+</table>
+</div>
+
+<p>When <span class="math">n = 0</span> the set is <span class="math">∅</span>, and its only subset is <span class="math">∅</span> itself, so the count is <span class="math">2<sup>0</sup> = 1</span>. Each new element doubles the count, because every old subset appears twice: once without the new element and once with it. This is the doubling in the running count of lecture 6.1, Task 5.</p>
+
+<p>In set language, lecture 6.1 found that the set of 14 syrups has <span class="math">2<sup>14</sup> = 16,384</span> subsets.</p>
+
+<div class="task" id="task2">
+<p class="task-label">Task 2 (about 4 minutes, calculator)</p>
+<p>Use the table of toppings in Section 1. For each part, show the power of 2 you use and give the answer as a number.</p>
+<ol type="a">
+<li>How many ways are there to top the drink when the toppings are chosen only from the 7 in the “Topping Options” group? Count the drink with no topping.</li>
+<li>How many ways are there when the toppings are chosen from all 11? Count the drink with no topping.</li>
+<li>Of the ways in (b), how many have at least one topping on the drink?</li>
+<li>An order is a size from <span class="math">S</span>, one of the 12 milks, and a set of toppings chosen from all 11. Leave syrups out. How many orders are there?</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<ol type="a">
+<li>A set with 7 elements has <span class="math">2<sup>7</sup> = 128</span> subsets, so there are 128 ways.</li>
+<li><span class="math">2<sup>11</sup> = 2048</span> ways. On most calculators, type <code>2 ^ 11</code> or use the <code>x<sup>y</sup></code> key.</li>
+<li>Of the 2048 subsets, exactly one has no topping: <span class="math">∅</span>. Subtract the combination that is not allowed, as in lecture 6.1: <span class="math">2<sup>11</sup> − 1 = 2048 − 1 = 2047</span>.</li>
+<li>Choosing a size has 4 options, choosing a milk has 12, and choosing toppings has <span class="math">2<sup>11</sup> = 2048</span>. By the multiplication principle, <span class="math">4 × 12 × 2048 = 98,304</span> orders.</li>
+</ol>
+<p>Adding the toppings to the 786,432 orders of lecture 6.1 multiplies that count by 2048: <span class="math">786,432 × 2048 = 1,610,612,736</span>, about 1.6 billion orders.</p>
+</details>
+
+<p>The syrups and the toppings can also be put into one set of <span class="math">14 + 11 = 25</span> elements. A customer’s choice of syrups and toppings is a subset of it, so there are <span class="math">2<sup>25</sup> = 33,554,432</span> such choices. This agrees with choosing the syrups and then the toppings: <span class="math">2<sup>14</sup> × 2<sup>11</sup> = 16,384 × 2048 = 33,554,432</span>.</p>
+
+<h2 id="s5">5. Union, intersection and complement</h2>
+
+<p>Three operations make new sets from old ones. The definitions use any two sets <span class="math">A</span> and <span class="math">B</span>. The examples use the drizzles <span class="math">D = {CD, MD}</span> and the caramel toppings <span class="math">C = {CC, CD}</span>, inside the universal set <span class="math">U</span> of 11 toppings.</p>
+
+<h3>Union</h3>
+<p>The <strong>union</strong> <span class="math">A ∪ B</span> is the set of elements that are in <span class="math">A</span> or in <span class="math">B</span> or in both. In set language, “or” includes “both”.</p>
+<p class="display math">D ∪ C = {CD, MD, CC}, &nbsp; |D ∪ C| = 3</p>
+<p>Caramel Drizzle (CD) is in both sets and is listed once.</p>
+
+<h3>Intersection</h3>
+<p>The <strong>intersection</strong> <span class="math">A ∩ B</span> is the set of elements that are in both <span class="math">A</span> and <span class="math">B</span>.</p>
+<p class="display math">D ∩ C = {CD}, &nbsp; |D ∩ C| = 1</p>
+<p>When two sets have no element in common, their intersection is <span class="math">∅</span>. For example, <span class="math">D ∩ {WC} = ∅</span>.</p>
+
+<h3>Complement</h3>
+<p>The <strong>complement</strong> <span class="math">A′</span> (read “A prime” or “not A”) is the set of elements of <span class="math">U</span> that are not in <span class="math">A</span>. The complement of the drizzles is every topping that is not a drizzle:</p>
+<p class="display math">D′ = {CP, CC, DS, TC, CK, PC, PS, SB, WC}</p>
+<p><span class="math">|D′| = 9</span>. Counting is quicker than listing: <span class="math">|D′| = |U| − |D| = 11 − 2 = 9</span>.</p>
+
+<p>The three operations match three everyday words, which Section 7 uses for orders:</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Set</th><th>Words</th></tr></thead>
+<tbody>
+<tr><td class="math">A ∪ B</td><td>A or B (or both)</td></tr>
+<tr><td class="math">A ∩ B</td><td>A and B</td></tr>
+<tr><td class="math">A′</td><td>not A</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="task" id="task3">
+<p class="task-label">Task 3 (about 5 minutes, paper)</p>
+<p>Let <span class="math">T</span> be the set of toppings in <span class="math">U</span> whose full name ends with the word “Topping”. Use the table in Section 1 and the set <span class="math">C = {CC, CD}</span> above. Write sets with the short names.</p>
+<ol type="a">
+<li>Write <span class="math">T</span> with braces and give <span class="math">|T|</span>.</li>
+<li>Write <span class="math">C ∪ T</span> and give its size.</li>
+<li>Write <span class="math">C ∩ T</span> and give its size.</li>
+<li>Give <span class="math">|T′|</span> using a subtraction, then list <span class="math">T′</span> to check.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<ol type="a">
+<li><span class="math">T = {CC, CK, PC, PS, SB}</span> (Caramel Crunch, Cookie Crumble, Pecan Crunch, Pumpkin Spice and Salted Brown-Buttery Topping), so <span class="math">|T| = 5</span>.</li>
+<li><span class="math">C ∪ T = {CC, CD, CK, PC, PS, SB}</span>, so <span class="math">|C ∪ T| = 6</span>. CC is in both sets and appears once.</li>
+<li><span class="math">C ∩ T = {CC}</span>, so <span class="math">|C ∩ T| = 1</span>.</li>
+<li><span class="math">|T′| = 11 − 5 = 6</span>. The list: <span class="math">T′ = {CP, DS, TC, CD, MD, WC}</span>.</li>
+</ol>
+<p>In (b), <span class="math">|C| + |T| = 2 + 5 = 7</span>, one more than <span class="math">|C ∪ T| = 6</span>. The extra 1 is CC, counted once in <span class="math">C</span> and again in <span class="math">T</span>. Section 7 turns this into a rule.</p>
+</details>
+
+<h2 id="s6">6. Venn diagrams</h2>
+
+<p>A <strong>Venn diagram</strong> draws the universal set as a rectangle and each set as a circle inside it. Two overlapping circles split the rectangle into four regions:</p>
+<ul>
+<li>inside both circles: <span class="math">A ∩ B</span>;</li>
+<li>inside <span class="math">A</span> only;</li>
+<li>inside <span class="math">B</span> only;</li>
+<li>outside both circles: elements in neither set.</li>
+</ul>
+<p>The union <span class="math">A ∪ B</span> is everything inside at least one circle. The complement <span class="math">A′</span> is everything outside circle <span class="math">A</span>.</p>
+
+<p>Find each of the 11 toppings in Figure 2 and check that it is in the right region. CD is in the overlap because it is both a drizzle and a caramel topping. Eight toppings are in neither set.</p>
+
+<figure>
+<svg viewBox="0 0 440 330" role="img" aria-label="Venn diagram of the 11 toppings with circles D (drizzles) and C (caramel toppings). D only: MD. Both: CD. C only: CC. Neither: CP, DS, TC, CK, PC, PS, SB, WC.">
+  <rect x="3" y="3" width="434" height="324" rx="6" class="urect"/>
+  <text x="14" y="28" class="lab">U: all 11 toppings</text>
+  <circle cx="170" cy="150" r="88" class="cA"/>
+  <circle cx="270" cy="150" r="88" class="cB"/>
+  <text x="130" y="56" class="lab mid">D: drizzles</text>
+  <text x="315" y="56" class="lab mid">C: caramel</text>
+  <text x="130" y="158" class="item">MD</text>
+  <text x="220" y="158" class="item">CD</text>
+  <text x="310" y="158" class="item">CC</text>
+  <text x="60" y="275" class="item">CP</text>
+  <text x="160" y="275" class="item">DS</text>
+  <text x="260" y="275" class="item">TC</text>
+  <text x="360" y="275" class="item">CK</text>
+  <text x="60" y="310" class="item">PC</text>
+  <text x="160" y="310" class="item">PS</text>
+  <text x="260" y="310" class="item">SB</text>
+  <text x="360" y="310" class="item">WC</text>
+</svg>
+<figcaption>Figure 2. Venn diagram of the toppings, with the short names from Section 1. Overlap: D ∩ C. Both circles together: D ∪ C (3 toppings). Outside circle D: D′ (9 toppings).</figcaption>
+</figure>
+
+<p>When a set is large, a Venn diagram shows how many elements are in each region instead of the elements themselves. Section 7 uses it that way.</p>
+
+<h2 id="s7">7. Counting orders with inclusion-exclusion</h2>
+
+<p>A search for published counts of how customers customize Starbucks drinks found none, so the order counts in this section are made up for the examples.</p>
+
+<p><strong>Example (made-up numbers).</strong> One store records 200 hot Caffè Latte orders on one morning. Of these, 64 orders added at least one syrup, 50 orders used a nondairy milk (Almondmilk, Coconutmilk, Oatmilk, Soymilk or Nondairy Vanilla Sweet Cream, from the 12 milks of lecture 6.1), and 18 orders did both. How many orders added a syrup or used a nondairy milk?</p>
+
+<p>Let <span class="math">U</span> now be the set of the 200 orders, <span class="math">Y</span> the orders with a syrup, and <span class="math">N</span> the orders with a nondairy milk. Then <span class="math">|U| = 200</span>, <span class="math">|Y| = 64</span>, <span class="math">|N| = 50</span> and <span class="math">|Y ∩ N| = 18</span>. The question asks for <span class="math">|Y ∪ N|</span>.</p>
+
+<p>Adding gives <span class="math">64 + 50 = 114</span>, which is too many. Each of the 18 orders with both is counted once among the 64 and again among the 50. Subtract them once so that they are counted once:</p>
+<p class="display math">|Y ∪ N| = 64 + 50 − 18 = 96</p>
+
+<p>Fill in a Venn diagram starting from the middle, so that each region holds a separate group of orders:</p>
+<ol>
+<li>Both: <span class="math">18</span>.</li>
+<li>Syrup only: <span class="math">64 − 18 = 46</span>.</li>
+<li>Nondairy milk only: <span class="math">50 − 18 = 32</span>.</li>
+<li>Neither: <span class="math">200 − 96 = 104</span>.</li>
+</ol>
+<p>Check: <span class="math">46 + 18 + 32 + 104 = 200</span>, the total number of orders.</p>
+
+<figure>
+<svg viewBox="0 0 440 310" role="img" aria-label="Venn diagram of 200 made-up orders: 46 syrup only, 18 both, 32 nondairy only, 104 neither">
+  <rect x="3" y="3" width="434" height="304" rx="6" class="urect"/>
+  <text x="14" y="28" class="lab">U: 200 orders (made up)</text>
+  <circle cx="170" cy="160" r="88" class="cA"/>
+  <circle cx="270" cy="160" r="88" class="cB"/>
+  <text x="120" y="62" class="lab mid">Y: syrup (64)</text>
+  <text x="320" y="62" class="lab mid">N: nondairy (50)</text>
+  <text x="125" y="170" class="count">46</text>
+  <text x="220" y="170" class="count">18</text>
+  <text x="315" y="170" class="count">32</text>
+  <text x="380" y="268" class="lab mid">neither</text>
+  <text x="380" y="296" class="count">104</text>
+</svg>
+<figcaption>Figure 3. The four regions for the made-up example. Circle Y holds 46 + 18 = 64 orders; circle N holds 18 + 32 = 50.</figcaption>
+</figure>
+
+<p>The same reasoning works for any two sets <span class="math">A</span> and <span class="math">B</span>. This rule is called <strong>inclusion-exclusion</strong> for two sets:</p>
+<p class="display math">|A ∪ B| = |A| + |B| − |A ∩ B|</p>
+<p>Adding <span class="math">|A|</span> and <span class="math">|B|</span> counts every element of <span class="math">A ∩ B</span> twice, and subtracting <span class="math">|A ∩ B|</span> removes the extra count. When <span class="math">A</span> and <span class="math">B</span> have no elements in common, <span class="math">|A ∩ B| = 0</span> and the rule is the addition principle from lecture 6.1. The rule also checks Task 3: <span class="math">|C ∪ T| = 2 + 5 − 1 = 6</span>.</p>
+
+<p>The complement gives the count for “not”:</p>
+<p class="display math">|A′| = |U| − |A|</p>
+<p>In the example, <span class="math">200 − 64 = 136</span> orders had no syrup, and <span class="math">|(Y ∪ N)′| = 200 − 96 = 104</span> orders had neither a syrup nor a nondairy milk.</p>
+
+<div class="task" id="task4">
+<p class="task-label">Task 4 (about 6 minutes, paper and calculator)</p>
+<p>Made-up numbers: a store sells 150 hot Caffè Lattes in one afternoon. 44 of them had at least one item from the “Topping Options” group added. 30 had Whipped Cream added. 12 had both.</p>
+<ol type="a">
+<li>How many orders had a Topping Options item or Whipped Cream?</li>
+<li>Draw a Venn diagram and write the number of orders in each of the four regions. Check that the four numbers add up to 150.</li>
+<li>How many orders had neither?</li>
+<li>How many orders had Whipped Cream but no Topping Options item?</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<p>Let <span class="math">O</span> be the orders with a Topping Options item and <span class="math">W</span> the orders with Whipped Cream. Then <span class="math">|O| = 44</span>, <span class="math">|W| = 30</span>, <span class="math">|O ∩ W| = 12</span>.</p>
+<ol type="a">
+<li><span class="math">|O ∪ W| = 44 + 30 − 12 = 62</span>.</li>
+<li>Start from the middle. Both: 12. Topping Options only: <span class="math">44 − 12 = 32</span>. Whipped Cream only: <span class="math">30 − 12 = 18</span>. Neither: <span class="math">150 − 62 = 88</span>, using (a). Check: <span class="math">32 + 12 + 18 + 88 = 150</span>.</li>
+<li><span class="math">|(O ∪ W)′| = 150 − 62 = 88</span>.</li>
+<li>This is the “Whipped Cream only” region: <span class="math">30 − 12 = 18</span>.</li>
+</ol>
+</details>
+
+<p>Inclusion-exclusion is an equation with four quantities. When three of them are known, the fourth can be found by solving the equation, as in week 2.</p>
+
+<div class="task" id="task5">
+<p class="task-label">Task 5 (about 4 minutes, calculator)</p>
+<p>Made-up numbers: of 120 hot Caffè Latte orders, 55 added Vanilla Syrup, 40 added Caramel Crunch Topping, and 73 added at least one of the two. Find the number of orders that added both, and the number that added neither.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<p>Let <span class="math">V</span> be the orders with Vanilla Syrup, <span class="math">K</span> the orders with Caramel Crunch Topping, and <span class="math">x = |V ∩ K|</span> the number that added both. Inclusion-exclusion gives</p>
+<p class="display math">73 = 55 + 40 − x</p>
+<p>so <span class="math">73 = 95 − x</span> and <span class="math">x = 95 − 73 = 22</span>. 22 orders added both.</p>
+<p>Neither: <span class="math">120 − 73 = 47</span> orders.</p>
+<p>Check with the regions: Vanilla Syrup only <span class="math">55 − 22 = 33</span>, Caramel Crunch Topping only <span class="math">40 − 22 = 18</span>, both 22, neither 47. <span class="math">33 + 18 + 22 + 47 = 120</span>.</p>
+</details>
+
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li>Starbucks, “Caffè Latte” (hot), online menu, <a href="https://www.starbucks.com/menu/product/407/hot">https://www.starbucks.com/menu/product/407/hot</a>. The page loads its menu data from <a href="https://www.starbucks.com/apiproxy/v1/ordering/407/hot">https://www.starbucks.com/apiproxy/v1/ordering/407/hot</a>, which was read on 4 October 2026 (the same source as [1] in lecture 6.1). Figures quoted: sizes “Short”, “Tall”, “Grande”, “Venti”; 12 “Milk Options”; 14 items in the “Syrups” group; the “Toppings” group with 11 items in four subgroups: “Powders” (“Cinnamon Powder”), “Topping Options” (“Caramel Crunch Topping”, “Cinnamon Dolce Sprinkles”, “Toasted Coconut Flakes”, “Cookie Crumble Topping”, “Pecan Crunch Topping”, “Pumpkin Spice Topping”, “Salted Brown-Buttery Topping”), “Drizzle” (“Caramel Drizzle”, “Mocha Drizzle”) and “Whipped Cream” (“Whipped Cream”); each topping offered light, regular or extra; no limit on the number of toppings given; no topping in the default recipe. A saved extract is in the folder src/ that accompanies this page.</li>
+</ol>
+
+</main>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-06/6-1-counting-drink-orders/" style="color:inherit">&larr; 6.1 Counting drink orders</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-06/6-3-permutations-and-combinations/" style="color:inherit">6.3 Permutations and combinations &rarr;</a></nav>
+</body>
+</html>

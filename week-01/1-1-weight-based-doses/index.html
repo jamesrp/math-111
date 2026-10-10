@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weight-based doses</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1d1d1f;
+    --muted: #5a5a63;
+    --rule: #d6d6dc;
+    --task-bg: #eef4fb;
+    --task-border: #3b6ea8;
+    --sol-bg: #f6f6f8;
+    --code-bg: #f1f1f4;
+    --accent: #3b6ea8;
+    --warn: #9b2c2c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181b;
+      --text: #e8e8ea;
+      --muted: #a6a6ae;
+      --rule: #3a3b40;
+      --task-bg: #1d2836;
+      --task-border: #6c9bd2;
+      --sol-bg: #222327;
+      --code-bg: #26272c;
+      --accent: #8db5e3;
+      --warn: #e59a9a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 19px;
+    line-height: 1.55;
+  }
+  main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+  a { color: var(--accent); }
+  .course { color: var(--muted); font-size: 0.95rem; margin: 0; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0.25rem 0 1.5rem; }
+  h2 { font-size: 1.4rem; margin: 2.5rem 0 0.75rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+  h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+  p, ul, ol { margin: 0 0 0.9rem; }
+  li { margin-bottom: 0.3rem; }
+  .cite { color: var(--accent); white-space: nowrap; }
+  .frac {
+    display: inline-flex; flex-direction: column; align-items: center;
+    vertical-align: middle; margin: 0 0.15em; line-height: 1.2;
+  }
+  .frac > span { padding: 0 0.2em; white-space: nowrap; }
+  .frac > span:first-child { border-bottom: 1.5px solid currentColor; }
+  .cx { text-decoration: line-through; text-decoration-color: var(--warn); text-decoration-thickness: 2px; }
+  .math {
+    display: block; overflow-x: auto; padding: 0.6rem 0.8rem; margin: 0.4rem 0 1rem;
+    background: var(--code-bg); border-radius: 6px; line-height: 2.4;
+  }
+  .keys {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em;
+    background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px;
+  }
+  .keys-block {
+    display: block; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em;
+    background: var(--code-bg); padding: 0.6rem 0.8rem; border-radius: 6px; margin: 0.4rem 0 1rem;
+    overflow-x: auto; white-space: pre-wrap;
+  }
+  .task {
+    border: 2px solid var(--task-border); background: var(--task-bg);
+    border-radius: 8px; padding: 0.9rem 1rem 0.3rem; margin: 1.5rem 0 0.5rem;
+  }
+  .task-label { font-weight: 700; margin-bottom: 0.4rem; }
+  details {
+    border: 1px solid var(--rule); background: var(--sol-bg); border-radius: 8px;
+    padding: 0.5rem 1rem; margin: 0 0 1.5rem;
+  }
+  details summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+  details[open] summary { margin-bottom: 0.6rem; }
+  table { border-collapse: collapse; margin: 0.5rem 0 1rem; font-size: 0.95rem; }
+  th, td { border: 1px solid var(--rule); padding: 0.3rem 0.6rem; text-align: left; }
+  th { background: var(--code-bg); }
+  .table-wrap { overflow-x: auto; }
+  .safety { border-left: 4px solid var(--muted); padding: 0.2rem 0 0.2rem 0.8rem; color: var(--muted); }
+  .sources li { margin-bottom: 0.7rem; font-size: 0.95rem; overflow-wrap: anywhere; }
+  @media (max-width: 520px) {
+    body { font-size: 17px; }
+    h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><span></span><a href="../../" style="color:inherit">All lectures</a><a href="../../week-01/1-2-concentrations-and-percentages/" style="color:inherit">1.2 Concentrations and percentages &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Titrating medicine · Lecture 1 of 3</p>
+<h1>Weight-based doses</h1>
+
+<h2>1. Children's liquid acetaminophen</h2>
+
+<p>Acetaminophen is the drug in Children's Tylenol. In the United States, liquid acetaminophen for children is sold as 160 mg of acetaminophen in every 5 mL of liquid <span class="cite">[5]</span>. A store-brand label lists the active ingredient as "Acetaminophen 160 mg" in each 5 mL <span class="cite">[2]</span>. Until 2011, liquid acetaminophen for infants came only in stronger forms, such as 80 mg in 0.8 mL. After dosing errors with them, manufacturers began changing infant products to the same 160 mg per 5 mL <span class="cite">[1]</span>.</p>
+
+<p>Doses for children are often figured from body weight. One drug reference gives the oral dose for a child as "10 to 15 mg/kg orally every 4 to 6 hours as needed not to exceed 5 doses in 24 hours" <span class="cite">[3]</span>. Here mg/kg means milligrams of drug for each kilogram the child weighs.</p>
+
+<p>In the United States a parent or nurse usually knows the child's weight in pounds. So three facts have to be combined:</p>
+<ul>
+  <li>the child's weight, in pounds;</li>
+  <li>the dose, in milligrams per kilogram of body weight;</li>
+  <li>the concentration, in milligrams per milliliter of liquid.</li>
+</ul>
+<p>The question is how many milliliters to give, and how to check that the answer is not off by a factor of ten. A 40 lb child is the running example.</p>
+
+<p class="safety">This is a mathematics lecture. Real dosing follows the prescriber's order, the product label and institutional protocol. The numbers here illustrate the arithmetic.</p>
+
+<div class="task" id="task1">
+  <div class="task-label">Task 1 (about 3 minutes, pencil and paper)</div>
+  <p>The liquid has 160 mg of acetaminophen in every 5 mL. Without a calculator, write each answer with its unit.</p>
+  <ol type="a">
+    <li>How many milligrams are in 1 mL?</li>
+    <li>How many milligrams are in 10 mL?</li>
+    <li>How many milliliters hold 240 mg?</li>
+  </ol>
+</div>
+<details>
+  <summary>Solution to Task 1</summary>
+  <ol type="a">
+    <li>Share 160 mg equally among 5 mL: 160 ÷ 5 = 32 mg in each mL.</li>
+    <li>10 mL is twice 5 mL, so 2 × 160 = 320 mg. Or 10 × 32 = 320 mg.</li>
+    <li>240 mg is one and a half times 160 mg, so it takes 1.5 × 5 = 7.5 mL. Or 240 ÷ 32 = 7.5 mL.</li>
+  </ol>
+</details>
+
+<h2>2. Rates written as fractions</h2>
+
+<p>A <b>rate</b> compares two quantities measured in different units. "160 mg per 5 mL" is a rate. Write it as a fraction with its units:</p>
+<p class="math"><span class="frac"><span>160 mg</span><span>5 mL</span></span> &nbsp;&nbsp; read "160 milligrams per 5 milliliters".</p>
+<p>The word "per" becomes the fraction bar. The dose "15 mg/kg" is the rate <span class="frac"><span>15 mg</span><span>1 kg</span></span>.</p>
+
+<h3>Simplifying a fraction</h3>
+<p>If the top and the bottom share a factor, divide both by it. The value does not change.</p>
+<p class="math"><span class="frac"><span>160</span><span>5</span></span> = <span class="frac"><span>32 × 5</span><span>1 × 5</span></span> = <span class="frac"><span>32</span><span>1</span></span> = 32</p>
+<p>So 160 mg per 5 mL is the same rate as 32 mg per 1 mL. This is Task 1(a) written as fractions. The rate can also be written the other way up, as milliliters per milligram:</p>
+<p class="math"><span class="frac"><span>5 mL</span><span>160 mg</span></span> = <span class="frac"><span>1 × 5</span><span>32 × 5</span></span> mL per mg = <span class="frac"><span>1</span><span>32</span></span> mL per mg</p>
+<p>Each milligram takes <span class="frac"><span>1</span><span>32</span></span> of a milliliter. Both fractions describe the same liquid.</p>
+
+<h3>Multiplying fractions, and units that cancel</h3>
+<p>To multiply fractions, multiply the tops and multiply the bottoms. A whole number is a fraction with 1 on the bottom, so 12 = <span class="frac"><span>12</span><span>1</span></span>.</p>
+<p class="math"><span class="frac"><span>2</span><span>3</span></span> × <span class="frac"><span>5</span><span>7</span></span> = <span class="frac"><span>2 × 5</span><span>3 × 7</span></span> = <span class="frac"><span>10</span><span>21</span></span></p>
+<p>Units in a fraction behave like numbers. A unit on top cancels the same unit on the bottom, just as 5 on top cancels 5 on the bottom. This tells you which way up to write each rate.</p>
+
+<p>Worked example with made-up numbers, chosen so the arithmetic can be done by hand. A medicine has 100 mg in every 5 mL. The dose is 10 mg/kg. The child weighs 12 kg.</p>
+<p><b>Step 1: milligrams.</b> Multiply the weight by the dose rate. The kilograms cancel and milligrams are left.</p>
+<p class="math">12 <span class="cx">kg</span> × <span class="frac"><span>10 mg</span><span>1 <span class="cx">kg</span></span></span> = 120 mg</p>
+<p><b>Step 2: milliliters.</b> Multiply by the concentration written with mg on the bottom, so that mg cancels and mL is left.</p>
+<p class="math">120 <span class="cx">mg</span> × <span class="frac"><span>5 mL</span><span>100 <span class="cx">mg</span></span></span> = <span class="frac"><span>600</span><span>100</span></span> mL = 6 mL</p>
+<p>If you write the concentration the other way up, as <span class="frac"><span>100 mg</span><span>5 mL</span></span>, the units come out as mg × mg / mL, which is not a volume. The units tell you that the setup is wrong before you compute anything.</p>
+
+<div class="task" id="task2">
+  <div class="task-label">Task 2 (about 5 minutes, pencil and paper)</div>
+  <p>Made-up numbers. A medicine has 120 mg in every 5 mL. The dose is 15 mg/kg. The child weighs 16 kg. Write each step with its units, and cross out units that cancel.</p>
+  <ol type="a">
+    <li>How many milligrams are in 1 mL of this medicine?</li>
+    <li>How many milligrams is the dose?</li>
+    <li>How many milliliters is the dose?</li>
+  </ol>
+</div>
+<details>
+  <summary>Solution to Task 2</summary>
+  <ol type="a">
+    <li><span class="frac"><span>120 mg</span><span>5 mL</span></span> = <span class="frac"><span>24 mg</span><span>1 mL</span></span>, since 120 ÷ 5 = 24. Each milliliter holds 24 mg.</li>
+    <li>16 <span class="cx">kg</span> × <span class="frac"><span>15 mg</span><span>1 <span class="cx">kg</span></span></span> = 240 mg. (16 × 15 = 160 + 80 = 240.)</li>
+    <li>240 <span class="cx">mg</span> × <span class="frac"><span>5 mL</span><span>120 <span class="cx">mg</span></span></span> = <span class="frac"><span>1200</span><span>120</span></span> mL = 10 mL. Using part (a) instead: 240 ÷ 24 = 10 mL.</li>
+  </ol>
+</details>
+
+<h2>3. Converting pounds to kilograms</h2>
+
+<p>The pound is defined in terms of the kilogram. By definition, 1 lb = 0.45359237 kg exactly <span class="cite">[4]</span>.</p>
+<p>Because 1 lb and 0.45359237 kg are the same amount, the fraction</p>
+<p class="math"><span class="frac"><span>0.45359237 kg</span><span>1 lb</span></span> = 1.</p>
+<p>Multiplying by this fraction changes the units and leaves the amount the same. It is called a <b>conversion factor</b>: a fraction equal to 1 whose top and bottom are in different units. Choose which way up to write it so that the unit you start with cancels and the unit you want is left.</p>
+
+<p>Example: a 44 lb child.</p>
+<p class="math">44 <span class="cx">lb</span> × <span class="frac"><span>0.45359237 kg</span><span>1 <span class="cx">lb</span></span></span> = 19.95806428 kg ≈ 20.0 kg</p>
+<p>Going the other way, from kilograms to pounds, flip the factor so kg cancels:</p>
+<p class="math"><span class="frac"><span>1 lb</span><span>0.45359237 kg</span></span></p>
+<p>Then 1 kg = 1 ÷ 0.45359237 lb ≈ 2.2046 lb. This is where the familiar "1 kg is about 2.2 lb" comes from. For estimating, a kilogram count is a little less than half the pound count.</p>
+
+<div class="task" id="task3">
+  <div class="task-label">Task 3 (about 3 minutes, calculator)</div>
+  <p>Write the conversion factor each time, with units. Round to one decimal place.</p>
+  <ol type="a">
+    <li>Convert 33 lb to kilograms.</li>
+    <li>Convert 50 lb to kilograms.</li>
+    <li>Convert 20 kg to pounds.</li>
+  </ol>
+</div>
+<details>
+  <summary>Solution to Task 3</summary>
+  <ol type="a">
+    <li>33 <span class="cx">lb</span> × <span class="frac"><span>0.45359237 kg</span><span>1 <span class="cx">lb</span></span></span> = 14.968548… kg ≈ 15.0 kg.</li>
+    <li>50 <span class="cx">lb</span> × <span class="frac"><span>0.45359237 kg</span><span>1 <span class="cx">lb</span></span></span> = 22.6796185 kg ≈ 22.7 kg.</li>
+    <li><span class="math">20 <span class="cx">kg</span> × <span class="frac"><span>1 lb</span><span>0.45359237 <span class="cx">kg</span></span></span> = 20 ÷ 0.45359237 lb</span>
+      = 44.092452… lb ≈ 44.1 lb. On the calculator: <span class="keys">20 ÷ 0.45359237 =</span>.</li>
+  </ol>
+  <p>Check: in (a) and (b) the kilogram number is a little less than half the pound number. In (c) the pound number is a little more than double.</p>
+</details>
+
+<h2>4. The whole calculation in one line</h2>
+
+<p>Now the real question for a 40 lb child, at the top of the range, 15 mg/kg, with liquid at 160 mg per 5 mL <span class="cite">[2]</span>. Chain the three rates so each unit cancels until only mL is left:</p>
+<p class="math">40 <span class="cx">lb</span> × <span class="frac"><span>0.45359237 <span class="cx">kg</span></span><span>1 <span class="cx">lb</span></span></span> × <span class="frac"><span>15 <span class="cx">mg</span></span><span>1 <span class="cx">kg</span></span></span> × <span class="frac"><span>5 mL</span><span>160 <span class="cx">mg</span></span></span></p>
+<p>Pounds cancel, then kilograms, then milligrams. Milliliters are left, which is what the question asks for.</p>
+<p>Step by step:</p>
+<ul>
+  <li>40 × 0.45359237 = 18.1436948 kg</li>
+  <li>18.1436948 × 15 = 272.155422 mg</li>
+  <li>272.155422 × 5 ÷ 160 = 8.5048569… mL</li>
+</ul>
+
+<h3>Entering it on a calculator</h3>
+<p>The whole chain can go in as one line. Everything on top is multiplied, and everything on the bottom is divided:</p>
+<span class="keys-block">40 × 0.45359237 × 15 × 5 ÷ 160 =
+8.5048569…</span>
+<p>This works on any calculator, including a phone. Calculators follow the <b>order of operations</b>: multiplication and division are done from left to right, after anything in parentheses. A line with only × and ÷ gives the right answer as long as each ÷ divides by a single number from the bottom of a fraction.</p>
+
+<h3>Dividing by a fraction</h3>
+<p>Task 1 used the concentration as 32 mg per mL, which is <span class="frac"><span>160</span><span>5</span></span>. Then mL = mg ÷ <span class="frac"><span>160</span><span>5</span></span>, a division by a fraction. To divide by a fraction, flip it over and multiply. The flipped fraction is called the <b>reciprocal</b>.</p>
+<p class="math"><span class="frac"><span>3</span><span>4</span></span> ÷ <span class="frac"><span>1</span><span>2</span></span> = <span class="frac"><span>3</span><span>4</span></span> × <span class="frac"><span>2</span><span>1</span></span> = <span class="frac"><span>6</span><span>4</span></span> = <span class="frac"><span>3</span><span>2</span></span></p>
+<p>So dividing by <span class="frac"><span>160</span><span>5</span></span> is the same as multiplying by its reciprocal <span class="frac"><span>5</span><span>160</span></span>: multiply by 5, then divide by 160. That is what the one-line key sequence above does, and why the made-up example in Section 2 multiplied by <span class="frac"><span>5 mL</span><span>100 mg</span></span>.</p>
+<p>Typing the division by <span class="frac"><span>160</span><span>5</span></span> directly goes wrong without parentheses:</p>
+<div class="table-wrap">
+<table>
+  <tr><th>Keys</th><th>Calculator does</th><th>Result</th></tr>
+  <tr><td><span class="keys">272.155422 × 5 ÷ 160 =</span></td><td>272.155422 × 5, then ÷ 160</td><td>8.505 mL</td></tr>
+  <tr><td><span class="keys">272.155422 ÷ 160 ÷ 5 =</span></td><td>(272.155422 ÷ 160) ÷ 5</td><td>0.340 mL</td></tr>
+</table>
+</div>
+<p>The second line divides by 160 and then divides by 5 again, which is dividing by 800. The answer is 25 times too small. Typing <span class="keys">272.155422 ÷ (160 ÷ 5) =</span> also works, but some phone calculators have no parentheses keys in portrait mode. Multiplying by 5 and dividing by 160 works everywhere.</p>
+<p>Another slip is dividing by 0.45359237 instead of multiplying. Then 40 lb becomes 88.18 "kg", and the dose comes out as 41.3 mL, almost five times too much. Writing the units catches this: lb ÷ (kg/lb) leaves lb² per kg, which is not a weight.</p>
+
+<h3>From a number to an amount you can measure</h3>
+<p>No one can measure 8.5048569 mL. The label <span class="cite">[2]</span> and the FDA <span class="cite">[1]</span> both say to use the dosing device that comes with the product, so the possible amounts are the markings on that cup. For the arithmetic in this lecture, assume a cup marked every 0.5 mL. This is a simplification, and a real cup may be marked differently.</p>
+<p>The dose is a range, 10 to 15 mg/kg <span class="cite">[3]</span>, so compute both ends:</p>
+<ul>
+  <li>At 10 mg/kg: 40 × 0.45359237 × 10 × 5 ÷ 160 = 5.67 mL</li>
+  <li>At 15 mg/kg: 8.50 mL</li>
+</ul>
+<p>Round toward the inside of the range. At the top, round down: 8.5049 mL becomes 8.5 mL (272 mg, 14.99 mg/kg). Rounding up to 9 mL would give 288 mg, or 15.87 mg/kg, above the top. At the bottom, round up: 5.67 mL becomes 6 mL (10.58 mg/kg), since 5.5 mL would be 9.70 mg/kg. So the marked amounts from 6 mL to 8.5 mL fall inside the range.</p>
+<p>The range is a check on a computed number. It does not choose the dose: the label or the prescriber's order does. For children from 36 to 47 lb the label says 7.5 mL <span class="cite">[2]</span>. That is 7.5 × 32 = 240 mg. For a 40 lb child, 240 mg ÷ 18.14 kg = 13.2 mg/kg, inside the range, so the check agrees with the label.</p>
+
+<div class="task" id="task4">
+  <div class="task-label">Task 4 (about 6 minutes, calculator)</div>
+  <p>A child weighs 26 lb. The liquid is 160 mg per 5 mL.</p>
+  <ol type="a">
+    <li>Write the one-line chain of fractions, with units, for the dose in mL at 15 mg/kg. Cross out the units that cancel. Then enter it on your calculator as one line and write the result to two decimal places.</li>
+    <li>Do the same at 10 mg/kg.</li>
+    <li>The label's dose for 24 to 35 lb is 5 mL <span class="cite">[2]</span>. Is 5 mL inside your range from (a) and (b)? How many mg is it, and how many mg/kg for this child?</li>
+  </ol>
+</div>
+<details>
+  <summary>Solution to Task 4</summary>
+  <ol type="a">
+    <li><span class="math">26 <span class="cx">lb</span> × <span class="frac"><span>0.45359237 <span class="cx">kg</span></span><span>1 <span class="cx">lb</span></span></span> × <span class="frac"><span>15 <span class="cx">mg</span></span><span>1 <span class="cx">kg</span></span></span> × <span class="frac"><span>5 mL</span><span>160 <span class="cx">mg</span></span></span></span>
+      Keys:
+      <span class="keys-block">26 × 0.45359237 × 15 × 5 ÷ 160 =</span>
+      This gives 5.5281570…, so 5.53 mL. (Along the way: 11.7934 kg and 176.90 mg.)</li>
+    <li>Keys:
+      <span class="keys-block">26 × 0.45359237 × 10 × 5 ÷ 160 =</span>
+      This gives 3.6854380…, so 3.69 mL. (117.93 mg.)</li>
+    <li>Yes, 5 mL lies between 3.69 mL and 5.53 mL. It is 5 × 32 = 160 mg. Per kilogram: 160 mg ÷ 11.7934 kg = 13.6 mg/kg.</li>
+  </ol>
+</details>
+
+<h2>5. Estimating the size of the answer</h2>
+
+<p>A calculator gives an answer to many decimal places whether or not the keys were right. An estimate made beforehand catches answers that are 10 times too big or too small. Use round numbers:</p>
+<ul>
+  <li>kilograms: about half the pounds;</li>
+  <li>concentration: 32 mg per mL is about 30 mg per mL.</li>
+</ul>
+<p>For the 40 lb child at 15 mg/kg: about 20 kg, so about 20 × 15 = 300 mg, so about 300 ÷ 30 = 10 mL.</p>
+<p>The computed answer, 8.5 mL, is the same size as 10 mL. An answer of 0.85 mL or 85 mL would be off by a factor of ten, and the estimate shows it immediately. It also catches the two slips from Section 4: 0.34 mL is far below 10 mL, and 41.3 mL is far above it. The estimate runs a little high because both round numbers push it up: half of 40 is more than 40 × 0.45, and dividing by 30 gives more than dividing by 32.</p>
+
+<div class="task" id="task5">
+  <div class="task-label">Task 5 (about 3 minutes, no calculator)</div>
+  <p>Three people computed the 15 mg/kg dose of the 160 mg per 5 mL liquid for a 60 lb child. They got 1.28 mL, 12.8 mL and 128 mL. Without a calculator, estimate the dose and say which answer is plausible. Write your estimate with its steps.</p>
+</div>
+<details>
+  <summary>Solution to Task 5</summary>
+  <p>60 lb is about 30 kg. 30 × 15 = 450 mg. 450 ÷ 30 = 15 mL. The plausible answer is 12.8 mL. The other two are 10 times too small and 10 times too big.</p>
+  <p>Exact value: 60 × 0.45359237 × 15 × 5 ÷ 160 = 12.757… mL.</p>
+</details>
+
+<h2>6. Comparing with the maximum daily amount</h2>
+
+<p>The label says not to give more than 5 doses in 24 hours, and calls this "the maximum daily amount" <span class="cite">[2]</span>. The American Academy of Pediatrics gives the same limit of 5 doses <span class="cite">[5]</span>. On the label, this means 5 doses of the amount in its weight table.</p>
+<p>The drug reference gives at most 15 mg/kg per dose and at most 5 doses in 24 hours <span class="cite">[3]</span>. Multiplying these two numbers gives a limit per kilogram for a whole day:</p>
+<p class="math">5 doses × <span class="frac"><span>15 mg/kg</span><span>1 dose</span></span> = 75 mg/kg in 24 hours</p>
+<p>The 75 mg/kg figure is our own calculation from the two numbers in the reference. For the 40 lb child (18.1436948 kg) the limit is 75 × 18.1436948 = 1360.8 mg in 24 hours.</p>
+<p>Five doses of the label's 7.5 mL:</p>
+<ul>
+  <li>5 × 7.5 mL = 37.5 mL</li>
+  <li>37.5 mL × 32 mg per mL = 1200 mg</li>
+  <li>1200 mg ÷ 18.1436948 kg = 66.1 mg/kg, under 75 mg/kg</li>
+</ul>
+<p>Five doses at the top of the range, 8.5 mL each, give 42.5 mL, or 1360 mg, which is 74.96 mg/kg. That is within 1 mg of the limit. A dose at the top of the per-dose range, given the most times allowed, lands on the daily limit, so there is no room to round up.</p>
+
+<div class="task" id="task6">
+  <div class="task-label">Task 6 (about 3 minutes, calculator)</div>
+  <p>The 26 lb child from Task 4 (11.7934 kg) gets the label's 5 mL, five times in 24 hours.</p>
+  <ol type="a">
+    <li>How many mL and how many mg is that in 24 hours?</li>
+    <li>How many mg/kg is that in 24 hours, to one decimal place?</li>
+    <li>What is the 75 mg/kg limit in mg for this child? Is the day's total under it?</li>
+  </ol>
+</div>
+<details>
+  <summary>Solution to Task 6</summary>
+  <ol type="a">
+    <li>5 × 5 mL = 25 mL. 25 mL × 32 mg per mL = 800 mg.</li>
+    <li>800 mg ÷ 11.7934 kg = 67.8 mg/kg.</li>
+    <li>75 × 11.7934 = 884.5 mg. The day's total, 800 mg, is under it.</li>
+  </ol>
+</details>
+
+<h2>Sources</h2>
+<ol class="sources">
+  <li>U.S. Food and Drug Administration. "FDA Drug Safety Communication: Addition of another concentration of liquid acetaminophen marketed for infants." December 22, 2011. Accessed October 4, 2026. Quoted: "liquid acetaminophen marketed for infants was only available in 80 mg/0.8 mL or 80 mg/mL concentrations"; "Due to dosing errors that occurred with the concentrated acetaminophen formulation (80 mg/0.8 mL or 80 mg/mL), some manufacturers decided to voluntarily change their liquid acetaminophen products marketed for 'infants' to the same concentration (160 mg/5 mL) of liquid acetaminophen products labeled for children"; "use the dosing device provided with the product". <a href="https://www.fda.gov/drugs/drug-safety-and-availability/fda-drug-safety-communication-addition-another-concentration-liquid-acetaminophen-marketed-infants">fda.gov/drugs/drug-safety-and-availability/fda-drug-safety-communication-addition-another-concentration-liquid-acetaminophen-marketed-infants</a></li>
+  <li>DailyMed, U.S. National Library of Medicine. Label: Childrens Acetaminophen Dye Free Grape (acetaminophen suspension), Caring Mills / FSA Store Inc. Label revised September 22, 2026; accessed October 4, 2026. Quoted: "Acetaminophen 160 mg" in each 5 mL; dose table, 24–35 lb: 5 mL, 36–47 lb: 7.5 mL; "do not exceed 5 doses in 24 hours"; "more than 5 doses in 24 hours, which is the maximum daily amount"; "Use only the enclosed dosing cup." <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=58dd57f1-6508-4635-b508-870218421c48">dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=58dd57f1-6508-4635-b508-870218421c48</a></li>
+  <li>Drugs.com. "Acetaminophen Dosage." Last updated January 6, 2026; accessed October 4, 2026. Quoted, usual pediatric dose: "10 to 15 mg/kg orally every 4 to 6 hours as needed not to exceed 5 doses in 24 hours". <a href="https://www.drugs.com/dosage/acetaminophen.html">drugs.com/dosage/acetaminophen.html</a></li>
+  <li>National Institute of Standards and Technology. NIST Guide to the SI (SP 811), Appendix B.8 and footnote 22. Last modified August 18, 2025; accessed October 4, 2026. Quoted: pound (avoirdupois) to kilogram, "The exact conversion factor is 4.535 923 7 E-01", that is, 1 lb = 0.45359237 kg. <a href="https://www.nist.gov/pml/special-publication-811/nist-guide-si-appendix-b-conversion-factors/nist-guide-si-appendix-b8">Appendix B.8</a>; <a href="https://www.nist.gov/physical-measurement-laboratory/nist-guide-si-footnotes">footnotes</a></li>
+  <li>American Academy of Pediatrics, HealthyChildren.org. "Acetaminophen for Fever and Pain." Last updated January 30, 2026; accessed October 4, 2026. Quoted: "Liquid syrup acetaminophen is available as 160mg/5mL"; "Do not give more than 5 doses in 24 hours." <a href="https://www.healthychildren.org/English/safety-prevention/at-home/medication-safety/Pages/Acetaminophen-for-Fever-and-Pain.aspx">healthychildren.org/English/safety-prevention/at-home/medication-safety/Pages/Acetaminophen-for-Fever-and-Pain.aspx</a></li>
+</ol>
+
+</main>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><span></span><a href="../../" style="color:inherit">All lectures</a><a href="../../week-01/1-2-concentrations-and-percentages/" style="color:inherit">1.2 Concentrations and percentages &rarr;</a></nav>
+</body>
+</html>

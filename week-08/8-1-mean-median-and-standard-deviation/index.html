@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mean, median and standard deviation</title>
+<style>
+:root {
+  --ink: #1d232b;
+  --muted: #55606d;
+  --bg: #ffffff;
+  --panel: #f4f6f8;
+  --line: #d3d9df;
+  --accent: #1f5f99;
+  --accent-soft: #dce9f5;
+  --bar: #5b8fbf;
+  --bar-in: #1f5f99;
+  --bar-out: #c5d3e0;
+  --task: #fff8e6;
+  --task-line: #d9a821;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 18px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+.course { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 24px; }
+h2 { font-size: 1.4rem; margin: 40px 0 12px; padding-top: 12px; border-top: 2px solid var(--line); }
+h3 { font-size: 1.1rem; margin: 24px 0 8px; }
+p, li { max-width: 72ch; }
+.math { font-family: "Cambria Math", Cambria, "Times New Roman", serif; font-size: 1.08em; white-space: nowrap; }
+.display { text-align: center; margin: 16px 0; font-size: 1.15em; overflow-x: auto; }
+.var { font-style: italic; }
+.xbar { font-style: italic; position: relative; display: inline-block; line-height: 1; }
+.xbar::before { content: ""; position: absolute; left: 0.1em; right: -0.1em; top: 0.1em; border-top: 0.07em solid currentColor; }
+.math .xbar::before { top: 0.26em; }
+.sigma { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; margin: 0 2px; }
+.sigma .big { font-size: 1.6em; line-height: 1; }
+.sigma small { font-size: 0.6em; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 3px; }
+.frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 4px 2px; }
+.frac > span:last-child { padding: 2px 4px 0; }
+.sqrt { white-space: nowrap; display: inline-flex; align-items: stretch; vertical-align: middle; }
+.sqrt .rsign { width: 0.8em; align-self: stretch; height: auto; display: block; overflow: visible; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.sqrt .rad { border-top: 1.5px solid currentColor; padding: 4px 3px 0; display: inline-flex; align-items: center; }
+table { border-collapse: collapse; margin: 12px 0; font-variant-numeric: tabular-nums; }
+th, td { border: 1px solid var(--line); padding: 4px 10px; text-align: right; }
+th { background: var(--panel); text-align: center; font-weight: 600; }
+td.l, th.l { text-align: left; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+.nw { white-space: nowrap; }
+code, .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.92em; }
+.task { background: var(--task); border: 2px solid var(--task-line); border-radius: 8px; padding: 12px 16px; margin: 20px 0 8px; }
+.task h3 { margin: 0 0 8px; }
+.task p:last-child, .task ol:last-child { margin-bottom: 0; }
+details.solution { border: 1px solid var(--line); border-radius: 8px; padding: 8px 16px; margin: 0 0 20px; background: var(--panel); }
+details.solution summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details.solution[open] summary { margin-bottom: 8px; }
+.steps li { margin-bottom: 4px; }
+figure { margin: 16px 0 20px; }
+figcaption { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: var(--ink); }
+.chart { width: 100%; height: auto; display: block; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 8px 0; }
+.controls input[type=range] { width: min(320px, 100%); }
+.readout { background: var(--accent-soft); border-radius: 6px; padding: 8px 12px; font-variant-numeric: tabular-nums; }
+button { font: inherit; font-size: 0.95rem; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+button.secondary { background: #fff; color: var(--accent); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; align-items: center; }
+.small { font-size: 0.9rem; color: var(--muted); }
+ol.sources li { margin-bottom: 8px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+.notation { border-left: 4px solid var(--accent); background: var(--panel); padding: 10px 14px; margin: 16px 0; }
+.notation p { margin: 6px 0; }
+@media (max-width: 560px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.6rem; }
+  th, td { padding: 3px 6px; }
+  .task table, details.solution table { font-size: 0.9em; }
+  .task th, .task td, details.solution th, details.solution td { padding: 3px 4px; }
+  table.sheet { font-size: 0.8em; }
+  table.sheet th, table.sheet td { padding: 2px 4px; }
+  table.sheet .mono { font-size: 0.85em; }
+  .task, details.solution { padding-left: 12px; padding-right: 12px; }
+}
+@media print {
+  button, .btnrow, .controls { display: none; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-07/7-3-expected-return-and-risk/" style="color:inherit">&larr; 7.3 Expected return and risk</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-08/8-2-scatterplots-and-regression-lines/" style="color:inherit">8.2 Scatterplots and regression lines &rarr;</a></nav>
+
+<main>
+<p class="course">Math 111 · Module: Statistics and regression (week 8) · Lecture 1 of 3</p>
+<h1>Mean, median and standard deviation</h1>
+
+<!-- ============================================================ -->
+<h2 id="s1">1. Hours of sleep of 253 college students</h2>
+
+<p>Pamela Thacher, a psychologist at St. Lawrence University in New York State, and her co-author Serge Onyper studied the sleep of 253 college students [1]. Each student kept a sleep diary, took tests of thinking skills and answered a survey about habits and mood [2]. The data are public [2, 3]. The R package Lock5Data, which also contains these data, is licensed under GPL-2 [4]. Two of the columns are used here:</p>
+<ul>
+  <li><b>AverageSleep</b>: the student's average number of hours of sleep per night, over weekdays and weekends together.</li>
+  <li><b>ClassesMissed</b>: the number of classes the student missed during the semester.</li>
+</ul>
+
+<p>The first 10 students in the data file:</p>
+
+<div class="tablewrap">
+<table id="first10">
+  <thead><tr><th>Student</th><th>Average sleep (hours)</th><th>Classes missed</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>7.18</td><td>0</td></tr>
+    <tr><td>2</td><td>6.93</td><td>0</td></tr>
+    <tr><td>3</td><td>5.02</td><td>12</td></tr>
+    <tr><td>4</td><td>6.90</td><td>0</td></tr>
+    <tr><td>5</td><td>6.35</td><td>4</td></tr>
+    <tr><td>6</td><td>9.04</td><td>0</td></tr>
+    <tr><td>7</td><td>7.52</td><td>2</td></tr>
+    <tr><td>8</td><td>9.01</td><td>0</td></tr>
+    <tr><td>9</td><td>8.54</td><td>0</td></tr>
+    <tr><td>10</td><td>6.68</td><td>0</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>A research paper cannot list every value, so it summarizes a column like this with a few numbers, in a form such as "mean 7.1 hours, SD 1.2 hours". (These two numbers are made up as an example; Task 8 returns to them.) This raises two questions. Which single numbers describe a list of 253 values well? What does a pair like "mean 7.1 hours, SD 1.2 hours" tell you about a typical person in the study?</p>
+
+<div class="task" id="task1">
+  <h3>Task 1 (about 3 minutes, calculator)</h3>
+  <p>Use the sleep column of the table above.</p>
+  <ol type="a">
+    <li>Add the 10 sleep values and divide the total by 10.</li>
+    <li>Write down the shortest and the longest sleep.</li>
+    <li>Count how many of the 10 students sleep less than your answer to (a).</li>
+  </ol>
+</div>
+<details class="solution">
+  <summary>Solution to Task 1</summary>
+  <p>(a) 7.18 + 6.93 + 5.02 + 6.90 + 6.35 + 9.04 + 7.52 + 9.01 + 8.54 + 6.68 = 73.17 hours. Dividing by 10 gives 7.317, about 7.32 hours.</p>
+  <p>(b) Shortest: 5.02 hours (student 3). Longest: 9.04 hours (student 6).</p>
+  <p>(c) Six students sleep less than 7.32 hours: students 1, 2, 3, 4, 5 and 10.</p>
+  <p>A quick check on (a): every value lies between 5.02 and 9.04, so the answer must lie between them too, and most values are near 7.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="s2">2. The mean and summation notation</h2>
+
+<p>The number in Task 1(a) is the <b>mean</b> of the list. The mean of a list of numbers is their sum divided by how many numbers there are. It is what people usually call "the average".</p>
+
+<p>To write this for any list, give the pieces names:</p>
+<ul>
+  <li><span class="var">n</span> is how many values there are. For the table, <span class="var">n</span> = 10.</li>
+  <li><span class="var">x</span><sub>1</sub>, <span class="var">x</span><sub>2</sub>, …, <span class="var">x<sub>n</sub></span> are the values. Here <span class="var">x</span><sub>1</sub> = 7.18, <span class="var">x</span><sub>2</sub> = 6.93, and so on up to <span class="var">x</span><sub>10</sub> = 6.68.</li>
+  <li><span class="xbar">x</span>, read "x-bar", is the mean.</li>
+</ul>
+
+<p>With the summation notation from lecture 4.2, the mean is</p>
+<p class="display"><span class="math"><span class="xbar">x</span> = <span class="frac"><span><span class="var">x</span><sub>1</sub> + <span class="var">x</span><sub>2</sub> + … + <span class="var">x<sub>n</sub></span></span><span><span class="var">n</span></span></span> = <span class="frac"><span>1</span><span><span class="var">n</span></span></span><span class="sigma"><small><span class="var">n</span></small><span class="big">Σ</span><small><span class="var">i</span> = 1</small></span><span class="var">x<sub>i</sub></span></span></p>
+
+<p>The capital Greek letter Σ ("sigma") with <span class="var">i</span> = 1 below it and <span class="var">n</span> above it, followed by <span class="var">x<sub>i</sub></span>, means: put <span class="var">i</span> = 1, 2, 3, …, <span class="var">n</span> into <span class="var">x<sub>i</sub></span> and add the results. For the 10 students,</p>
+<p class="display"><span class="math"><span class="sigma"><small>10</small><span class="big">Σ</span><small><span class="var">i</span> = 1</small></span><span class="var">x<sub>i</sub></span> = 73.17</span> &nbsp;and&nbsp; <span class="math"><span class="xbar">x</span> = <span class="frac"><span>73.17</span><span>10</span></span> = 7.317 hours.</span></p>
+
+<p>The mean has the same unit as the data, here hours of sleep per night. It is the balance point of the list: the values above it and the values below it are, in total, the same distance from it.</p>
+
+<!-- ============================================================ -->
+<h2 id="s3">3. The median, and when it is the better summary</h2>
+
+<p>The <b>median</b> is the middle value of a list sorted from smallest to largest. If <span class="var">n</span> is odd, there is one middle value. If <span class="var">n</span> is even, there are two, and the median is the mean of those two.</p>
+
+<p>The 10 sleep values, sorted:</p>
+<p class="display"><span class="mono">5.02, 6.35, 6.68, 6.90, <b>6.93, 7.18</b>, 7.52, 8.54, 9.01, 9.04</span></p>
+<p>The 5th and 6th values are 6.93 and 7.18, so the median is (6.93 + 7.18) ÷ 2 = 7.055, about 7.06 hours. Half of the 10 students (5 of them) sleep less than the median. In Task 1(c), 6 of the 10 sleep less than the mean, because the mean (7.32) is a little larger than the median (7.06). For these sleep values the two are close.</p>
+
+<div class="task" id="task2">
+  <h3>Task 2 (about 3 minutes, calculator)</h3>
+  <p>The classes missed by the 10 students in the table are 0, 0, 12, 0, 4, 0, 2, 0, 0, 0.</p>
+  <ol type="a">
+    <li>Find the mean and the median number of classes missed.</li>
+    <li>Suppose student 3 had missed 0 classes instead of 12. Find the mean and the median again.</li>
+    <li>Which of the two numbers from (a) describes a typical student among these 10 better? Write one sentence saying why.</li>
+  </ol>
+</div>
+<details class="solution">
+  <summary>Solution to Task 2</summary>
+  <p>(a) Sum: 0 + 0 + 12 + 0 + 4 + 0 + 2 + 0 + 0 + 0 = 18. Mean: 18 ÷ 10 = 1.8 classes. Sorted: 0, 0, 0, 0, 0, 0, 0, 2, 4, 12. The 5th and 6th values are both 0, so the median is 0 classes.</p>
+  <p>(b) Sum: 6. Mean: 6 ÷ 10 = 0.6 classes. Sorted: 0, 0, 0, 0, 0, 0, 0, 0, 2, 4. The median is still 0.</p>
+  <p>(c) The median. Seven of the 10 students missed no classes, and the mean of 1.8 is pulled up by student 3 alone: changing that one value moves the mean from 1.8 to 0.6 and leaves the median at 0.</p>
+</details>
+
+<p>A value far from the rest of the data, like student 3's 12 missed classes, is called an <b>extreme value</b>. The mean uses the size of every value, so one extreme value moves it. The median uses only the order of the values, so making the largest value even larger does not change the median at all.</p>
+
+<p>Use the median when a few values are far out on one side, as with classes missed. Use the mean when the values are spread fairly evenly on both sides of the middle, as with the sleep values. When the two are close, either one describes the center.</p>
+
+<p>For all 253 students in the study, the mean number of classes missed is 2.21 and the median is 1. Of the 253 students, 94 (37%) missed no classes.</p>
+
+<!-- ============================================================ -->
+<h2 id="s4">4. Range and standard deviation</h2>
+
+<p>The mean and the median describe the center of the data. Two groups can have the same mean and still differ a lot: in one group everyone could sleep close to 8 hours, in another some could sleep 5 hours and some 11. A second number describes this <b>spread</b>.</p>
+
+<p>The simplest is the <b>range</b>: the largest value minus the smallest. For the 10 students in Section 1 it is 9.04 − 5.02 = 4.02 hours. The range uses only the two most extreme values, so one unusual student can make it large.</p>
+
+<div class="task" id="task3">
+  <h3>Task 3 (about 3 minutes, calculator)</h3>
+  <p>Two groups of five students from the data set average these hours of sleep:</p>
+  <ul>
+    <li>Group A (students 61, 73, 120, 124 and 224): 7.96, 7.90, 8.00, 8.20, 7.94</li>
+    <li>Group B (students 25, 46, 102, 108 and 126): 8.0, 8.3, 6.5, 9.8, 7.4</li>
+  </ul>
+  <ol type="a">
+    <li>Find the mean and the range of each group.</li>
+    <li>For group A, subtract the mean from each of the five values, then add the five differences. Write down the five differences and their sum.</li>
+  </ol>
+</div>
+<details class="solution">
+  <summary>Solution to Task 3</summary>
+  <p>(a) Group A: (7.96 + 7.90 + 8.00 + 8.20 + 7.94) ÷ 5 = 40.00 ÷ 5 = 8.00 hours. Range: 8.20 − 7.90 = 0.30 hours.</p>
+  <p>Group B: (8.0 + 8.3 + 6.5 + 9.8 + 7.4) ÷ 5 = 40.0 ÷ 5 = 8.0 hours. Range: 9.8 − 6.5 = 3.3 hours.</p>
+  <p>(b) The differences are −0.04, −0.10, 0.00, 0.20 and −0.06. Their sum is 0.</p>
+</details>
+
+<p>Both groups have mean 8.0 hours, and group B is far more spread out: its range is 11 times as large. A natural way to measure spread is to ask how far the values typically are from the mean. Averaging the differences from the mean does not work. They always add up to 0, as in Task 3(b), because the mean is the balance point: the negative differences cancel the positive ones. The standard deviation removes the signs by squaring.</p>
+
+<p>The <b>standard deviation</b> (SD) uses every value. It is roughly the typical distance of the values from their mean. For values <span class="var">x</span><sub>1</sub>, …, <span class="var">x<sub>n</sub></span> with mean <span class="xbar">x</span>:</p>
+<ol class="steps">
+  <li>Find the mean <span class="xbar">x</span>.</li>
+  <li>For each value, find its <b>deviation</b> from the mean: <span class="math"><span class="var">x<sub>i</sub></span> − <span class="xbar">x</span></span>. Values below the mean have negative deviations.</li>
+  <li>Square each deviation.</li>
+  <li>Add the squares and divide the total by <span class="var">n</span> − 1.</li>
+  <li>Take the square root.</li>
+</ol>
+<p>In one formula, the standard deviation <span class="var">s</span> is</p>
+<p class="display"><span class="math"><span class="var">s</span> = <span class="sqrt"><svg class="rsign" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60 L22 50 L50 100 L100 0.5" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg><span class="sr">√</span><span class="rad"><span class="frac"><span><span class="sigma"><small><span class="var">n</span></small><span class="big">Σ</span><small><span class="var">i</span> = 1</small></span>(<span class="var">x<sub>i</sub></span> − <span class="xbar">x</span>)<sup>2</sup></span><span><span class="var">n</span> − 1</span></span></span></span></span></p>
+
+<div class="notation" id="notation">
+  <p><b>Notation.</b> These symbols mean the same thing in this lecture and in lectures 8.2 and 8.3.</p>
+  <p><span class="var">n</span>: the number of values in the data set, also called the <b>sample size</b>. For the full study, <span class="var">n</span> = 253.</p>
+  <p><span class="xbar">x</span> ("x-bar"): the mean of the values, also called the <b>sample mean</b>.</p>
+  <p><span class="var">s</span>: the standard deviation computed with the five steps above, dividing by <span class="var">n</span> − 1. It is also called the <b>sample standard deviation</b>, and research papers write it as SD.</p>
+</div>
+
+<div class="task" id="task4">
+  <h3>Task 4 (about 5 minutes, calculator)</h3>
+  <p>Find the standard deviation <span class="var">s</span> of group B from Task 3: 8.0, 8.3, 6.5, 9.8 and 7.4 hours, with mean 8.0. Copy this table, fill it in, and then follow steps 4 and 5.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Student</th><th>Sleep <span class="var">x<sub>i</sub></span></th><th>Deviation <span class="var">x<sub>i</sub></span> − <span class="xbar">x</span></th><th>Squared<br>deviation</th></tr></thead>
+    <tbody>
+      <tr><td>25</td><td>8.0</td><td></td><td></td></tr>
+      <tr><td>46</td><td>8.3</td><td></td><td></td></tr>
+      <tr><td>102</td><td>6.5</td><td></td><td></td></tr>
+      <tr><td>108</td><td>9.8</td><td></td><td></td></tr>
+      <tr><td>126</td><td>7.4</td><td></td><td></td></tr>
+      <tr><td class="l">Sum</td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Produce: the five deviations and their sum, the five squared deviations and their sum, and <span class="var">s</span> rounded to two decimals.</p>
+</div>
+<details class="solution">
+  <summary>Solution to Task 4</summary>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Student</th><th>Sleep <span class="var">x<sub>i</sub></span></th><th>Deviation <span class="var">x<sub>i</sub></span> − 8.0</th><th>Squared<br>deviation</th></tr></thead>
+    <tbody>
+      <tr><td>25</td><td>8.0</td><td>0.0</td><td>0.00</td></tr>
+      <tr><td>46</td><td>8.3</td><td>0.3</td><td>0.09</td></tr>
+      <tr><td>102</td><td>6.5</td><td>−1.5</td><td>2.25</td></tr>
+      <tr><td>108</td><td>9.8</td><td>1.8</td><td>3.24</td></tr>
+      <tr><td>126</td><td>7.4</td><td>−0.6</td><td>0.36</td></tr>
+      <tr><td class="l">Sum</td><td>40.0</td><td>0.0</td><td>5.94</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Step 4: 5.94 ÷ (5 − 1) = 5.94 ÷ 4 = 1.485.</p>
+  <p>Step 5: √1.485 = 1.2186…, so <span class="var">s</span> is about 1.22 hours.</p>
+  <p>The same steps for group A give a sum of squares of 0.0552 and <span class="var">s</span> = √(0.0552 ÷ 4) = √0.0138 = 0.1175…, about 0.12 hours. Group B's SD is about 10 times as large.</p>
+</details>
+
+<h3>Why each step</h3>
+<p><b>Why square the deviations.</b> The deviations always add up to 0, as in Task 3(b) and in the table above, so their average says nothing about spread. Squaring makes every deviation positive (or 0), so they no longer cancel. Squaring also counts large deviations more heavily than small ones.</p>
+<p><b>Why the square root.</b> The squares are in hours², a unit that is hard to picture. The square root brings the answer back to hours, the unit of the data.</p>
+<p><b>Why divide by <span class="var">n</span> − 1.</b> Research papers and the spreadsheet function STDEV divide by <span class="var">n</span> − 1, and this course does the same. The reason belongs to a statistics course. Dividing by <span class="var">n</span> = 5 instead would give √(5.94 ÷ 5) = 1.09 hours for group B. For large data sets the choice hardly matters: for all 253 students the two versions give 0.965 and 0.963 hours.</p>
+
+<p><b>Reading the answer.</b> The distances of the five group B students from the mean are 0, 0.3, 1.5, 1.8 and 0.6 hours. An SD of 1.22 hours says that these students sleep roughly 1.2 hours more or less than the mean of 8.0. The plain average of the five distances is 0.84 hours. The SD comes out larger because squaring gives the larger distances more weight, which is why the SD is only roughly the typical distance.</p>
+
+<!-- ============================================================ -->
+<h2 id="s5">5. Mean, median and standard deviation in a spreadsheet</h2>
+
+<p>For all 253 students, the steps of Section 4 would take 253 deviations and 253 squares. A spreadsheet does this with built-in functions. Each one is applied to a block of cells: <code>B2:B254</code> means the cells B2, B3, …, B254 in column B.</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th class="l">Function</th><th class="l">What it gives</th></tr></thead>
+  <tbody>
+    <tr><td class="l"><code>=AVERAGE(B2:B254)</code></td><td class="l">mean of the values in B2 to B254</td></tr>
+    <tr><td class="l"><code>=MEDIAN(B2:B254)</code></td><td class="l">median</td></tr>
+    <tr><td class="l"><code>=STDEV(B2:B254)</code></td><td class="l">standard deviation (divides by <span class="var">n</span> − 1)</td></tr>
+    <tr><td class="l"><code>=MIN(B2:B254)</code>, <code>=MAX(B2:B254)</code></td><td class="l">smallest and largest value</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Spreadsheet layout</h3>
+<p>Columns A to C hold the data, one student per row, in rows 2 to 254. Column D is empty. Columns E to G, rows 1 to 7, hold the summary formulas.</p>
+<div class="tablewrap">
+<table class="sheet">
+  <thead><tr><th></th><th>A</th><th>B</th><th>C</th></tr></thead>
+  <tbody>
+    <tr><th>1</th><td class="l">Student</td><td class="l">AverageSleep</td><td class="l">ClassesMissed</td></tr>
+    <tr><th>2</th><td>1</td><td>7.18</td><td>0</td></tr>
+    <tr><th>3</th><td>2</td><td>6.93</td><td>0</td></tr>
+    <tr><th>4</th><td>3</td><td>5.02</td><td>12</td></tr>
+    <tr><th>5</th><td>4</td><td>6.90</td><td>0</td></tr>
+    <tr><th>6</th><td>5</td><td>6.35</td><td>4</td></tr>
+    <tr><th>7</th><td>6</td><td>9.04</td><td>0</td></tr>
+    <tr><th>…</th><td>…</td><td>…</td><td>…</td></tr>
+    <tr><th>254</th><td>253</td><td>8.82</td><td>3</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="tablewrap">
+<table class="sheet">
+  <thead><tr><th></th><th>E</th><th>F</th><th>G</th></tr></thead>
+  <tbody>
+    <tr><th>1</th><td class="l">Statistic</td><td class="l">Sleep (hours)</td><td class="l">Classes missed</td></tr>
+    <tr><th>2</th><td class="l">Mean</td><td class="l mono">=AVERAGE(B2:B254)</td><td class="l mono">=AVERAGE(C2:C254)</td></tr>
+    <tr><th>3</th><td class="l">Median</td><td class="l mono">=MEDIAN(B2:B254)</td><td class="l mono">=MEDIAN(C2:C254)</td></tr>
+    <tr><th>4</th><td class="l">SD</td><td class="l mono">=STDEV(B2:B254)</td><td class="l mono">=STDEV(C2:C254)</td></tr>
+    <tr><th>5</th><td class="l">Smallest</td><td class="l mono">=MIN(B2:B254)</td><td class="l mono">=MIN(C2:C254)</td></tr>
+    <tr><th>6</th><td class="l">Largest</td><td class="l mono">=MAX(B2:B254)</td><td class="l mono">=MAX(C2:C254)</td></tr>
+    <tr><th>7</th><td class="l">Range</td><td class="l mono">=F6-F5</td><td class="l mono">=G6-G5</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="small">A spreadsheet may display student 4's 6.90 as 6.9.</p>
+<div class="btnrow">
+  <button type="button" id="dl-csv">Download sleep-study.csv</button>
+  <button type="button" class="secondary" id="copy-tsv">Copy layout to clipboard</button>
+  <span class="small" id="copy-msg" aria-live="polite"></span>
+</div>
+<p class="small">The CSV file and the copied layout contain all 253 students and the formulas above. "Copy layout" copies tab-separated text: click cell A1 of an empty sheet and paste. These files and formulas have not been tested in Excel or Google Sheets.</p>
+
+<div class="task" id="task5">
+  <h3>Task 5 (about 5 minutes, spreadsheet)</h3>
+  <ol type="a">
+    <li>Open sleep-study.csv in Excel or Google Sheets, or paste the copied layout into cell A1 of an empty sheet.</li>
+    <li>Write down, rounded to two decimals, the mean, median, SD, smallest value, largest value and range of the sleep column (column F).</li>
+    <li>In an empty cell, type <code>=STDEV(8.0,8.3,6.5,9.8,7.4)</code> and compare the result with your answer to Task 4.</li>
+  </ol>
+</div>
+<details class="solution">
+  <summary>Solution to Task 5</summary>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th class="l">Statistic</th><th>Sleep (hours)</th><th>Classes missed</th></tr></thead>
+    <tbody>
+      <tr><td class="l">Mean</td><td>7.97</td><td>2.21</td></tr>
+      <tr><td class="l">Median</td><td>8.00</td><td>1.00</td></tr>
+      <tr><td class="l">SD</td><td>0.96</td><td>3.24</td></tr>
+      <tr><td class="l">Smallest</td><td>4.95</td><td>0.00</td></tr>
+      <tr><td class="l">Largest</td><td>10.62</td><td>20.00</td></tr>
+      <tr><td class="l">Range</td><td>5.67</td><td>20.00</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>(c) <code>=STDEV(8.0,8.3,6.5,9.8,7.4)</code> gives 1.2186…, the same 1.22 hours as in Task 4.</p>
+  <p>The values for classes missed (column G) are used in the next paragraph and in Section 7.</p>
+</details>
+
+<p>The researchers reported: "Average total sleep time for weekdays and weekends was 8.0 hours" [1]. The mean of 7.97 hours rounds to this 8.0.</p>
+<p>For sleep, the mean (7.97) and the median (8.00) almost agree. For classes missed, the mean (2.21) is more than twice the median (1), for the same reason as in Task 2: a few students missed many classes.</p>
+
+<!-- ============================================================ -->
+<h2 id="s6">6. Histograms</h2>
+
+<p>A <b>histogram</b> shows how the values of a data set are spread out. To draw one, split the number line into intervals of equal width, called <b>bins</b>, count how many values fall into each bin, and draw a bar over each bin whose height is that count. In Figure 1 the bins are half an hour wide: 4.5 to 5 hours, 5 to 5.5 hours, and so on. A value on the boundary between two bins goes into the bin on its right, so 7.0 hours counts in the bin from 7 to 7.5.</p>
+
+<figure>
+  <svg id="hist-sleep" class="chart" viewBox="0 0 720 340" role="img" aria-label="Histogram of average hours of sleep for 253 students"></svg>
+  <figcaption>Figure 1. Average hours of sleep per night for the 253 students [3], in bins of half an hour. The number above each bar is the number of students in that bin.</figcaption>
+</figure>
+
+<figure>
+  <svg id="hist-missed" class="chart" viewBox="0 0 720 340" role="img" aria-label="Histogram of classes missed for 253 students"></svg>
+  <figcaption>Figure 2. Classes missed in the semester by the same 253 students [3], in bins of two classes (0 or 1, 2 or 3, and so on).</figcaption>
+</figure>
+
+<div class="task" id="task6">
+  <h3>Task 6 (about 3 minutes, Figures 1 and 2)</h3>
+  <ol type="a">
+    <li>In Figure 1, which bin has the most students, and how many students are in it?</li>
+    <li>From Figure 1, how many of the 253 students average less than 7 hours of sleep? Write this as a percentage of 253.</li>
+    <li>From Figure 2, how many students missed 0 or 1 classes?</li>
+  </ol>
+</div>
+<details class="solution">
+  <summary>Solution to Task 6</summary>
+  <p>(a) The bin from 7.5 to 8 hours, with 56 students. The bin from 8 to 8.5 hours is close behind with 55.</p>
+  <p>(b) Add the bars to the left of 7: 1 + 1 + 5 + 14 + 15 = 36 students. As a percentage: 36 ÷ 253 = 0.142, about 14%.</p>
+  <p>(c) 143 students, the first bar.</p>
+</details>
+
+<p>The two histograms have different shapes. Figure 1 has one peak in the middle, near 8 hours, and falls off on both sides at about the same rate. A histogram with this shape is called <b>bell-shaped</b>. Figure 2 has its tallest bar at the left and a long, thin tail to the right: a few students missed 10 or more classes. A histogram with a long tail on the right is called <b>skewed to the right</b>. In a right-skewed data set the values in the tail pull the mean up, so the mean is larger than the median, as in Section 5.</p>
+
+<!-- ============================================================ -->
+<h2 id="s7">7. How much of the data lies within one or two standard deviations</h2>
+
+<p>The sleep data of all 253 students have mean <span class="xbar">x</span> = 7.97 hours and SD <span class="var">s</span> = 0.96 hours. "Within one SD of the mean" means between <span class="nw">7.97 − 0.96</span> and <span class="nw">7.97 + 0.96</span> hours. "Within two SDs" means between <span class="nw">7.97 − 2 × 0.96</span> and <span class="nw">7.97 + 2 × 0.96</span> hours. In Figure 3, the slider sets how many SDs to go out on each side of the mean, and the count below the figure gives the number of students in that interval.</p>
+
+<figure>
+  <svg id="hist-band" class="chart" viewBox="0 0 720 360" role="img" aria-label="Histogram of sleep with a shaded band around the mean"></svg>
+  <div class="controls">
+    <label for="k-slider">Number of SDs on each side: <b id="k-value">1</b></label>
+    <input type="range" id="k-slider" min="0.5" max="3" step="0.5" value="1">
+  </div>
+  <div class="readout" id="band-readout" aria-live="polite"></div>
+  <figcaption>Figure 3. The sleep data of Figure 1. The shaded band between the dashed lines is the interval from mean − <span class="var">k</span> × SD to mean + <span class="var">k</span> × SD, using mean 7.97 and SD 0.96, with the ends rounded to two decimals. The count is made from the 253 individual values, not from the bars. Students exactly on an end of the interval count as inside.</figcaption>
+</figure>
+
+<div class="task" id="task7">
+  <h3>Task 7 (about 3 minutes, Figure 3 and calculator)</h3>
+  <ol type="a">
+    <li>With a calculator, find the interval within one SD of the mean: from 7.97 − 0.96 to 7.97 + 0.96 hours. Then set the slider to 1, check that the dashed lines are at your two numbers, and write down the number of students inside. Turn that number into a percentage of 253.</li>
+    <li>Do the same for two SDs, with the slider set to 2.</li>
+  </ol>
+</div>
+<details class="solution">
+  <summary>Solution to Task 7</summary>
+  <p>(a) From 7.97 − 0.96 = 7.01 to 7.97 + 0.96 = 8.93 hours. 181 students, and 181 ÷ 253 = 0.715, about 72%.</p>
+  <p>Adding the four bars from 7 to 9 hours gives 34 + 56 + 55 + 39 = 184, three more than 181. The bars include two students at exactly 7.00 hours, below 7.01, and one at 8.94 hours, above 8.93. These three are outside the interval.</p>
+  <p>(b) From 7.97 − 1.92 = 6.05 to 7.97 + 1.92 = 9.89 hours. 240 students, and 240 ÷ 253 = 0.949, about 95%.</p>
+</details>
+
+<p>Many data sets with a bell-shaped histogram follow the same pattern, which gives a rule of thumb:</p>
+<p class="display" style="text-align:left"><b>Rule of thumb.</b> If a histogram is roughly bell-shaped, about 68% of the values (roughly two-thirds) lie within one SD of the mean, and about 95% lie within two SDs of the mean.</p>
+<p>The sleep data come close: 72% within one SD and 95% within two. The percentages 68% and 95% come from an ideal bell-shaped curve, called the normal curve, which real data follow only roughly. That is why the rule says "about".</p>
+<p>The rule does not apply to skewed data. For classes missed, the mean is 2.21 and the SD is 3.24. One SD below the mean is 2.21 − 3.24 = −1.03 classes, which is impossible, and 223 of the 253 students (88%) lie within one SD of the mean instead of about 68%. For data like these, the median and a histogram describe the students better than the mean and SD.</p>
+
+<!-- ============================================================ -->
+<h2 id="s8">8. Reading a reported mean and standard deviation</h2>
+
+<p>When a paper reports only the mean and SD of a measurement, the rule of thumb turns those two numbers into a picture of the group, as long as the histogram is roughly bell-shaped, as it is for the sleep data in Figure 1.</p>
+
+<div class="task" id="task8">
+  <h3>Task 8 (about 3 minutes, calculator)</h3>
+  <p>A study reports that the people in it sleep "mean 7.1 hours, SD 1.2 hours". These are the made-up numbers from Section 1. Assume the histogram is roughly bell-shaped.</p>
+  <ol type="a">
+    <li>Between which two numbers of hours do about two-thirds of the people sleep?</li>
+    <li>Between which two numbers of hours do about 95% of the people sleep?</li>
+    <li>Is a person in this study who sleeps 4 hours a night unusual? Give a reason using (b).</li>
+  </ol>
+</div>
+<details class="solution">
+  <summary>Solution to Task 8</summary>
+  <p>(a) Within one SD: 7.1 − 1.2 = 5.9 to 7.1 + 1.2 = 8.3 hours.</p>
+  <p>(b) Within two SDs: 7.1 − 2.4 = 4.7 to 7.1 + 2.4 = 9.5 hours.</p>
+  <p>(c) Yes. 4 hours is below 4.7, so this person is outside the interval that holds about 95% of the group. Only about 5% of people are outside it, and if the histogram is symmetric, about half of those, roughly 2.5%, are on the low side.</p>
+</details>
+
+<p>So "mean 7.1 hours, SD 1.2 hours" says that a typical person in the study sleeps about 7 hours, that about two-thirds of the group sleep within 1.2 hours of that, and that sleeping less than about 4.7 or more than about 9.5 hours is rare in the group. The two numbers do not tell you how much any particular person sleeps, and they do not show whether the data are skewed. When the mean and median of a measurement are far apart, or a histogram has a long tail, the median and the histogram tell you more than the mean and SD.</p>
+
+<!-- ============================================================ -->
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+  <li>American Academy of Sleep Medicine, press release "College students sleep longer but drink more and get lower grades when classes start later", June 8, 2011. <a href="https://aasm.org/college-students-sleep-longer-but-drink-more-and-get-lower-grades-when-classes-start-later/">aasm.org/college-students-sleep-longer-but-drink-more-and-get-lower-grades-when-classes-start-later/</a> (read October 4, 2026). Quoted: Thacher (Department of Psychology, St. Lawrence University) and co-author Onyper "studied 253 college students"; "Average total sleep time for weekdays and weekends was 8.0 hours."</li>
+  <li>R. Lock, documentation of the data set SleepStudy in the R package Lock5Data, version 4.0.1, January 8, 2026. <a href="https://search.r-project.org/CRAN/refmans/Lock5Data/html/SleepStudy.html">search.r-project.org/CRAN/refmans/Lock5Data/html/SleepStudy.html</a> (read October 4, 2026). Used: 253 students; the meaning of AverageSleep ("Average hours of sleep for all days") and ClassesMissed; students kept a sleep diary, did skills tests and completed a survey. The original study: S. Onyper, P. Thacher, J. Gilbert, S. Gradess, "Class Start Times, Sleep, and Academic Performance in College: A Path Analysis," <i>Chronobiology International</i> 29(3): 318–335, April 2012, <a href="https://doi.org/10.3109/07420528.2012.655868">doi:10.3109/07420528.2012.655868</a> (journal name confirmed in the Crossref record, read October 4, 2026).</li>
+  <li>Data file SleepStudy.csv (undated) from the data page of the textbook <i>Statistics: Unlocking the Power of Data</i>, 3rd edition, <a href="https://www.lock5stat.com/datapage3e.html">lock5stat.com/datapage3e.html</a>. File: <a href="https://www.lock5stat.com/datasets3e/SleepStudy.csv">lock5stat.com/datasets3e/SleepStudy.csv</a> (read October 4, 2026). Used: the AverageSleep and ClassesMissed values of all 253 students. Every statistic, table and figure in this lecture is computed from this file.</li>
+  <li>CRAN page of the R package Lock5Data, version 4.0.1, published January 8, 2026. <a href="https://cran.r-project.org/package=Lock5Data">cran.r-project.org/package=Lock5Data</a> (read October 4, 2026). Used: the package, which also contains this data set, is licensed under GPL-2.</li>
+</ol>
+
+</main>
+
+<script>
+/* Data: AverageSleep and ClassesMissed for the 253 students, in file order, from source [3]. */
+var DATA = {"sleep":[7.18,6.93,5.02,6.9,6.35,9.04,7.52,9.01,8.54,6.68,8.09,8.43,6.89,7.45,8.93,8.9,8.34,8.22,8.39,7.43,7.29,8.57,9.39,9.57,8.0,9.87,8.75,8.57,7.71,7.43,8.32,9.07,8.64,9.06,7.14,7.79,6.93,8.33,9.68,8.43,7.82,7.93,7.98,8.93,8.46,8.3,8.61,6.14,6.07,6.39,8.36,7.68,8.27,9.07,6.14,5.78,8.9,7.05,8.29,6.29,7.96,8.16,7.24,7.13,6.12,9.29,10.45,7.98,9.14,8.66,7.85,8.44,7.9,7.96,8.73,8.21,8.07,8.24,7.59,8.94,8.11,8.23,8.42,9.05,4.95,6.0,9.19,7.21,8.8,6.82,9.64,7.29,8.43,8.18,7.0,9.0,7.87,7.46,8.86,7.64,8.11,6.5,6.51,7.83,7.63,8.49,9.96,9.8,7.93,7.05,7.61,7.84,8.52,8.59,6.36,8.54,7.21,7.64,7.05,8.0,7.25,9.25,7.71,8.2,7.6,7.4,7.81,9.15,8.71,5.93,7.54,7.73,7.67,7.18,8.68,7.88,6.0,7.39,7.87,5.75,9.32,6.78,6.43,9.0,9.19,7.99,6.36,7.26,7.53,7.64,8.89,7.83,7.04,8.0,8.79,8.17,8.18,9.85,7.89,7.5,8.21,8.71,8.93,6.93,7.79,8.21,8.29,7.3,7.86,8.18,7.75,7.96,7.64,6.51,9.87,7.86,6.69,10.62,7.11,8.04,8.61,6.57,8.43,8.75,8.29,7.32,8.49,7.57,7.43,8.88,7.43,7.5,6.19,5.96,7.52,8.07,7.98,8.81,8.82,9.05,7.63,8.75,6.43,7.93,9.61,8.42,7.38,8.19,8.24,8.46,8.9,7.93,6.96,7.93,8.39,8.57,8.23,9.11,8.43,7.68,8.36,7.91,8.27,7.94,8.68,7.44,7.24,8.21,9.64,9.21,7.29,5.64,7.25,8.61,7.0,7.14,8.26,7.98,7.75,8.26,10.0,8.75,8.86,8.24,6.5,8.54,8.38,7.61,7.55,9.17,8.07,8.55,8.82],"missed":[0,0,12,0,4,0,2,0,0,0,0,0,0,6,1,0,5,0,0,20,4,1,1,5,0,20,10,0,3,2,0,0,0,6,0,0,1,0,5,4,1,0,1,2,0,2,6,1,2,0,0,0,3,4,1,1,2,2,0,3,2,1,5,2,14,10,1,0,0,4,1,4,0,2,1,2,1,0,3,2,0,3,0,2,15,0,0,0,0,0,1,3,0,2,1,1,7,1,6,4,0,0,1,0,2,0,1,7,1,0,0,0,0,0,3,0,1,2,0,7,2,0,2,5,1,4,4,0,7,2,0,1,1,0,4,1,0,1,2,4,0,2,2,2,2,0,6,13,7,1,0,3,7,1,0,1,1,0,0,0,0,0,15,0,0,0,0,3,4,2,0,0,0,3,2,0,1,2,0,1,1,1,5,3,3,1,4,2,2,5,0,1,3,6,5,1,0,2,0,6,6,0,2,14,3,1,0,1,1,4,1,0,1,1,0,1,2,0,6,2,2,2,0,3,2,5,2,4,1,0,6,0,0,0,6,0,1,2,0,3,0,0,2,0,8,0,10,0,7,1,1,0,3]};
+
+(function () {
+  var sleep = DATA.sleep, missed = DATA.missed;
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent, text) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  /* Draw a histogram.
+     svg: target; labels: tick label per bin edge or per bar; counts: bar heights;
+     opts: {W,H, ymax, ystep, xlabel, ylabel, edgeLabels (array, length counts+1) or barLabels (length counts),
+            colorFor(i) -> color, band: {x0,x1} in bin units (0..counts.length)} */
+  function histogram(svg, counts, opts) {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var narrow = window.innerWidth < 600;
+    var W = narrow ? 440 : 720, H = narrow ? 300 : opts.H, L = narrow ? 48 : 58, R = 12, T = 26, B = (narrow && opts.barLabels) ? 74 : 62;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var small = narrow ? 13 : 14;
+    var pw = W - L - R, ph = H - T - B, nb = counts.length;
+    var bw = pw / nb;
+    function X(u) { return L + u * bw; }
+    function Y(c) { return T + ph - c / opts.ymax * ph; }
+    for (var g = 0; g <= opts.ymax; g += opts.ystep) {
+      el('line', {x1: L, x2: L + pw, y1: Y(g), y2: Y(g), stroke: css('--line'), 'stroke-width': 1}, svg);
+      el('text', {x: L - 6, y: Y(g) + 4, 'text-anchor': 'end', 'font-size': small}, svg, String(g));
+    }
+    for (var i = 0; i < nb; i++) {
+      var c = counts[i];
+      el('rect', {x: X(i) + 1, y: Y(c), width: bw - 2, height: Y(0) - Y(c),
+                  fill: opts.colorFor ? opts.colorFor(i) : css('--bar')}, svg);
+      el('text', {x: X(i) + bw / 2, y: Y(c) - 5, 'text-anchor': 'middle', 'font-size': narrow ? 12 : 13}, svg, String(c));
+    }
+    if (opts.band) {
+      el('rect', {x: X(opts.band.x0), y: T - 6, width: X(opts.band.x1) - X(opts.band.x0), height: ph + 6,
+                  fill: css('--accent'), 'fill-opacity': 0.18}, svg);
+      [opts.band.x0, opts.band.x1].forEach(function (u) {
+        el('line', {x1: X(u), x2: X(u), y1: T - 6, y2: Y(0), stroke: css('--accent'), 'stroke-width': 2,
+                    'stroke-dasharray': '6 4'}, svg);
+      });
+    }
+    el('line', {x1: L, x2: L + pw, y1: Y(0), y2: Y(0), stroke: css('--ink'), 'stroke-width': 1.5}, svg);
+    if (opts.edgeLabels) {
+      opts.edgeLabels.forEach(function (lab, j) {
+        el('line', {x1: X(j), x2: X(j), y1: Y(0), y2: Y(0) + 5, stroke: css('--ink')}, svg);
+        if (lab !== '') el('text', {x: X(j), y: Y(0) + 22, 'text-anchor': 'middle', 'font-size': 14}, svg, lab);
+      });
+    }
+    if (opts.barLabels) {
+      opts.barLabels.forEach(function (lab, j) {
+        var cx = X(j) + bw / 2, cy = Y(0) + 18;
+        if (narrow) el('text', {x: cx + 4, y: cy, 'text-anchor': 'end', 'font-size': small,
+                                transform: 'rotate(-45 ' + (cx + 4) + ' ' + cy + ')'}, svg, lab);
+        else el('text', {x: cx, y: cy + 4, 'text-anchor': 'middle', 'font-size': small}, svg, lab);
+      });
+    }
+    el('text', {x: L + pw / 2, y: H - 14, 'text-anchor': 'middle', 'font-size': 15}, svg, opts.xlabel);
+    var yx = narrow ? 12 : 16;
+    el('text', {x: yx, y: T + ph / 2, 'text-anchor': 'middle', 'font-size': narrow ? 12 : 15,
+                transform: 'rotate(-90 ' + yx + ' ' + (T + ph / 2) + ')'}, svg, opts.ylabel);
+    return {X: X, Y: Y};
+  }
+
+  /* Sleep histogram: bins of 0.5 h from 4.5 to 11.0, left-closed. */
+  var lo0 = 4.5, w = 0.5, nb = 13;
+  var sleepCounts = new Array(nb).fill(0);
+  sleep.forEach(function (x) {
+    var j = Math.floor(Math.round((x - lo0) * 100) / (w * 100));
+    sleepCounts[j]++;
+  });
+  var edgeLabels = [];
+  for (var j = 0; j <= nb; j++) {
+    var v = lo0 + j * w;
+    edgeLabels.push(v % 1 === 0 ? String(v) : '');
+  }
+  /* Classes missed: bins 0-1, 2-3, ..., 20-21. */
+  var mCounts = new Array(11).fill(0);
+  missed.forEach(function (x) { mCounts[Math.floor(x / 2)]++; });
+  var mLabels = [];
+  for (var b = 0; b < 11; b++) mLabels.push((2 * b) + '–' + (2 * b + 1));
+
+  function drawStatic() {
+  histogram(document.getElementById('hist-sleep'), sleepCounts, {
+    W: 720, H: 340, ymax: 60, ystep: 10, edgeLabels: edgeLabels,
+    xlabel: 'Average sleep per night (hours)', ylabel: 'Number of students'
+  });
+  histogram(document.getElementById('hist-missed'), mCounts, {
+    W: 720, H: 340, ymax: 150, ystep: 25, barLabels: mLabels,
+    xlabel: 'Classes missed in the semester', ylabel: 'Number of students'
+  });
+  }
+
+  /* Interactive band. */
+  var MEAN = 7.97, SD = 0.96;
+  var slider = document.getElementById('k-slider');
+  function r2(x) { return Math.round(x * 100) / 100; }
+  function fmt(x) { return x.toFixed(2); }
+  function drawBand() {
+    var k = parseFloat(slider.value);
+    var a = r2(MEAN - k * SD), b = r2(MEAN + k * SD);
+    var inside = sleep.filter(function (x) { return x >= a - 1e-9 && x <= b + 1e-9; }).length;
+    document.getElementById('k-value').textContent = String(k);
+    var x0 = Math.max(0, (a - lo0) / w), x1 = Math.min(nb, (b - lo0) / w);
+    histogram(document.getElementById('hist-band'), sleepCounts, {
+      W: 720, H: 360, ymax: 60, ystep: 10, edgeLabels: edgeLabels,
+      band: {x0: x0, x1: x1},
+      xlabel: 'Average sleep per night (hours)', ylabel: 'Number of students'
+    });
+    document.getElementById('band-readout').innerHTML =
+      'Students inside the shaded interval: <b>' + inside + '</b> of 253.';
+    window.__band = {lo: fmt(a), hi: fmt(b), count: inside};
+  }
+  slider.addEventListener('input', drawBand);
+  var lastNarrow = null;
+  function drawAll() {
+    var n = window.innerWidth < 600;
+    if (n === lastNarrow) return;
+    lastNarrow = n; drawStatic(); drawBand();
+  }
+  window.addEventListener('resize', drawAll);
+  drawAll();
+
+  /* Spreadsheet layout: CSV download and tab-separated copy. */
+  var formulas = [
+    ['Statistic', 'Sleep (hours)', 'Classes missed'],
+    ['Mean', '=AVERAGE(B2:B254)', '=AVERAGE(C2:C254)'],
+    ['Median', '=MEDIAN(B2:B254)', '=MEDIAN(C2:C254)'],
+    ['SD', '=STDEV(B2:B254)', '=STDEV(C2:C254)'],
+    ['Smallest', '=MIN(B2:B254)', '=MIN(C2:C254)'],
+    ['Largest', '=MAX(B2:B254)', '=MAX(C2:C254)'],
+    ['Range', '=F6-F5', '=G6-G5']
+  ];
+  function rows() {
+    var out = [];
+    for (var i = 0; i <= 253; i++) {
+      var r = i === 0 ? ['Student', 'AverageSleep', 'ClassesMissed'] : [String(i), String(sleep[i - 1]), String(missed[i - 1])];
+      r.push('');
+      if (i < formulas.length) r = r.concat(formulas[i]); else r = r.concat(['', '', '']);
+      out.push(r);
+    }
+    return out;
+  }
+  function trimRow(r) { while (r.length && r[r.length - 1] === '') r.pop(); return r; }
+  function toCSV() { return rows().map(function (r) { return trimRow(r).join(','); }).join('\r\n') + '\r\n'; }
+  function toTSV() { return rows().map(function (r) { return trimRow(r).join('\t'); }).join('\n') + '\n'; }
+  document.getElementById('dl-csv').addEventListener('click', function () {
+    var blob = new Blob([toCSV()], {type: 'text/csv'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sleep-study.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  var msg = document.getElementById('copy-msg');
+  document.getElementById('copy-tsv').addEventListener('click', function () {
+    var text = toTSV();
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      msg.textContent = ok ? 'Copied 254 rows. Paste into cell A1.' : 'Copy failed. Use the CSV download instead.';
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        msg.textContent = 'Copied 254 rows. Paste into cell A1.';
+      }, fallback);
+    } else fallback();
+  });
+  window.addEventListener('beforeprint', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('details.solution'), function (d) { d.open = true; });
+  });
+  window.__toCSV = toCSV; window.__toTSV = toTSV; window.__counts = {sleep: sleepCounts, missed: mCounts};
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-07/7-3-expected-return-and-risk/" style="color:inherit">&larr; 7.3 Expected return and risk</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-08/8-2-scatterplots-and-regression-lines/" style="color:inherit">8.2 Scatterplots and regression lines &rarr;</a></nav>
+</body>
+</html>

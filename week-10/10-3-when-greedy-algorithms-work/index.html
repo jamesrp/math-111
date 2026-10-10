@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When greedy algorithms work</title>
+<style>
+:root{
+  --ink:#1d2329; --muted:#56606b; --bg:#ffffff; --panel:#f4f6f8; --line:#c9d0d7;
+  --accent:#b34700; --accent-soft:#fbeee4; --good:#1f6f43; --blue:#1f5fa8; --blue-soft:#e8f0fa;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+.course{font-size:.9rem;color:var(--muted);margin:0 0 4px}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 18px}
+h2{font-size:1.35rem;margin:38px 0 10px;padding-top:10px;border-top:1px solid var(--line)}
+h3{font-size:1.08rem;margin:22px 0 6px}
+p,li{max-width:72ch}
+table{border-collapse:collapse;margin:10px 0 16px;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+figure{margin:12px 0 18px}
+figure svg{width:100%;max-width:560px;height:auto;display:block;background:#fbfcfd;border:1px solid var(--line);border-radius:6px}
+figcaption{font-size:.9rem;color:var(--muted);margin-top:4px;max-width:560px}
+svg .faint{stroke:#aeb7c0;stroke-width:2.5;stroke-dasharray:6 7}
+svg .strong{stroke:#1d2329;stroke-width:7}
+svg .strong.thin{stroke-width:3.5}
+svg .inside{stroke:#1d2329;stroke-width:3.5}
+svg .leave{stroke:var(--accent);stroke-width:4;stroke-dasharray:12 7}
+svg .cycle{stroke:var(--blue);stroke-width:7}
+svg .removed{stroke:#9aa3ab;stroke-width:4;stroke-dasharray:3 7}
+svg .group{fill:var(--accent-soft);stroke:var(--accent-soft);stroke-width:70;stroke-linejoin:round}
+svg .node{fill:#fff;stroke:#1d2329;stroke-width:3.5}
+svg .node.hi{fill:var(--accent);stroke:var(--accent)}
+svg .tl{font-size:21px;font-weight:600;fill:#1d2329;paint-order:stroke;stroke:#fbfcfd;stroke-width:5px}
+svg .el{font-size:20px;font-weight:600;fill:#1d2329;text-anchor:middle;paint-order:stroke;stroke:#fbfcfd;stroke-width:5px}
+svg .scale line{stroke:#56606b;stroke-width:3}
+svg .scale text{font-size:18px;fill:#56606b}
+svg .scale path.north{fill:#56606b}
+svg .scale text.north{font-weight:700}
+.task{border:2px solid var(--accent);border-radius:8px;padding:12px 14px;margin:18px 0 6px;background:var(--accent-soft)}
+.task h3{margin:0 0 6px;color:var(--accent)}
+.task p:last-child,.task ol:last-child{margin-bottom:0}
+details.solution{border:1px solid var(--line);border-radius:8px;margin:0 0 18px;background:var(--panel)}
+details.solution summary{cursor:pointer;padding:9px 14px;font-weight:600}
+details.solution > div{padding:0 14px 10px}
+.rule{border-left:4px solid var(--blue);background:var(--blue-soft);padding:10px 14px;margin:14px 0}
+.rule p{margin:4px 0}
+.small{font-size:.9rem;color:var(--muted)}
+.tool{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:14px 0;background:var(--panel)}
+.tool label{display:inline-block;margin:4px 12px 4px 0}
+.tool input{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:4px}
+.tool input[type=text]{width:9em}
+.tool input[type=number]{width:5em}
+.tool button{font:inherit;padding:5px 12px;border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:4px;cursor:pointer}
+.tool table{font-size:.9rem}
+tr.fail td{background:#fde2d3}
+#cc-msg{min-height:1.2em;color:var(--accent)}
+ol.sources li{margin-bottom:8px;overflow-wrap:anywhere}
+a{color:var(--blue)}
+@media (max-width:520px){
+  body{font-size:16px}
+  h1{font-size:1.55rem}
+  th,td{padding:4px 6px}
+  .course-table thead{display:none}
+  .course-table,.course-table tbody,.course-table tr,.course-table td{display:block;width:100%}
+  .course-table tr{border:1px solid var(--line);border-radius:6px;margin:0 0 10px;padding:4px 0}
+  .course-table td{border:0;text-align:left;padding:3px 10px}
+  .course-table td::before{content:attr(data-label) ": ";font-weight:600}
+  svg .tl{font-size:25px}
+  svg .el{font-size:24px}
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-10/10-2-minimum-spanning-trees/" style="color:inherit">&larr; 10.2 Minimum spanning trees</a><a href="../../" style="color:inherit">All lectures</a><span></span></nav>
+
+<main>
+<p class="course">Math 111 · Module: Building mountain roads (week 10) · Lecture 3 of 3</p>
+<h1>When greedy algorithms work</h1>
+
+<h2 id="s1">1. The six towns and their minimum spanning tree</h2>
+
+<p>The map is the one from Lectures 1 and 2: six towns in Okanogan County, Washington [1]–[6], and eight candidate road segments, one for each pair of towns less than 25 miles apart in a straight line. Each cost is the straight-line distance times $10.948 million per mile, the FHWA typical cost for a two-lane rural road on a new alignment in mountainous terrain [7], rounded to the nearest million. All costs are in millions of 2014 dollars. The simplifications named in Lecture 10.1 still apply: straight-line distances, one cost per mile for every segment, no existing roads, and a made-up 25-mile cutoff.</p>
+
+<p>In Lecture 10.2, Kruskal's algorithm went down the list of edges from cheapest to most expensive. It built each edge whose two towns were not yet joined by a path of built edges, skipped each edge that would have closed a cycle, and stopped at 6&nbsp;−&nbsp;1&nbsp;=&nbsp;5 edges.</p>
+
+<div class="scroll">
+<table>
+<thead><tr><th class="num">Row</th><th>Road segment</th><th class="num">Miles</th><th class="num">Cost ($&nbsp;million)</th><th>Kruskal</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Pateros–Brewster</td><td class="num">7.5</td><td class="num">82</td><td>build</td></tr>
+<tr><td class="num">2</td><td>Winthrop–Twisp</td><td class="num">7.9</td><td class="num">86</td><td>build</td></tr>
+<tr><td class="num">3</td><td>Mazama–Winthrop</td><td class="num">13.2</td><td class="num">145</td><td>build</td></tr>
+<tr><td class="num">4</td><td>Mazama–Twisp</td><td class="num">20.4</td><td class="num">223</td><td>skip</td></tr>
+<tr><td class="num">5</td><td>Winthrop–Conconully</td><td class="num">20.5</td><td class="num">224</td><td>build</td></tr>
+<tr><td class="num">6</td><td>Twisp–Conconully</td><td class="num">21.8</td><td class="num">239</td><td>skip</td></tr>
+<tr><td class="num">7</td><td>Twisp–Pateros</td><td class="num">23.8</td><td class="num">261</td><td>build</td></tr>
+<tr><td class="num">8</td><td>Twisp–Brewster</td><td class="num">24.7</td><td class="num">270</td><td>not checked</td></tr>
+</tbody>
+</table>
+</div>
+
+<figure>
+<svg viewBox="0 -12 600 540" role="img" aria-label="Map of the six towns. The five roads of the minimum spanning tree are thick, total 798 million dollars; the three other candidate roads are dashed."><g class="scale"><line x1="40" y1="500" x2="160" y2="500"/><line x1="40" y1="492" x2="40" y2="508"/><line x1="160" y1="492" x2="160" y2="508"/><text x="100" y="490" text-anchor="middle">10 miles</text><text x="40" y="440" text-anchor="middle" class="north">N</text><path d="M40 448 L33 466 L40 461 L47 466 Z" class="north"/></g><line x1="120.0" y1="40.0" x2="275.0" y2="229.7" class="faint"/><text x="136" y="115" class="el">223</text><line x1="275.0" y1="229.7" x2="480.6" y2="67.6" class="faint"/><text x="414" y="159" class="el">239</text><line x1="275.0" y1="229.7" x2="478.0" y2="445.5" class="faint"/><text x="398" y="327" class="el">270</text><line x1="120.0" y1="40.0" x2="244.0" y2="139.9" class="strong"/><text x="212" y="85" class="el">145</text><line x1="244.0" y1="139.9" x2="275.0" y2="229.7" class="strong"/><text x="292" y="191" class="el">86</text><line x1="244.0" y1="139.9" x2="480.6" y2="67.6" class="strong"/><text x="350" y="91" class="el">224</text><line x1="275.0" y1="229.7" x2="398.4" y2="486.5" class="strong"/><text x="313" y="377" class="el">261</text><line x1="398.4" y1="486.5" x2="478.0" y2="445.5" class="strong"/><text x="424" y="447" class="el">82</text><circle cx="120.0" cy="40.0" r="9" class="node"/><text x="120.0" y="25.0" text-anchor="middle" class="tl">Mazama</text><circle cx="244.0" cy="139.9" r="9" class="node"/><text x="226.0" y="150.9" text-anchor="end" class="tl">Winthrop</text><circle cx="275.0" cy="229.7" r="9" class="node"/><text x="257.0" y="250.7" text-anchor="end" class="tl">Twisp</text><circle cx="480.6" cy="67.6" r="9" class="node"/><text x="480.6" y="52.599999999999994" text-anchor="middle" class="tl">Conconully</text><circle cx="398.4" cy="486.5" r="9" class="node"/><text x="380.4" y="501.5" text-anchor="end" class="tl">Pateros</text><circle cx="478.0" cy="445.5" r="9" class="node"/><text x="478.0" y="492.5" text-anchor="middle" class="tl">Brewster</text></svg>
+<figcaption>Figure 1. The minimum spanning tree (thick), total 82 + 86 + 145 + 224 + 261 = $798 million. The three dashed roads are not in it. Costs in $ million (2014 dollars). Towns are placed by latitude and longitude, to scale.</figcaption>
+</figure>
+
+<p>A computer check in Lecture 10.2 added up all 24 spanning trees of this graph. Only Kruskal's tree costs $798 million, and the next cheapest costs $807 million. That check covers this one map. Lecture 10.2 also used a fact it did not prove, the swap test, and promised a reason why each choice Kruskal's algorithm makes is safe. Section 3 gives both reasons, and they hold on every map.</p>
+
+<p>Kruskal's algorithm takes the cheapest edge it can at every step and ends with the cheapest tree. Two everyday problems have a rule of the same kind, which takes the option that looks best at each step:</p>
+<ul>
+<li>Driving from one town to another: at each town, drive to the nearest town you have not visited yet.</li>
+<li>Making change: hand over the largest coin that does not go over the amount still owed, and repeat.</li>
+</ul>
+<p>Whether a rule like this gives the best answer depends on the problem.</p>
+
+<h2 id="s2">2. Greedy algorithms</h2>
+
+<p>A <b>greedy algorithm</b> builds an answer one step at a time. At each step it takes the option that looks best right now, and it never goes back to change an earlier step. Kruskal's algorithm is greedy: each step builds one edge, and the option that looks best is the cheapest edge that does not close a cycle. Prim's algorithm from Lecture 10.2 is greedy too.</p>
+
+<div class="scroll">
+<table>
+<thead><tr><th>Problem</th><th>One step</th><th>Greedy choice at each step</th></tr></thead>
+<tbody>
+<tr><td>Minimum spanning tree (Kruskal)</td><td>Build one edge</td><td>The cheapest edge that does not close a cycle</td></tr>
+<tr><td>Minimum spanning tree (Prim)</td><td>Build one edge</td><td>The cheapest edge with one town in the group and one outside</td></tr>
+<tr><td>Shortest drive from one town to another</td><td>Drive to one more town</td><td>The nearest town, along a road, that you have not visited yet</td></tr>
+<tr><td>Change for an amount, with as few coins as possible</td><td>Hand over one coin</td><td>The largest coin that is not more than the amount still owed</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Greedy algorithms are quick to follow by hand. For each problem, either an argument shows that the greedy rule always gives the best answer, or one example shows that it can fail.</p>
+
+<h2 id="s3">3. Why each road Kruskal's algorithm builds is safe</h2>
+
+<p>In this section a <b>group</b> is a set of towns with at least one town but not all six. An edge <b>leaves the group</b> if one of its towns is inside the group and the other is outside. Prim's algorithm in Lecture 10.2 used the same idea: at each step it built the cheapest edge leaving its group. For example, with the group {Mazama, Winthrop, Twisp}, the edge Twisp–Pateros leaves the group, and the edge Mazama–Winthrop is inside it.</p>
+
+<p>An edge is <b>safe</b> if some minimum spanning tree contains it. On this map no two costs are equal and there is only one minimum spanning tree, so the safe edges are the five roads of Figure 1.</p>
+
+<figure>
+<svg viewBox="0 -12 600 540" role="img" aria-label="The group Mazama, Winthrop, Twisp is shaded on the map of all eight candidate roads with their costs."><g class="scale"><line x1="40" y1="500" x2="160" y2="500"/><line x1="40" y1="492" x2="40" y2="508"/><line x1="160" y1="492" x2="160" y2="508"/><text x="100" y="490" text-anchor="middle">10 miles</text><text x="40" y="440" text-anchor="middle" class="north">N</text><path d="M40 448 L33 466 L40 461 L47 466 Z" class="north"/></g><polygon points="120.0,40.0 244.0,139.9 275.0,229.7" class="group"/><line x1="120.0" y1="40.0" x2="244.0" y2="139.9" class="strong thin"/><text x="212" y="85" class="el">145</text><line x1="120.0" y1="40.0" x2="275.0" y2="229.7" class="strong thin"/><text x="136" y="115" class="el">223</text><line x1="244.0" y1="139.9" x2="275.0" y2="229.7" class="strong thin"/><text x="292" y="191" class="el">86</text><line x1="244.0" y1="139.9" x2="480.6" y2="67.6" class="strong thin"/><text x="350" y="91" class="el">224</text><line x1="275.0" y1="229.7" x2="480.6" y2="67.6" class="strong thin"/><text x="414" y="159" class="el">239</text><line x1="275.0" y1="229.7" x2="398.4" y2="486.5" class="strong thin"/><text x="313" y="377" class="el">261</text><line x1="275.0" y1="229.7" x2="478.0" y2="445.5" class="strong thin"/><text x="398" y="327" class="el">270</text><line x1="398.4" y1="486.5" x2="478.0" y2="445.5" class="strong thin"/><text x="424" y="447" class="el">82</text><circle cx="120.0" cy="40.0" r="9" class="node hi"/><text x="120.0" y="25.0" text-anchor="middle" class="tl">Mazama</text><circle cx="244.0" cy="139.9" r="9" class="node hi"/><text x="226.0" y="150.9" text-anchor="end" class="tl">Winthrop</text><circle cx="275.0" cy="229.7" r="9" class="node hi"/><text x="257.0" y="250.7" text-anchor="end" class="tl">Twisp</text><circle cx="480.6" cy="67.6" r="9" class="node"/><text x="480.6" y="52.599999999999994" text-anchor="middle" class="tl">Conconully</text><circle cx="398.4" cy="486.5" r="9" class="node"/><text x="380.4" y="501.5" text-anchor="end" class="tl">Pateros</text><circle cx="478.0" cy="445.5" r="9" class="node"/><text x="478.0" y="492.5" text-anchor="middle" class="tl">Brewster</text></svg>
+<figcaption>Figure 2. The group {Mazama, Winthrop, Twisp} is shaded. All eight candidate roads are drawn, with costs in $ million (2014 dollars).</figcaption>
+</figure>
+
+<div class="task">
+<h3>Task 1 (about 3 minutes, paper)</h3>
+<p>Use Figure 2 or the table in Section 1. Write down every edge that leaves the group {Mazama, Winthrop, Twisp}, with its cost, and circle the cheapest. Then write whether the cheapest one is a road of the minimum spanning tree in Figure 1.</p>
+</div>
+<details class="solution"><summary>Solution to Task 1</summary><div>
+<div class="scroll"><table>
+<thead><tr><th>Edge leaving the group</th><th class="num">Cost ($&nbsp;million)</th></tr></thead>
+<tbody>
+<tr><td><b>Winthrop–Conconully</b></td><td class="num"><b>224</b></td></tr>
+<tr><td>Twisp–Conconully</td><td class="num">239</td></tr>
+<tr><td>Twisp–Pateros</td><td class="num">261</td></tr>
+<tr><td>Twisp–Brewster</td><td class="num">270</td></tr>
+</tbody></table></div>
+<p>Four edges leave the group. The cheapest is Winthrop–Conconully at $224 million, and it is a road of the minimum spanning tree. The other edges are not on the list: Mazama–Winthrop, Mazama–Twisp and Winthrop–Twisp have both towns inside the group, and Pateros–Brewster has both towns outside it.</p>
+</div></details>
+
+<div class="rule">
+<p><b>Safe-edge rule.</b> Take any group of towns. A cheapest edge leaving the group is safe: some minimum spanning tree contains it.</p>
+</div>
+
+<p>Network N is a spanning tree with five roads: Pateros–Brewster, Winthrop–Twisp, Mazama–Winthrop, Twisp–Conconully and Twisp–Pateros. It does not contain Winthrop–Conconully, the cheapest edge leaving the group {Mazama, Winthrop, Twisp}. Task 2 turns N into a tree that does contain it.</p>
+
+<figure>
+<svg viewBox="0 -12 600 540" role="img" aria-label="Network N, total 813 million dollars. It does not use Winthrop–Conconully."><g class="scale"><line x1="40" y1="500" x2="160" y2="500"/><line x1="40" y1="492" x2="40" y2="508"/><line x1="160" y1="492" x2="160" y2="508"/><text x="100" y="490" text-anchor="middle">10 miles</text><text x="40" y="440" text-anchor="middle" class="north">N</text><path d="M40 448 L33 466 L40 461 L47 466 Z" class="north"/></g><polygon points="120.0,40.0 244.0,139.9 275.0,229.7" class="group"/><line x1="120.0" y1="40.0" x2="244.0" y2="139.9" class="strong"/><text x="212" y="85" class="el">145</text><line x1="120.0" y1="40.0" x2="275.0" y2="229.7" class="faint"/><text x="136" y="115" class="el">223</text><line x1="244.0" y1="139.9" x2="275.0" y2="229.7" class="strong"/><text x="292" y="191" class="el">86</text><line x1="244.0" y1="139.9" x2="480.6" y2="67.6" class="leave"/><text x="350" y="91" class="el">224</text><line x1="275.0" y1="229.7" x2="480.6" y2="67.6" class="strong"/><text x="414" y="159" class="el">239</text><line x1="275.0" y1="229.7" x2="398.4" y2="486.5" class="strong"/><text x="313" y="377" class="el">261</text><line x1="275.0" y1="229.7" x2="478.0" y2="445.5" class="faint"/><text x="398" y="327" class="el">270</text><line x1="398.4" y1="486.5" x2="478.0" y2="445.5" class="strong"/><text x="424" y="447" class="el">82</text><circle cx="120.0" cy="40.0" r="9" class="node hi"/><text x="120.0" y="25.0" text-anchor="middle" class="tl">Mazama</text><circle cx="244.0" cy="139.9" r="9" class="node hi"/><text x="226.0" y="150.9" text-anchor="end" class="tl">Winthrop</text><circle cx="275.0" cy="229.7" r="9" class="node hi"/><text x="257.0" y="250.7" text-anchor="end" class="tl">Twisp</text><circle cx="480.6" cy="67.6" r="9" class="node"/><text x="480.6" y="52.599999999999994" text-anchor="middle" class="tl">Conconully</text><circle cx="398.4" cy="486.5" r="9" class="node"/><text x="380.4" y="501.5" text-anchor="end" class="tl">Pateros</text><circle cx="478.0" cy="445.5" r="9" class="node"/><text x="478.0" y="492.5" text-anchor="middle" class="tl">Brewster</text></svg>
+<figcaption>Figure 3. Network N (thick roads). The group {Mazama, Winthrop, Twisp} is shaded. The dashed orange road Winthrop–Conconully is not in N; the gray dashed roads are not in N either.</figcaption>
+</figure>
+
+<div class="task">
+<h3>Task 2 (about 5 minutes, paper and calculator)</h3>
+<ol type="a">
+<li>Add up the costs of the five roads of network N.</li>
+<li>Add the edge Winthrop–Conconully to N. This closes a cycle. Write the towns of the cycle in order.</li>
+<li>On that cycle, find the edge other than Winthrop–Conconully that leaves the group {Mazama, Winthrop, Twisp}. Remove it. Write the new total, and say which spanning tree you now have.</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 2</summary><div>
+<p>(a) 82 + 86 + 145 + 239 + 261 = $813 million.</p>
+<p>(b) In N, the path from Winthrop to Conconully is Winthrop → Twisp → Conconully. With the new edge the cycle is Winthrop → Conconully → Twisp → Winthrop.</p>
+<p>(c) The cycle has three edges. Winthrop–Conconully leaves the group. Twisp–Conconully also leaves it, since Twisp is inside and Conconully is outside. Winthrop–Twisp is inside the group. Remove Twisp–Conconully ($239 million). The new total is 813 + 224 − 239 = $798 million. Every town is still connected: a trip that used Twisp–Conconully now goes Twisp → Winthrop → Conconully. The five roads are the minimum spanning tree of Figure 1. This is the swap of Lecture 10.2, Task 4(a), run backwards.</p>
+<figure>
+<svg viewBox="0 -12 600 540" role="img" aria-label="The swap: Winthrop–Conconully added, Twisp–Conconully removed, total 798 million dollars."><g class="scale"><line x1="40" y1="500" x2="160" y2="500"/><line x1="40" y1="492" x2="40" y2="508"/><line x1="160" y1="492" x2="160" y2="508"/><text x="100" y="490" text-anchor="middle">10 miles</text><text x="40" y="440" text-anchor="middle" class="north">N</text><path d="M40 448 L33 466 L40 461 L47 466 Z" class="north"/></g><polygon points="120.0,40.0 244.0,139.9 275.0,229.7" class="group"/><line x1="120.0" y1="40.0" x2="244.0" y2="139.9" class="strong"/><text x="212" y="85" class="el">145</text><line x1="120.0" y1="40.0" x2="275.0" y2="229.7" class="faint"/><text x="136" y="115" class="el">223</text><line x1="244.0" y1="139.9" x2="275.0" y2="229.7" class="cycle"/><text x="292" y="191" class="el">86</text><line x1="244.0" y1="139.9" x2="480.6" y2="67.6" class="cycle"/><text x="350" y="91" class="el">224 added</text><line x1="275.0" y1="229.7" x2="480.6" y2="67.6" class="removed"/><text x="414" y="159" class="el">239 removed</text><line x1="275.0" y1="229.7" x2="398.4" y2="486.5" class="strong"/><text x="313" y="377" class="el">261</text><line x1="275.0" y1="229.7" x2="478.0" y2="445.5" class="faint"/><text x="398" y="327" class="el">270</text><line x1="398.4" y1="486.5" x2="478.0" y2="445.5" class="strong"/><text x="424" y="447" class="el">82</text><circle cx="120.0" cy="40.0" r="9" class="node hi"/><text x="120.0" y="25.0" text-anchor="middle" class="tl">Mazama</text><circle cx="244.0" cy="139.9" r="9" class="node hi"/><text x="226.0" y="150.9" text-anchor="end" class="tl">Winthrop</text><circle cx="275.0" cy="229.7" r="9" class="node hi"/><text x="257.0" y="250.7" text-anchor="end" class="tl">Twisp</text><circle cx="480.6" cy="67.6" r="9" class="node"/><text x="480.6" y="52.599999999999994" text-anchor="middle" class="tl">Conconully</text><circle cx="398.4" cy="486.5" r="9" class="node"/><text x="380.4" y="501.5" text-anchor="end" class="tl">Pateros</text><circle cx="478.0" cy="445.5" r="9" class="node"/><text x="478.0" y="492.5" text-anchor="middle" class="tl">Brewster</text></svg>
+<figcaption>Figure 4. The swap. The cycle Winthrop → Conconully → Twisp → Winthrop is blue, except for the removed edge Twisp–Conconully ($239 million, dotted gray). Adding Winthrop–Conconully ($224 million) lowers the total by $15 million.</figcaption>
+</figure>
+</div></details>
+
+<h3>The safe-edge rule on any map</h3>
+
+<p>Task 2 is one case of an argument that works on every map. Take any group of towns. Let <i>e</i> be a cheapest edge leaving the group, and let W be any minimum spanning tree.</p>
+<ol>
+<li>If W contains <i>e</i>, then <i>e</i> is safe.</li>
+<li>If W does not contain <i>e</i>, add <i>e</i> to W. W is connected, so a path in W already joins the two towns of <i>e</i>. That path and <i>e</i> form a cycle.</li>
+<li>Go around the cycle, starting from the town of <i>e</i> inside the group. Crossing <i>e</i> takes you outside the group. To get back to the start you must cross into the group again, along another edge <i>f</i> of the cycle. So <i>f</i> also leaves the group, and <i>f</i> is in W.</li>
+<li>Since <i>e</i> is a cheapest edge leaving the group, <i>f</i> costs at least as much as <i>e</i>.</li>
+<li>Remove <i>f</i>. This is a swap from Lecture 10.2, so the result is again a spanning tree. Its total is (total of W) + (cost of <i>e</i>) − (cost of <i>f</i>), which is at most the total of W.</li>
+<li>W is a minimum spanning tree, so the new tree cannot cost less. It costs the same, so it is also a minimum spanning tree, and it contains <i>e</i>. So <i>e</i> is safe.</li>
+</ol>
+
+<h3>Why Kruskal's tree is a minimum spanning tree on every map</h3>
+
+<p>In Kruskal's algorithm a group is a set of towns joined to each other by the edges built so far, as in Lecture 10.2. At each step the algorithm builds an edge whose two towns are in different groups. Take the group of one of those two towns. Every cheaper edge was looked at earlier and was either built or skipped. Either way its two towns are now in the same group, so it does not leave this group. The edge being built is therefore a cheapest edge leaving the group, and by the safe-edge rule it is safe.</p>
+
+<p>On the map, row 5 builds Winthrop–Conconully. Just before it, Mazama, Winthrop and Twisp form one group, and Task 1 found that Winthrop–Conconully is the cheapest edge leaving that group.</p>
+
+<p>Each built edge is safe. The argument must also show that all the built edges fit in one minimum spanning tree, and it goes step by step.</p>
+<ul>
+<li>Before the first step no edges are built, so every minimum spanning tree contains all of them.</li>
+<li>Suppose that after some step a minimum spanning tree W contains every edge built so far, and the next step builds <i>e</i>. Use this W in the argument above. If W does not contain <i>e</i>, the removed edge <i>f</i> leaves the group. Every edge built so far has both towns in one group, so it does not leave the group, and <i>f</i> is not a built edge. The new minimum spanning tree contains <i>e</i> and every edge built before it.</li>
+</ul>
+<p>So after every step some minimum spanning tree contains all the edges built so far. After the last step the algorithm has built n&nbsp;−&nbsp;1 edges. A minimum spanning tree has exactly n&nbsp;−&nbsp;1 edges, so the one that contains them has no others. Kruskal's tree is that minimum spanning tree.</p>
+
+<h3>Why the swap test works</h3>
+
+<p>Lecture 10.2 used this fact from the literature [9]: <i>if no single swap lowers the total of a spanning tree, that tree is a minimum spanning tree.</i> Here is the argument when no two edges cost the same, as on this map. It is a proof by contradiction, as in week 9.</p>
+
+<p>Suppose T is a spanning tree that no swap improves, and suppose some spanning tree costs less than T. Let M be a minimum spanning tree. M costs less than T, so M is a different tree, and M contains some edge <i>e</i> that T does not.</p>
+<ol>
+<li>Remove <i>e</i> from M. M has no cycle, so no other path in M joins the two towns of <i>e</i>. The towns split into two groups: the towns still joined to one town of <i>e</i>, and the towns joined to the other. No edge of M other than <i>e</i> leaves these groups.</li>
+<li>Add <i>e</i> to T. It closes a cycle with the path in T between the two towns of <i>e</i>. That path starts in one group and ends in the other, so some edge <i>f</i> on it leaves the group. The edge <i>f</i> is in T, and by step 1 it is not in M.</li>
+<li>No swap improves T, so adding <i>e</i> to T and removing <i>f</i> does not lower the total: <i>f</i> costs no more than <i>e</i>. No two costs are equal, so <i>f</i> costs less than <i>e</i>.</li>
+<li>Put <i>f</i> into M in place of <i>e</i>. The edge <i>f</i> joins the two groups, so every town is connected again. There is no cycle, because a cycle would have to cross between the two groups and come back, which needs two edges between them, and <i>f</i> is the only one. So this is a spanning tree, and its total is (total of M) − (cost of <i>e</i>) + (cost of <i>f</i>), which is less than the total of M.</li>
+<li>That contradicts M being a minimum spanning tree. So no spanning tree costs less than T.</li>
+</ol>
+<p>The fact also holds when some edges cost the same, with a longer argument [9].</p>
+
+<h2 id="s4">4. The shortest drive between two towns</h2>
+
+<p>For this section, suppose all eight candidate roads have been built, so a driver can use any of them. This is made up; the county's plan has five roads. The length of each road is its straight-line distance from Section 1.</p>
+
+<figure>
+<svg viewBox="0 -12 600 540" role="img" aria-label="All eight candidate roads with their lengths in miles."><g class="scale"><line x1="40" y1="500" x2="160" y2="500"/><line x1="40" y1="492" x2="40" y2="508"/><line x1="160" y1="492" x2="160" y2="508"/><text x="100" y="490" text-anchor="middle">10 miles</text><text x="40" y="440" text-anchor="middle" class="north">N</text><path d="M40 448 L33 466 L40 461 L47 466 Z" class="north"/></g><line x1="120.0" y1="40.0" x2="244.0" y2="139.9" class="strong thin"/><text x="212" y="85" class="el">13.2</text><line x1="120.0" y1="40.0" x2="275.0" y2="229.7" class="strong thin"/><text x="136" y="115" class="el">20.4</text><line x1="244.0" y1="139.9" x2="275.0" y2="229.7" class="strong thin"/><text x="292" y="191" class="el">7.9</text><line x1="244.0" y1="139.9" x2="480.6" y2="67.6" class="strong thin"/><text x="350" y="91" class="el">20.5</text><line x1="275.0" y1="229.7" x2="480.6" y2="67.6" class="strong thin"/><text x="414" y="159" class="el">21.8</text><line x1="275.0" y1="229.7" x2="398.4" y2="486.5" class="strong thin"/><text x="313" y="377" class="el">23.8</text><line x1="275.0" y1="229.7" x2="478.0" y2="445.5" class="strong thin"/><text x="398" y="327" class="el">24.7</text><line x1="398.4" y1="486.5" x2="478.0" y2="445.5" class="strong thin"/><text x="424" y="447" class="el">7.5</text><circle cx="120.0" cy="40.0" r="9" class="node"/><text x="120.0" y="25.0" text-anchor="middle" class="tl">Mazama</text><circle cx="244.0" cy="139.9" r="9" class="node"/><text x="226.0" y="150.9" text-anchor="end" class="tl">Winthrop</text><circle cx="275.0" cy="229.7" r="9" class="node"/><text x="257.0" y="250.7" text-anchor="end" class="tl">Twisp</text><circle cx="480.6" cy="67.6" r="9" class="node"/><text x="480.6" y="52.599999999999994" text-anchor="middle" class="tl">Conconully</text><circle cx="398.4" cy="486.5" r="9" class="node"/><text x="380.4" y="501.5" text-anchor="end" class="tl">Pateros</text><circle cx="478.0" cy="445.5" r="9" class="node"/><text x="478.0" y="492.5" text-anchor="middle" class="tl">Brewster</text></svg>
+<figcaption>Figure 5. The eight roads of this section, with lengths in miles, drawn to scale.</figcaption>
+</figure>
+
+<div class="rule">
+<p><b>Nearest-next-town rule.</b> Start at the starting town. From the town you are in, look at the roads that lead to towns you have not visited yet, and drive along the shortest of them. Stop when you reach the destination. If every road from the town you are in leads to a town you have already visited, the rule is stuck and gives no route.</p>
+</div>
+
+<div class="task">
+<h3>Task 3 (about 4 minutes, paper)</h3>
+<ol type="a">
+<li>Use Figure 5. Follow the nearest-next-town rule from Pateros to Twisp. Write the route and its length in miles. Then find a shorter route from Pateros to Twisp and write its length.</li>
+<li>Follow the rule from Twisp to Pateros. Write the towns you visit, in order, and what happens.</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 3</summary><div>
+<p>(a) At Pateros the roads go to Brewster (7.5 miles) and Twisp (23.8 miles). Drive to Brewster. At Brewster the only road to a town not yet visited goes to Twisp (24.7 miles). Drive to Twisp and stop.</p>
+<p>Greedy route: Pateros → Brewster → Twisp, 7.5 + 24.7 = 32.2 miles. Shorter route: the road Pateros–Twisp, 23.8 miles, which is 32.2 − 23.8 = 8.4 miles shorter. These are the only two paths from Pateros to Twisp, so 23.8 miles is the shortest.</p>
+<p>(b) At Twisp the roads go to Winthrop (7.9), Mazama (20.4), Conconully (21.8), Pateros (23.8) and Brewster (24.7). Drive to Winthrop. At Winthrop the roads to towns not yet visited go to Mazama (13.2) and Conconully (20.5). Drive to Mazama. At Mazama both roads lead to towns already visited, Winthrop and Twisp. The rule is stuck at Mazama and never reaches Pateros, though a road from Twisp to Pateros exists.</p>
+</div></details>
+
+<p>At Pateros the rule compares only the next road: 7.5 miles to Brewster is less than 23.8 miles to Twisp. The road from Brewster to Twisp is 24.7 miles, so that first choice leads to a 32.2-mile trip. A choice that is shortest for one step can make the whole trip longer, or lead to a town with no way forward. A computer check of all 30 start-and-destination pairs on this map finds that the rule gives a shortest route for 6 pairs, a longer route for 12 and gets stuck for 12.</p>
+
+<p>The Pateros-to-Twisp drive settles the question: the nearest-next-town rule does not always find the shortest route. A method that does, when no road length is negative, was published by Edsger Dijkstra in 1959 [8]. It is also greedy. At each step it picks, among the towns it has not finished, the one with the shortest route from the start found so far. The distance it compares is the total distance from the start.</p>
+
+<h2 id="s5">5. Making change with coins</h2>
+
+<p>U.S. coins in everyday use are worth 1, 5, 10 and 25 cents. A cashier making change can follow the greedy rule.</p>
+
+<div class="rule">
+<p><b>Greedy change rule.</b> Hand over the largest coin that is not more than the amount still owed. Subtract it. Repeat until nothing is owed.</p>
+</div>
+
+<p>The goal is to use as few coins as possible.</p>
+
+<div class="task">
+<h3>Task 4 (about 4 minutes, paper)</h3>
+<ol type="a">
+<li>Use the greedy change rule with U.S. coins to make 68 cents. List the coins and count them.</li>
+<li>Now use a made-up coin system with coins worth 1, 3 and 4 cents. Use the greedy change rule to make 6 cents. List the coins and count them. Then find a way to make 6 cents with fewer coins.</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 4</summary><div>
+<p>(a) 68 → hand 25, 43 left → hand 25, 18 left → hand 10, 8 left → hand 5, 3 left → hand 1, 2 left → hand 1, 1 left → hand 1. Coins: 25 + 25 + 10 + 5 + 1 + 1 + 1 = 68, which is 7 coins.</p>
+<p>(b) 6 → hand 4, 2 left → hand 1, 1 left → hand 1. Coins: 4 + 1 + 1, which is 3 coins. Two 3-cent coins make 3 + 3 = 6 with only 2 coins. The greedy rule does not give the fewest coins here.</p>
+</div></details>
+
+<h3>Why greedy change works for U.S. coins</h3>
+
+<p>Take any way of making an amount with the fewest U.S. coins. It cannot contain any of these, because each could be traded for fewer coins of the same total:</p>
+<ul>
+<li>5 pennies (trade for 1 nickel),</li>
+<li>2 nickels (trade for 1 dime),</li>
+<li>3 dimes (trade for 1 quarter and 1 nickel: 2 coins instead of 3),</li>
+<li>2 dimes and a nickel together (trade for 1 quarter).</li>
+</ul>
+<p>So in a fewest-coins answer there are at most 4 pennies, at most 1 nickel and at most 2 dimes, and not 2 dimes together with a nickel. The pennies, nickels and dimes together are then worth at most 24 cents (2 dimes and 4 pennies: 2 × 10 + 4 = 24). If a fewest-coins answer used fewer quarters than fit, the other coins would have to make up at least 25 cents. So a fewest-coins answer uses as many quarters as fit, which is what the greedy rule does. The same reasoning with the bounds 9 cents (1 nickel and 4 pennies) and 4 cents (4 pennies) shows it also uses as many dimes, and then nickels, as fit. So the greedy rule always gives the fewest U.S. coins.</p>
+
+<p>For the made-up system with coins 1, 3 and 4, no such argument exists, because Task 4 found an amount, 6 cents, where greedy fails. The change checker finds every such amount in a range. For each amount it lists the greedy coins and the fewest possible coins, found by computer, and shades the rows where greedy uses more coins.</p>
+
+<div class="tool" id="cc">
+<label>Coins (cents, separated by commas): <input type="text" id="cc-coins" value="1, 5, 10, 25" inputmode="numeric"></label>
+<label>Check amounts from 1 to <input type="number" id="cc-max" value="10" min="1" max="200"> cents</label>
+<button type="button" id="cc-go">Check</button>
+<p id="cc-msg">Enter coins and an upper amount, then press Check.</p>
+<div class="scroll"><table id="cc-table"><thead><tr><th class="num">Amount</th><th>Greedy coins</th><th>Fewest coins</th></tr></thead><tbody></tbody></table></div>
+</div>
+
+<div class="task">
+<h3>Task 5 (about 4 minutes, change checker)</h3>
+<ol type="a">
+<li>Enter coins 1, 3, 4. List every amount from 1 to 20 cents where greedy uses more coins than the fewest possible.</li>
+<li>Change the coins to 1, 10, 25. This is the U.S. system with the nickel taken out (made up). Check amounts from 1 to 40 cents. Write down the smallest amount where greedy fails, the greedy coins for it, and the fewest coins for it.</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 5</summary><div>
+<p>(a) 6, 10, 14 and 18 cents. For example, at 10 cents greedy gives 4 + 4 + 1 + 1 (4 coins) and the fewest is 4 + 3 + 3 (3 coins). Each failing amount is 4 more than the one before: adding a 4-cent coin to a failing amount gives another failing amount.</p>
+<p>(b) 30 cents. Greedy gives 25 + 1 + 1 + 1 + 1 + 1, which is 6 coins. Three dimes, 10 + 10 + 10, use 3 coins. Without a nickel, the trade of 3 dimes for a quarter and a nickel is not available, so the argument for U.S. coins breaks down.</p>
+</div></details>
+
+<h2 id="s6">6. When a counterexample settles a question</h2>
+
+<p>Each question here has the form "Does this greedy rule <i>always</i> give the best answer?" A <b>counterexample</b> is one specific case where the rule does not give the best answer. One correct counterexample settles the question: the answer is no. The 6-cent example settles it for coins 1, 3, 4. The Pateros-to-Twisp drive settles it for the nearest-next-town rule.</p>
+
+<p>A proposed counterexample settles the question only when all of these checks pass:</p>
+<ol>
+<li><b>It is a case of the question asked.</b> It uses only the coins of the coin system in question, or only roads on the stated map.</li>
+<li><b>The rule was followed exactly.</b> Every step of the greedy answer is the step the rule says to take.</li>
+<li><b>A better answer is written down and checked.</b> The other answer is valid (the coins add up to the amount, the route joins the two towns along roads, the roads form a spanning tree), and it is strictly better (fewer coins, fewer miles, lower cost).</li>
+</ol>
+
+<p>Examples where a rule works never settle an "always" question in the other direction. The computer check of all 24 spanning trees covers only this map. A computer check of every amount from 1 cent to $10.00 finds no amount where greedy change fails for U.S. coins, but it covers only those amounts. The arguments in Sections 3 and 5 cover every map and every amount.</p>
+
+<div class="task">
+<h3>Task 6 (about 4 minutes, paper)</h3>
+<p>For each claim, write "settles it" or "does not settle it". If it does not, name a check from the list above that fails.</p>
+<ol type="a">
+<li>"Greedy change fails for U.S. coins. For 30 cents greedy gives 25 + 5, but 10 + 10 + 10 also makes 30 cents."</li>
+<li>"The nearest-next-town rule fails. From Brewster to Twisp it goes Brewster → Pateros → Twisp, 7.5 + 23.8 = 31.3 miles, but the road Brewster–Twisp is 24.7 miles."</li>
+<li>"Kruskal's algorithm fails on the six towns. It builds Pateros–Brewster, Winthrop–Twisp, Mazama–Winthrop, Mazama–Twisp and Winthrop–Conconully, for $760 million, which is less than $798 million."</li>
+<li>"Greedy change fails for U.S. coins. For 40 cents greedy gives 25 + 10 + 5, which is 3 coins, but two 20-cent coins make 40 cents."</li>
+</ol>
+</div>
+<details class="solution"><summary>Solution to Task 6</summary><div>
+<p>(a) Does not settle it. Check 3 fails: the other answer uses 3 coins and greedy uses 2, so the other answer is worse.</p>
+<p>(b) Settles it. At Brewster the roads go to Pateros (7.5 miles) and Twisp (24.7 miles), so the rule drives to Pateros, and from Pateros the only road to a town not yet visited goes to Twisp. The road Brewster–Twisp exists and is shorter.</p>
+<p>(c) Does not settle it. Check 2 fails: Kruskal's algorithm skips Mazama–Twisp, because Mazama and Twisp are already joined through Winthrop. Check 3 fails too: the five roads contain the cycle Mazama → Winthrop → Twisp → Mazama and do not reach Pateros or Brewster from the other towns, so they are not a spanning tree.</p>
+<p>(d) Does not settle it. Check 1 fails: there is no 20-cent coin among U.S. coins in everyday use. With the coins 1, 5, 10 and 25, 40 cents takes at least 3 coins.</p>
+</div></details>
+
+<h2 id="s7">7. The course in one table</h2>
+
+<p>Each module started from a question about a real situation and answered it with the methods named in its lecture titles.</p>
+
+<div class="scroll">
+<table class="course-table">
+<thead><tr><th class="num">Week</th><th>Module</th><th>Question</th><th>Lectures (methods)</th></tr></thead>
+<tbody>
+<tr><td data-label="Week" class="num">1</td><td data-label="Module">Titrating medicine</td><td data-label="Question">How many milliliters of children's liquid acetaminophen should a child of a given weight get, and what does a concentration such as 0.9% saline mean?</td><td data-label="Lectures (methods)">Weight-based doses; Concentrations and percentages; A dosage table in a spreadsheet</td></tr>
+<tr><td data-label="Week" class="num">2</td><td data-label="Module">What's for breakfast?</td><td data-label="Question">How much of each food reaches a protein target, and can one breakfast meet two targets at once?</td><td data-label="Lectures (methods)">Breakfast Protein Equations; Graphing Lines and Slope; Two equations in two unknowns</td></tr>
+<tr><td data-label="Week" class="num">3</td><td data-label="Module">Breakfast on a budget</td><td data-label="Question">Which breakfasts meet every minimum and maximum, and which of them is cheapest?</td><td data-label="Lectures (methods)">Inequalities; Systems of inequalities; Minimizing Breakfast Cost</td></tr>
+<tr><td data-label="Week" class="num">4</td><td data-label="Module">Buying a house</td><td data-label="Question">What is the monthly payment on a 30-year mortgage, and how long does it take to save the down payment?</td><td data-label="Lectures (methods)">Monthly Mortgage Payment; Monthly Payment Formula; Saving for the Down Payment</td></tr>
+<tr><td data-label="Week" class="num">5</td><td data-label="Module">Remodeling a kitchen</td><td data-label="Question">How big is the kitchen on a scale drawing, will a refrigerator fit through the doorway, and how much do the cabinets hold?</td><td data-label="Lectures (methods)">Reading a Shop Drawing; Square roots and the Pythagorean theorem; Volume and Surface Area</td></tr>
+<tr><td data-label="Week" class="num">6</td><td data-label="Module">Ordering at Starbucks</td><td data-label="Question">How many different drinks can you order, and how do you count them without listing them all?</td><td data-label="Lectures (methods)">Counting Drink Orders; Sets and subsets; Permutations and Combinations</td></tr>
+<tr><td data-label="Week" class="num">7</td><td data-label="Module">Probability and the stock market</td><td data-label="Question">What does a probability mean, is a day's move in the S&amp;P 500 like a coin flip, and what does an average return of about 10% a year mean for one person's money?</td><td data-label="Lectures (methods)">Probability by counting; Independence and simulation; Expected Return and Risk</td></tr>
+<tr><td data-label="Week" class="num">8</td><td data-label="Module">Statistics and regression</td><td data-label="Question">What numbers describe data from a psychology study, how well does a line describe two measurements, and when does a graph or statistic mislead?</td><td data-label="Lectures (methods)">Mean, median and standard deviation; Scatterplots and regression lines; Misleading Graphs and Analyses</td></tr>
+<tr><td data-label="Week" class="num">9</td><td data-label="Module">Stable matching</td><td data-label="Question">How can medical graduates and residency programs be matched so that nobody wants to break the match, and which side gets the better deal?</td><td data-label="Lectures (methods)">Stable Matchings; Deferred Acceptance Algorithm; Why the Algorithm Works</td></tr>
+<tr><td data-label="Week" class="num">10</td><td data-label="Module">Building mountain roads</td><td data-label="Question">Which roads connect six Okanogan County towns most cheaply, how do you know nothing cheaper exists, and when does taking the cheapest option work?</td><td data-label="Lectures (methods)">Weighted Graphs; Minimum Spanning Trees; When greedy algorithms work</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="data">Data used in this module</h2>
+
+<p>This lecture uses exactly the towns, the eight candidate roads and the costs listed under "Data used in this module" in Lecture 10.1: six towns in Okanogan County [1]–[6], with costs in millions of 2014 dollars from FHWA's Conditions and Performance report, 23rd edition, Exhibit A-1 [7]. Distances are great-circle (haversine) distances with Earth radius 3,958.8 miles, rounded to 0.1 mile; costs are distance × $10.948 million, rounded to the nearest million. New in this lecture:</p>
+<ul>
+<li>Network N (Section 3): the minimum spanning tree with Twisp–Conconully in place of Winthrop–Conconully, $813 million.</li>
+<li>Section 4 uses the eight straight-line distances as driving distances and assumes all eight roads are built (made up).</li>
+<li>The coin system 1, 3, 4 cents and the system 1, 10, 25 cents are made up.</li>
+</ul>
+
+<h2 id="sources">Sources</h2>
+<p class="small">All sources accessed 4 October 2026. Sources [1]–[7] are the ones cited in Lectures 1 and 2. Each Wikipedia infobox cites the U.S. Geological Survey Geographic Names Information System (GNIS).</p>
+<ol class="sources">
+<li>Wikipedia, "Mazama, Washington." Coordinates 48.59222°N 120.40389°W; county: Okanogan. <a href="https://en.wikipedia.org/wiki/Mazama,_Washington">https://en.wikipedia.org/wiki/Mazama,_Washington</a></li>
+<li>Wikipedia, "Winthrop, Washington." Coordinates 48.47167°N 120.17917°W; county: Okanogan. <a href="https://en.wikipedia.org/wiki/Winthrop,_Washington">https://en.wikipedia.org/wiki/Winthrop,_Washington</a></li>
+<li>Wikipedia, "Twisp, Washington." Coordinates 48.36333°N 120.12306°W; county: Okanogan. <a href="https://en.wikipedia.org/wiki/Twisp,_Washington">https://en.wikipedia.org/wiki/Twisp,_Washington</a></li>
+<li>Wikipedia, "Conconully, Washington." Coordinates 48.55889°N 119.75056°W; county: Okanogan. <a href="https://en.wikipedia.org/wiki/Conconully,_Washington">https://en.wikipedia.org/wiki/Conconully,_Washington</a></li>
+<li>Wikipedia, "Pateros, Washington." Coordinates 48.05333°N 119.89944°W; county: Okanogan. <a href="https://en.wikipedia.org/wiki/Pateros,_Washington">https://en.wikipedia.org/wiki/Pateros,_Washington</a></li>
+<li>Wikipedia, "Brewster, Washington." Coordinates 48.10278°N 119.75528°W; county: Okanogan. <a href="https://en.wikipedia.org/wiki/Brewster,_Washington">https://en.wikipedia.org/wiki/Brewster,_Washington</a></li>
+<li>Federal Highway Administration, <i>Status of the Nation's Highways, Bridges, and Transit: Conditions and Performance</i>, 23rd Edition, report to Congress, November 22, 2019. Appendix A, Exhibit A-1 "Typical Costs per Lane Mile Assumed in HERS by Type of Improvement," page A-3: rural major collector, mountainous terrain, new alignment, normal cost, $5,474 thousand per lane mile in 2014 dollars. Page A-3 also states that these typical costs "do not reflect the large variation in cost among projects of the same type." <a href="https://www.fhwa.dot.gov/policy/23cpr/pdfs/pdf/AppendixA.pdf">https://www.fhwa.dot.gov/policy/23cpr/pdfs/pdf/AppendixA.pdf</a></li>
+<li>E. W. Dijkstra, "A note on two problems in connexion with graphs," <i>Numerische Mathematik</i> 1, 1959, pages 269–271. <a href="https://link.springer.com/article/10.1007/BF01386390">https://link.springer.com/article/10.1007/BF01386390</a>. The description of the method is from Wikipedia, "Dijkstra's algorithm": it "finds the shortest path from a given source node to every other node," needs road lengths that are not negative, and at each step selects "from the unvisited set ... the one with the smallest (finite) distance"; conceived in 1956 and "published three years later." <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm</a></li>
+<li>Ravindra K. Ahuja, Thomas L. Magnanti and James B. Orlin, <i>Network Flows: Theory, Algorithms, and Applications</i>, Prentice Hall, 1993, Chapter 13, Theorem 13.3 (path optimality conditions), as quoted in T. Ralphs, ISE 411 Lecture 7, Lehigh University: "A spanning tree T* is a MST if and only if for every non-tree arc (k, l) of G, c<sub>ij</sub> ≤ c<sub>kl</sub> for every arc (i, j) contained in the path in T* connecting nodes k and l." This is the swap test of Lecture 10.2 (source [10] there), stated without any assumption that costs differ. <a href="https://coral.ise.lehigh.edu/~ted/files/ie411/lectures-python/Lecture7.pdf">https://coral.ise.lehigh.edu/~ted/files/ie411/lectures-python/Lecture7.pdf</a></li>
+</ol>
+
+</main>
+<script>
+(function(){
+  function greedy(coins, amt){
+    var out=[], cs=coins.slice().sort(function(a,b){return b-a;});
+    for(var i=0;i<cs.length;i++){ while(amt>=cs[i]){ out.push(cs[i]); amt-=cs[i]; } }
+    return amt===0 ? out : null;
+  }
+  function fewest(coins, amt){
+    var INF=1e9, dp=[0], ch=[0];
+    for(var a=1;a<=amt;a++){
+      dp[a]=INF; ch[a]=0;
+      for(var i=0;i<coins.length;i++){
+        var c=coins[i];
+        if(c<=a && dp[a-c]+1<dp[a]){ dp[a]=dp[a-c]+1; ch[a]=c; }
+      }
+    }
+    if(dp[amt]>=INF) return null;
+    var out=[], r=amt;
+    while(r>0){ out.push(ch[r]); r-=ch[r]; }
+    return out.sort(function(a,b){return b-a;});
+  }
+  function show(list){
+    if(!list) return "cannot be made";
+    return list.join(" + ")+' <span style="white-space:nowrap">('+list.length+(list.length===1?" coin)":" coins)")+"</span>";
+  }
+  function run(){
+    var msg=document.getElementById("cc-msg");
+    var body=document.querySelector("#cc-table tbody"); body.innerHTML="";
+    var raw=document.getElementById("cc-coins").value.split(/[,\s]+/).filter(function(s){return s!=="";});
+    var coins=[];
+    for(var i=0;i<raw.length;i++){
+      var v=Number(raw[i]);
+      if(!Number.isInteger(v)||v<1||v>500){ msg.textContent="Coins must be whole numbers of cents from 1 to 500."; return; }
+      if(coins.indexOf(v)<0) coins.push(v);
+    }
+    if(coins.length===0){ msg.textContent="Enter at least one coin."; return; }
+    var max=Math.floor(Number(document.getElementById("cc-max").value));
+    if(!(max>=1&&max<=200)){ msg.textContent="Choose an upper amount from 1 to 200 cents."; return; }
+    var fails=[];
+    for(var a=1;a<=max;a++){
+      var g=greedy(coins,a), f=fewest(coins,a);
+      var bad = f && (!g || g.length>f.length);
+      if(bad) fails.push(a);
+      var tr=document.createElement("tr"); if(bad) tr.className="fail";
+      tr.innerHTML='<td class="num">'+a+'</td><td>'+show(g)+'</td><td>'+show(f)+'</td>';
+      body.appendChild(tr);
+    }
+    msg.textContent = fails.length ? "Greedy does not give the fewest coins at: "+fails.join(", ")+" cents."
+                                   : "Greedy uses the fewest coins at every amount from 1 to "+max+" cents.";
+    if(coins.indexOf(1)<0) msg.textContent+=" There is no 1-cent coin, so some amounts may not be possible.";
+  }
+  document.getElementById("cc-go").addEventListener("click", run);
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-10/10-2-minimum-spanning-trees/" style="color:inherit">&larr; 10.2 Minimum spanning trees</a><a href="../../" style="color:inherit">All lectures</a><span></span></nav>
+</body>
+</html>

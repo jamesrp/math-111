@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Volume and Surface Area</title>
+<style>
+  :root {
+    --ink: #1d1d1f;
+    --muted: #555a60;
+    --line: #c9ced4;
+    --paper: #ffffff;
+    --tint: #f3f5f8;
+    --accent: #2f5d8a;
+    --task: #fff8e6;
+    --taskline: #c99a2e;
+    --sol: #eef6ee;
+    --solline: #5a8f5a;
+    --base: #d9c6a5;
+    --wall: #b9cfe3;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 19px; line-height: 1.55;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+  .course { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 15px; color: var(--muted); margin: 0 0 4px; }
+  h1 { font-size: 34px; line-height: 1.2; margin: 0 0 24px; }
+  h2 { font-size: 25px; margin: 40px 0 10px; border-bottom: 2px solid var(--line); padding-bottom: 4px; }
+  h3 { font-size: 20px; margin: 24px 0 6px; }
+  p, li { max-width: 72ch; }
+  .math { white-space: nowrap; }
+  .calc { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.92em; background: var(--tint); padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+  .display { margin: 12px 0 12px 1.2em; line-height: 1.9; }
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table { border-collapse: collapse; font-size: 17px; }
+  th, td { border: 1px solid var(--line); padding: 5px 9px; text-align: right; }
+  th { background: var(--tint); font-family: system-ui, sans-serif; font-size: 15px; }
+  td:first-child, th:first-child { text-align: left; }
+  figure { margin: 16px 0; }
+  figure svg { width: 100%; max-width: 640px; height: auto; display: block; }
+  table.left td, table.left th { text-align: left; }
+  figcaption { font-family: system-ui, sans-serif; font-size: 15px; color: var(--muted); margin-top: 4px; }
+  .task { border: 2px solid var(--taskline); background: var(--task); border-radius: 6px; padding: 10px 16px; margin: 20px 0 8px; }
+  .task .label { font-family: system-ui, sans-serif; font-weight: 700; margin: 0 0 6px; }
+  .task p:last-child, .task ol:last-child, .task ul:last-child { margin-bottom: 4px; }
+  details.solution { border: 1px solid var(--solline); background: var(--sol); border-radius: 6px; padding: 6px 16px; margin: 0 0 20px; }
+  details.solution summary { font-family: system-ui, sans-serif; font-weight: 600; cursor: pointer; padding: 4px 0; }
+  .sheet { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; }
+  .sheet td, .sheet th { text-align: left; }
+  .sheet th.rowhead, .sheet td.rowhead { background: var(--tint); color: var(--muted); text-align: center; }
+  button, .btn { font-family: system-ui, sans-serif; font-size: 15px; padding: 7px 12px; border: 1px solid var(--accent); background: #fff; color: var(--accent); border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin: 4px 6px 4px 0; }
+  button:hover, .btn:hover { background: var(--accent); color: #fff; }
+  .small { font-family: system-ui, sans-serif; font-size: 15px; color: var(--muted); }
+  .scaler { border: 1px solid var(--line); border-radius: 6px; padding: 12px; margin: 16px 0; }
+  .scaler label { font-family: system-ui, sans-serif; font-weight: 600; }
+  .scaler input[type=range] { width: 100%; }
+  #scaleSvg { width: 100%; max-width: 480px; height: auto; display: block; margin: 8px auto; }
+  .readout td, .readout th { font-size: 16px; }
+  @media (max-width: 520px) { .scaler { padding: 8px; } .readout td, .readout th { font-size: 14px; padding: 3px 4px; } }
+  .sources li { margin-bottom: 8px; }
+  a { color: var(--accent); }
+  @media (max-width: 520px) {
+    body { font-size: 17px; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 22px; }
+    table { font-size: 15px; }
+    th, td { padding: 4px 6px; }
+    .sheet { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-05/5-2-square-roots-and-the-pythagorean-theorem/" style="color:inherit">&larr; 5.2 Square roots and the Pythagorean theorem</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-06/6-1-counting-drink-orders/" style="color:inherit">6.1 Counting drink orders &rarr;</a></nav>
+
+<main>
+
+<p class="course">Math 111 · Module: Remodeling a kitchen (week 5) · Lecture 3 of 3</p>
+<h1>Volume and surface area</h1>
+
+<h2>1. Cabinets in plan and elevation views</h2>
+
+<p>Kitchen cabinets are boxes sold in standard sizes. KraftMaid, a cabinet manufacturer, gives these standard sizes [1]:</p>
+<ul>
+  <li>A <b>base cabinet</b> (on the floor, under the counter) is 34&#189; inches tall and 24 inches deep.</li>
+  <li>A <b>wall cabinet</b> (hung on the wall above the counter) is 12 inches deep. Wall cabinets have no single standard height; KraftMaid makes them from 12 to 54 inches tall.</li>
+  <li>Both kinds come in widths from 6 to 48 inches, in steps of 3 inches.</li>
+</ul>
+
+<p>Our example is a 10-foot wall (120 inches) with four base cabinets, 36, 30, 24 and 30 inches wide, and four wall cabinets of the same widths above them. The wall cabinets are 30 inches tall, a height inside KraftMaid's range. The left end of the run stands against a side wall; the right end is open. The layout is made up for this lecture; the cabinet sizes are real.</p>
+
+<p>Three questions about this run of cabinets: how much storage it gives, how much paint covers it, and why a cabinet twice as wide holds twice as much while a cabinet twice as big in every direction holds eight times as much.</p>
+
+<p>Two standard drawings describe a cabinet. A <b>plan view</b> is the drawing you see looking straight down from above. An <b>elevation view</b> is the drawing you see looking straight at the front. A box has three measurements: width (left to right), depth (front to back) and height (floor to top). Each view shows two of them. Both views show the width; only the plan shows the depth; only the elevation shows the height.</p>
+
+<figure>
+<svg viewBox="0 0 480 302" role="img" aria-label="Elevation view of the cabinet run">
+  <text x="240" y="18" text-anchor="middle" font-family="system-ui, sans-serif" font-size="19" font-weight="700" fill="#1d1d1f">Elevation (looking at the front)</text>
+  <!-- scale 3 px per inch; x0 = 60; floor y = 270 -->
+  <!-- wall cabinets: top y=40, height 30in = 90px, bottom y=130 -->
+  <g stroke="#1d1d1f" stroke-width="1.5">
+    <rect x="60" y="40" width="108" height="90" fill="#b9cfe3"/>
+    <rect x="168" y="40" width="90" height="90" fill="#b9cfe3"/>
+    <rect x="258" y="40" width="72" height="90" fill="#b9cfe3"/>
+    <rect x="330" y="40" width="90" height="90" fill="#b9cfe3"/>
+    <!-- base: height 34.5in = 103.5px, top y = 166.5 -->
+    <rect x="60" y="166.5" width="108" height="103.5" fill="#d9c6a5"/>
+    <rect x="168" y="166.5" width="90" height="103.5" fill="#d9c6a5"/>
+    <rect x="258" y="166.5" width="72" height="103.5" fill="#d9c6a5"/>
+    <rect x="330" y="166.5" width="90" height="103.5" fill="#d9c6a5"/>
+  </g>
+  <line x1="40" y1="270" x2="440" y2="270" stroke="#1d1d1f" stroke-width="3"/>
+  <g font-family="system-ui, sans-serif" font-size="19" fill="#1d1d1f" text-anchor="middle">
+    <text x="114" y="90">36</text><text x="213" y="90">30</text><text x="294" y="90">24</text><text x="375" y="90">30</text>
+    <text x="114" y="222">36</text><text x="213" y="222">30</text><text x="294" y="222">24</text><text x="375" y="222">30</text>
+    <text x="240" y="154" font-size="17" fill="#555a60">gap above counter (not to scale)</text>
+    <text x="240" y="293">total width 120</text>
+  </g>
+  <g stroke="#555a60" stroke-width="1">
+    <line x1="48" y1="40" x2="48" y2="130"/><line x1="44" y1="40" x2="52" y2="40"/><line x1="44" y1="130" x2="52" y2="130"/>
+    <line x1="48" y1="166.5" x2="48" y2="270"/><line x1="44" y1="166.5" x2="52" y2="166.5"/><line x1="44" y1="270" x2="52" y2="270"/>
+  </g>
+  <g font-family="system-ui, sans-serif" font-size="19" fill="#1d1d1f" text-anchor="end">
+    <text x="42" y="91">30</text>
+    <text x="42" y="222">34&#189;</text>
+  </g>
+</svg>
+<figcaption>Elevation of the run. Wall cabinets in blue, base cabinets in tan. All measurements in inches.</figcaption>
+</figure>
+
+<figure>
+<svg viewBox="0 0 480 172" role="img" aria-label="Plan view of the cabinet run">
+  <text x="240" y="18" text-anchor="middle" font-family="system-ui, sans-serif" font-size="19" font-weight="700" fill="#1d1d1f">Plan (looking down from above)</text>
+  <g transform="translate(0,16)">
+  <!-- back wall at y=40; depth 24in = 72px -->
+  <rect x="40" y="30" width="400" height="10" fill="#9aa0a6"/>
+  <rect x="50" y="30" width="10" height="100" fill="#9aa0a6"/>
+  <text x="240" y="27" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" fill="#555a60">back wall</text>
+  <g stroke="#1d1d1f" stroke-width="1.5" fill="#d9c6a5">
+    <rect x="60" y="40" width="108" height="72"/>
+    <rect x="168" y="40" width="90" height="72"/>
+    <rect x="258" y="40" width="72" height="72"/>
+    <rect x="330" y="40" width="90" height="72"/>
+  </g>
+  <!-- wall cabinets above, dashed, depth 12 = 36px -->
+  <g fill="none" stroke="#2f5d8a" stroke-width="2" stroke-dasharray="6 4">
+    <rect x="60" y="40" width="108" height="36"/><rect x="168" y="40" width="90" height="36"/>
+    <rect x="258" y="40" width="72" height="36"/><rect x="330" y="40" width="90" height="36"/>
+  </g>
+  <g font-family="system-ui, sans-serif" font-size="19" fill="#1d1d1f" text-anchor="middle">
+    <text x="114" y="65" fill="#2f5d8a">36</text><text x="213" y="65" fill="#2f5d8a">30</text><text x="294" y="65" fill="#2f5d8a">24</text><text x="375" y="65" fill="#2f5d8a">30</text>
+    <text x="114" y="103">36</text><text x="213" y="103">30</text><text x="294" y="103">24</text><text x="375" y="103">30</text>
+    <text x="240" y="138">total width 120</text>
+  </g>
+  <g stroke="#555a60" stroke-width="1">
+    <line x1="34" y1="40" x2="34" y2="112"/><line x1="30" y1="40" x2="38" y2="40"/><line x1="30" y1="112" x2="38" y2="112"/>
+    <line x1="432" y1="40" x2="432" y2="76"/><line x1="428" y1="40" x2="436" y2="40"/><line x1="428" y1="76" x2="436" y2="76"/>
+  </g>
+  <g font-family="system-ui, sans-serif" font-size="19" fill="#1d1d1f">
+    <text x="28" y="83" text-anchor="end">24</text>
+    <text x="438" y="65" text-anchor="start" fill="#2f5d8a">12</text>
+  </g>
+  </g>
+</svg>
+<figcaption>Plan of the same run. The dashed blue outlines are the wall cabinets, which hang above the base cabinets; their widths are in blue. The grey strips are the back wall and the side wall at the left end. All measurements in inches.</figcaption>
+</figure>
+
+<div class="task">
+<p class="label">Task 1 (about 2 minutes, paper)</p>
+<p>Use the plan and the elevation. Write down the width, depth and height of (a) the 24-inch base cabinet and (b) the 36-inch wall cabinet. Next to each number, write which view you read it from.</p>
+</div>
+<details class="solution"><summary>Solution to Task 1</summary>
+<div class="table-wrap"><table class="left">
+<tr><th>Cabinet</th><th>Width</th><th>Depth</th><th>Height</th></tr>
+<tr><td>(a) 24-inch base</td><td>24 in (plan or elevation)</td><td>24 in (plan)</td><td>34&#189; in (elevation)</td></tr>
+<tr><td>(b) 36-inch wall</td><td>36 in (plan, dashed outline, or elevation)</td><td>12 in (plan, dashed outline)</td><td>30 in (elevation)</td></tr>
+</table></div>
+<p>The width appears in both views. You need both drawings to get all three measurements of one box.</p>
+</details>
+
+<h2>2. Volume of one cabinet</h2>
+
+<p>The <b>volume</b> of a box is the amount of space inside it. It is measured by counting cubes. A <b>cubic inch</b> (in<sup>3</sup>) is a cube 1 inch on each side.</p>
+
+<p>Take the 30-inch base cabinet: 30 in wide, 24 in deep, 34&#189; in tall. The bottom of the box is a rectangle 30 in by 24 in, so one layer of 1-inch cubes on the bottom holds <span class="math">30 × 24 = 720</span> cubes. The box is 34 full layers and a half layer tall, so it holds</p>
+<p class="display"><span class="math">720 × 34.5 = 24,840 cubic inches.</span></p>
+
+<p>The general rule is</p>
+<p class="display"><b>volume of a box = width × depth × height.</b></p>
+<p>The order of the three numbers does not matter. On a calculator, type <span class="calc">30 × 24 × 34.5</span>.</p>
+
+<p>We treat each cabinet as a closed box and use its outside measurements. This is a simplification. The space you can fill is smaller, because the side panels, shelves and the recessed strip at the floor (the toe kick) take up some of it. The volumes in this lecture are the size of the box, so they are an upper limit on the storage.</p>
+
+<h2>3. Cubic inches and cubic feet</h2>
+
+<p>A number like 24,840 cubic inches is hard to picture. Volumes this size are easier to picture in <b>cubic feet</b> (ft<sup>3</sup>): a cube 1 foot on each side.</p>
+
+<p>One foot is 12 inches. A cube 1 foot on each side is 12 inches wide, 12 inches deep and 12 inches tall, so it holds</p>
+<p class="display"><span class="math">12 × 12 × 12 = 1,728 cubic inches.</span></p>
+<p>So 1 ft<sup>3</sup> = 1,728 in<sup>3</sup>. In lecture 5.1 the same reasoning gave 1 ft<sup>2</sup> = 12 × 12 = 144 in<sup>2</sup>. For volume there is a third factor of 12.</p>
+
+<p>To convert, multiply by a fraction equal to 1, as in week 1:</p>
+<p class="display"><span class="math">24,840 in<sup>3</sup> × (1 ft<sup>3</sup> / 1,728 in<sup>3</sup>)</span> <span class="math">= 24,840 ÷ 1,728</span> <span class="math">= 14.375 ft<sup>3</sup>.</span></p>
+
+<p>Check by converting each measurement to feet first: 30 in = 2.5 ft, 24 in = 2 ft, 34.5 in = 2.875 ft, and <span class="math">2.5 × 2 × 2.875 = 14.375 ft<sup>3</sup></span>. The two methods agree.</p>
+
+<p>A common mistake is to divide by 144, the factor for square feet, which gives 172.5. Estimate the size of the answer to catch it: the cabinet is about 2&#189; ft by 2 ft by 3 ft, so its volume is about 15 ft<sup>3</sup>, and 172.5 is far too big.</p>
+
+<div class="task">
+<p class="label">Task 2 (about 4 minutes, calculator)</p>
+<p>The 30-inch wall cabinet is 30 in wide, 12 in deep and 30 in tall. Find its volume (a) in cubic inches and (b) in cubic feet. (c) Check your answer to (b) by converting the three measurements to feet first.</p>
+</div>
+<details class="solution"><summary>Solution to Task 2</summary>
+<p>(a) <span class="math">30 × 12 × 30 = 10,800 in<sup>3</sup></span>.</p>
+<p>(b) <span class="math">10,800 ÷ 1,728 = 6.25 ft<sup>3</sup></span>.</p>
+<p>(c) 30 in = 2.5 ft and 12 in = 1 ft, so <span class="math">2.5 × 1 × 2.5 = 6.25 ft<sup>3</sup></span>.</p>
+<p>The wall cabinet holds less than half of the 30-inch base cabinet's 14.375 ft<sup>3</sup>. It is half as deep and a little shorter.</p>
+</details>
+
+<h2>4. Storage in the whole run, with a spreadsheet</h2>
+
+<p>The run has eight cabinets. Computing eight volumes by hand is slow; a spreadsheet does it with one formula copied down. The layout has the measurements in columns A to D. Columns E and F are for you to fill.</p>
+
+<div class="table-wrap"><table class="sheet">
+<tr><th class="rowhead"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>
+<tr><td class="rowhead">1</td><td>Cabinet</td><td>Width (in)</td><td>Depth (in)</td><td>Height (in)</td><td>Volume (cu in)</td><td>Volume (cu ft)</td></tr>
+<tr><td class="rowhead">2</td><td>Base 36</td><td>36</td><td>24</td><td>34.5</td><td></td><td></td></tr>
+<tr><td class="rowhead">3</td><td>Base 30</td><td>30</td><td>24</td><td>34.5</td><td></td><td></td></tr>
+<tr><td class="rowhead">4</td><td>Base 24</td><td>24</td><td>24</td><td>34.5</td><td></td><td></td></tr>
+<tr><td class="rowhead">5</td><td>Base 30</td><td>30</td><td>24</td><td>34.5</td><td></td><td></td></tr>
+<tr><td class="rowhead">6</td><td>Wall 36</td><td>36</td><td>12</td><td>30</td><td></td><td></td></tr>
+<tr><td class="rowhead">7</td><td>Wall 30</td><td>30</td><td>12</td><td>30</td><td></td><td></td></tr>
+<tr><td class="rowhead">8</td><td>Wall 24</td><td>24</td><td>12</td><td>30</td><td></td><td></td></tr>
+<tr><td class="rowhead">9</td><td>Wall 30</td><td>30</td><td>12</td><td>30</td><td></td><td></td></tr>
+</table></div>
+<p class="small">On a phone, scroll the table sideways to see columns E and F.</p>
+
+<p>
+<button type="button" id="copyLayout">Copy layout to clipboard</button>
+<a class="btn" id="csvLink" download="cabinet-volumes.csv" href="#">Download CSV</a>
+<span id="copyMsg" class="small"></span>
+</p>
+<p class="small">The copied layout uses tabs between columns, so it pastes into separate cells. The layout and the formulas in the solution were not tested in Excel or Google Sheets.</p>
+
+<p>A formula starts with =. In E2, <b>=B2*C2*D2</b> multiplies the width, depth and height in row 2. When you copy E2 down to E9, the row numbers change with the row: E3 becomes =B3*C3*D3, as in lecture 1.3. The formula <b>=SUM(F2:F5)</b> adds the cells F2 through F5.</p>
+
+<div class="task">
+<p class="label">Task 3 (about 6 minutes, laptop with Excel or Google Sheets)</p>
+<p>Paste the layout into cell A1, or open the CSV. (a) In E2 type =B2*C2*D2 and in F2 type =E2/1728, then copy both down to row 9. Column F is now the volume of each cabinet in cubic feet. (b) In F10 type =SUM(F2:F5) for the total storage of the base cabinets. (c) In F11 type a formula for the total storage of the wall cabinets. (d) In F12 type a formula for the total of the whole run. Write down the three totals in cubic feet.</p>
+</div>
+<details class="solution"><summary>Solution to Task 3</summary>
+<div class="table-wrap"><table>
+<tr><th>Cabinet</th><th>Volume (in<sup>3</sup>)</th><th>Volume (ft<sup>3</sup>)</th></tr>
+<tr><td>Base 36</td><td>29,808</td><td>17.25</td></tr>
+<tr><td>Base 30</td><td>24,840</td><td>14.375</td></tr>
+<tr><td>Base 24</td><td>19,872</td><td>11.5</td></tr>
+<tr><td>Base 30</td><td>24,840</td><td>14.375</td></tr>
+<tr><td>Wall 36</td><td>12,960</td><td>7.5</td></tr>
+<tr><td>Wall 30</td><td>10,800</td><td>6.25</td></tr>
+<tr><td>Wall 24</td><td>8,640</td><td>5</td></tr>
+<tr><td>Wall 30</td><td>10,800</td><td>6.25</td></tr>
+<tr><td><b>Total</b></td><td><b>142,560</b></td><td><b>82.5</b></td></tr>
+</table></div>
+<p>The finished layout:</p>
+<div class="table-wrap"><table class="sheet">
+<tr><th class="rowhead"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>
+<tr><td class="rowhead">1</td><td>Cabinet</td><td>Width (in)</td><td>Depth (in)</td><td>Height (in)</td><td>Volume (cu in)</td><td>Volume (cu ft)</td></tr>
+<tr><td class="rowhead">2</td><td>Base 36</td><td>36</td><td>24</td><td>34.5</td><td>=B2*C2*D2</td><td>=E2/1728</td></tr>
+<tr><td class="rowhead">3</td><td>Base 30</td><td>30</td><td>24</td><td>34.5</td><td>=B3*C3*D3</td><td>=E3/1728</td></tr>
+<tr><td class="rowhead">4</td><td>Base 24</td><td>24</td><td>24</td><td>34.5</td><td>=B4*C4*D4</td><td>=E4/1728</td></tr>
+<tr><td class="rowhead">5</td><td>Base 30</td><td>30</td><td>24</td><td>34.5</td><td>=B5*C5*D5</td><td>=E5/1728</td></tr>
+<tr><td class="rowhead">6</td><td>Wall 36</td><td>36</td><td>12</td><td>30</td><td>=B6*C6*D6</td><td>=E6/1728</td></tr>
+<tr><td class="rowhead">7</td><td>Wall 30</td><td>30</td><td>12</td><td>30</td><td>=B7*C7*D7</td><td>=E7/1728</td></tr>
+<tr><td class="rowhead">8</td><td>Wall 24</td><td>24</td><td>12</td><td>30</td><td>=B8*C8*D8</td><td>=E8/1728</td></tr>
+<tr><td class="rowhead">9</td><td>Wall 30</td><td>30</td><td>12</td><td>30</td><td>=B9*C9*D9</td><td>=E9/1728</td></tr>
+<tr><td class="rowhead">10</td><td>Base total</td><td></td><td></td><td></td><td></td><td>=SUM(F2:F5)</td></tr>
+<tr><td class="rowhead">11</td><td>Wall total</td><td></td><td></td><td></td><td></td><td>=SUM(F6:F9)</td></tr>
+<tr><td class="rowhead">12</td><td>Run total</td><td></td><td></td><td></td><td></td><td>=SUM(F2:F9)</td></tr>
+</table></div>
+<p>(b) =SUM(F2:F5) gives 17.25 + 14.375 + 11.5 + 14.375 = 57.5 ft<sup>3</sup>. (c) =SUM(F6:F9) gives 7.5 + 6.25 + 5 + 6.25 = 25 ft<sup>3</sup>. (d) =SUM(F2:F9), or =F10+F11, gives 57.5 + 25 = 82.5 ft<sup>3</sup>.</p>
+<p>A shortcut: the four base cabinets have the same depth and height, so together they form one box 120 in wide, 24 in deep and 34.5 in tall. Its volume is <span class="math">120 × 24 × 34.5 = 99,360 in<sup>3</sup></span>, and <span class="math">99,360 ÷ 1,728 = 57.5 ft<sup>3</sup></span>, the same total.</p>
+</details>
+
+<h2>5. Surface area from a net</h2>
+
+<p>Paint and veneer cover the outside of a box, so they depend on its <b>surface area</b>: the total area of all its faces, in square inches or square feet. A box has six rectangular faces in three matching pairs: top and bottom, front and back, left side and right side.</p>
+
+<p>A <b>net</b> is the box cut along some edges and unfolded flat. Every face appears once, so the surface area of the box is the area of the net.</p>
+
+<figure>
+<svg viewBox="80 60 395 305" role="img" aria-label="Net of a 30 by 24 by 34.5 inch box">
+  <!-- scale 2.4 px/in. Columns: side 24in=57.6, front 30in=72, side 57.6, back 72 -->
+  <!-- x0=20: side L 20-77.6, front 77.6-149.6, side R 149.6-207.2, back 207.2-279.2 -->
+  <!-- rows: top 24in=57.6 (y 40-97.6), middle 34.5in=82.8 (97.6-180.4), bottom 57.6 (180.4-238) -->
+  <g transform="translate(60,10) scale(1.45)">
+  <g stroke="#1d1d1f" stroke-width="1.2">
+    <rect x="77.6" y="40" width="72" height="57.6" fill="#e8dcc6"/>
+    <rect x="20" y="97.6" width="57.6" height="82.8" fill="#cbb48c"/>
+    <rect x="77.6" y="97.6" width="72" height="82.8" fill="#d9c6a5"/>
+    <rect x="149.6" y="97.6" width="57.6" height="82.8" fill="#cbb48c"/>
+    <rect x="207.2" y="97.6" width="72" height="82.8" fill="#d9c6a5"/>
+    <rect x="77.6" y="180.4" width="72" height="57.6" fill="#e8dcc6"/>
+  </g>
+  <g font-family="system-ui, sans-serif" font-size="10" fill="#1d1d1f" text-anchor="middle">
+    <text x="113.6" y="65">top</text><text x="113.6" y="79">30 × 24</text>
+    <text x="48.8" y="134">side</text><text x="48.8" y="148">24 × 34½</text>
+    <text x="113.6" y="134">front</text><text x="113.6" y="148">30 × 34½</text>
+    <text x="178.4" y="134">side</text><text x="178.4" y="148">24 × 34½</text>
+    <text x="243.2" y="134">back</text><text x="243.2" y="148">30 × 34½</text>
+    <text x="113.6" y="205">bottom</text><text x="113.6" y="219">30 × 24</text>
+  </g>
+  </g>
+</svg>
+<figcaption>Net of the 30 in × 24 in × 34&#189; in base cabinet. Faces of the same shade come in matching pairs. Measurements in inches.</figcaption>
+</figure>
+
+<p>Add the faces in pairs:</p>
+<div class="table-wrap"><table>
+<tr><th>Pair</th><th>One face (in<sup>2</sup>)</th><th>Both faces (in<sup>2</sup>)</th></tr>
+<tr><td>Top and bottom</td><td>30 × 24 = 720</td><td>1,440</td></tr>
+<tr><td>Front and back</td><td>30 × 34.5 = 1,035</td><td>2,070</td></tr>
+<tr><td>Two sides</td><td>24 × 34.5 = 828</td><td>1,656</td></tr>
+<tr><td><b>Surface area</b></td><td></td><td><b>5,166</b></td></tr>
+</table></div>
+<p>As one rule: <b>surface area of a box = 2 × (width × depth + width × height + depth × height)</b>. Here <span class="math">2 × (720 + 1,035 + 828) = 2 × 2,583 = 5,166 in<sup>2</sup></span>.</p>
+<p>To convert to square feet, divide by 144 (lecture 5.1): <span class="math">5,166 ÷ 144 = 35.875 ft<sup>2</sup></span>.</p>
+
+<div class="task">
+<p class="label">Task 4 (about 4 minutes, calculator and paper)</p>
+<p>The 30-inch wall cabinet is 30 in wide, 12 in deep and 30 in tall. (a) Sketch its net and label each face with its two measurements. (b) Find its surface area in square inches and in square feet.</p>
+</div>
+<details class="solution"><summary>Solution to Task 4</summary>
+<p>(a) The net has the same shape as the one above: a row of four faces (side, front, side, back) with the top and bottom attached to the front. Top and bottom are 30 × 12; front and back are 30 × 30; the sides are 12 × 30.</p>
+<p>(b) Top and bottom: 2 × 360 = 720. Front and back: 2 × 900 = 1,800. Sides: 2 × 360 = 720. Total <span class="math">720 + 1,800 + 720 = 3,240 in<sup>2</sup></span>, and <span class="math">3,240 ÷ 144 = 22.5 ft<sup>2</sup></span>.</p>
+</details>
+
+<h2>6. How much paint to buy</h2>
+
+<p>Once the cabinets are installed, only some faces show. The left end of the run stands against the side wall and the right end is open (see the plan). The faces to paint are the eight fronts, the right side of the last base cabinet, the right side of the last wall cabinet, and the undersides of the wall cabinets, which face the counter. We treat each front as a flat rectangle. This is a simplification: real doors have edges and backs that also take paint, and we leave those out.</p>
+
+<div class="table-wrap"><table>
+<tr><th>Faces to paint</th><th>Area (in<sup>2</sup>)</th><th>Area (ft<sup>2</sup>)</th></tr>
+<tr><td>Fronts of the base cabinets, 120 × 34.5</td><td>4,140</td><td>28.75</td></tr>
+<tr><td>Fronts of the wall cabinets, 120 × 30</td><td>3,600</td><td>25</td></tr>
+<tr><td>Open end of the base run, 24 × 34.5</td><td>828</td><td>5.75</td></tr>
+<tr><td>Open end of the wall run, 12 × 30</td><td>360</td><td>2.5</td></tr>
+<tr><td>Undersides of the wall cabinets, 120 × 12</td><td>1,440</td><td>10</td></tr>
+<tr><td><b>Total</b></td><td><b>10,368</b></td><td><b>72</b></td></tr>
+</table></div>
+
+<p>The fronts of the four base cabinets together form one rectangle 120 in wide, so one multiplication gives all four. The same holds for the wall fronts and the wall undersides. Each square-foot figure is the square-inch figure divided by 144.</p>
+
+<p>Benjamin Moore's data sheet for its ADVANCE Waterborne Interior Alkyd Semi Gloss paint, which it lists for "interior doors, trim, cabinets, walls, and ceilings," gives "Coverage per Gallon at Recommended Film Thickness 400 – 500 sq. ft." and recommends 1 or 2 coats [2]. Coverage is a rate: 400 to 500 square feet per gallon. The data sheet gives a range because coverage depends on "surface texture and porosity" [2]. To be safe, plan with the low end, 400 ft<sup>2</sup> per gallon. The data sheet also calls for a coat of primer on cabinets before the paint [2]; we estimate only the paint.</p>
+
+<div class="task">
+<p class="label">Task 5 (about 3 minutes, calculator)</p>
+<p>You will paint the 72 ft<sup>2</sup> of exposed faces with 2 coats of this paint. (a) How many square feet of painting is that? (b) How many gallons does it take at 400 ft<sup>2</sup> per gallon, and at 500 ft<sup>2</sup> per gallon? (c) A quart is &#188; gallon. Write your answer at 400 ft<sup>2</sup> per gallon in quarts, and give the smallest whole number of quarts that is sure to be enough.</p>
+</div>
+<details class="solution"><summary>Solution to Task 5</summary>
+<p>(a) Two coats cover the area twice: <span class="math">2 × 72 = 144 ft<sup>2</sup></span>.</p>
+<p>(b) Divide the area by the rate, as with any rate in week 1: <span class="math">144 ft<sup>2</sup> × (1 gal / 400 ft<sup>2</sup>) = 0.36 gal</span>, and <span class="math">144 ÷ 500 = 0.288 gal</span>.</p>
+<p>(c) In quarts, 0.36 gal = 0.36 × 4 = 1.44 quarts, so 2 quarts are sure to be enough. One quart is never enough: it would have to cover 144 ft<sup>2</sup>, which takes a coverage of 144 ÷ 0.25 = 576 ft<sup>2</sup> per gallon, above the top of the range. A full gallon is 1 ÷ 0.36 = 2.8 times what the job needs at 400 ft<sup>2</sup> per gallon.</p>
+</details>
+
+<h2>7. Scaling: twice as wide or twice as big</h2>
+
+<p>Start again from the 30-inch base cabinet: 30 × 24 × 34.5, with volume 24,840 in<sup>3</sup> and surface area 5,166 in<sup>2</sup>.</p>
+
+<p><b>Twice as wide, same depth and height:</b> 60 × 24 × 34.5 = 49,680 in<sup>3</sup>. That is <span class="math">49,680 ÷ 24,840 = 2</span> times the volume. Only one of the three factors doubled, so the product doubled. For volume this is the same as placing two cabinets side by side. The surface area is less than double, because the two side panels that touch end up inside the wider box.</p>
+
+<p><b>Twice as big in every direction:</b> every length is doubled, to 60 in wide, 48 in deep and 69 in tall.</p>
+
+<p>The number every length is multiplied by is the <b>scale factor</b>, written k. Doubling every length is k = 2. The slider multiplies every length of the 30-inch base cabinet by k. The grey dashed outline is the original cabinet; the tan box is the scaled one. The Ratio column is the scaled value divided by the original value.</p>
+
+<div class="scaler">
+  <label for="kSlider">Scale factor k = <span id="kVal">1</span></label>
+  <input type="range" id="kSlider" min="0.5" max="3" step="0.25" value="1">
+  <svg id="scaleSvg" viewBox="0 0 420 380" role="img" aria-label="Original and scaled cabinet drawn as boxes"></svg>
+  <p class="small">The drawing zooms so that the larger of the two boxes fills the panel.</p>
+  <div class="table-wrap"><table class="readout">
+    <tr><th></th><th>Original</th><th>Scaled</th><th>Ratio</th></tr>
+    <tr><td>Measurements (in)</td><td>30 × 24 × 34.5</td><td id="rDims"></td><td id="rLen"></td></tr>
+    <tr><td>Surface area (in<sup>2</sup>)</td><td>5,166</td><td id="rArea"></td><td id="rAreaRatio"></td></tr>
+    <tr><td>Volume (in<sup>3</sup>)</td><td>24,840</td><td id="rVol"></td><td id="rVolRatio"></td></tr>
+  </table></div>
+</div>
+
+<div class="task">
+<p class="label">Task 6 (about 4 minutes, calculator and slider)</p>
+<p>(a) Guess how many times as much the 60 × 48 × 69 box holds as the original cabinet, and write the guess down. Then compute <span class="calc">60 × 48 × 69 ÷ 24840</span>. (b) Set the slider to k = 0.5 and then to k = 3. For each, write down k, the area ratio and the volume ratio from the Ratio column. Compute k × k and k × k × k on your calculator and write them next to the ratios.</p>
+</div>
+<details class="solution"><summary>Solution to Task 6</summary>
+<p>(a) <span class="math">60 × 48 × 69 = 198,720 in<sup>3</sup></span>, and <span class="math">198,720 ÷ 24,840 = 8</span>. Doubling every length gives 8 times the volume.</p>
+<div class="table-wrap"><table>
+<tr><th>k</th><th>k × k</th><th>k × k × k</th><th>Area ratio</th><th>Volume ratio</th></tr>
+<tr><td>0.5</td><td>0.25</td><td>0.125</td><td>0.25</td><td>0.125</td></tr>
+<tr><td>3</td><td>9</td><td>27</td><td>9</td><td>27</td></tr>
+</table></div>
+<p>(b) The area ratio equals k × k and the volume ratio equals k × k × k. At k = 0.5 the cabinet is half as big in every direction and holds only 1/8 as much. At k = 3 it holds 27 times as much.</p>
+</details>
+
+<p>The reason is in the formulas. The volume is width × depth × height. When all three lengths are doubled, each of the three factors is doubled, so the volume is multiplied by <span class="math">2 × 2 × 2 = 8</span>. The surface area of the doubled box is 2 × (60 × 48 + 60 × 69 + 48 × 69) = 20,664 in<sup>2</sup>, which is <span class="math">20,664 ÷ 5,166 = 4</span> times the original. Each face is a rectangle with both sides doubled, and <span class="math">2 × 2 = 4</span>.</p>
+
+<p>The same reasoning works for any scale factor k. Each area is a product of two lengths, so it is multiplied by <span class="math">k × k = k<sup>2</sup></span> ("k squared"). Each volume is a product of three lengths, so it is multiplied by <span class="math">k × k × k = k<sup>3</sup></span> ("k cubed").</p>
+<p class="display"><b>Multiply every length by k: area is multiplied by k<sup>2</sup>, volume by k<sup>3</sup>.</b></p>
+
+<h2>8. Cubes and cube roots on a calculator</h2>
+
+<p>The <b>cube</b> of a number is the number times itself three times: the cube of 1.5 is <span class="math">1.5<sup>3</sup> = 1.5 × 1.5 × 1.5 = 3.375</span>. On a calculator, type <span class="calc">1.5 ^ 3</span>, or use a key marked x<sup>3</sup> or x<sup>y</sup>. The cubes of 1 through 12 are</p>
+<p class="display">1, 8, 27, 64, 125, 216, 343, 512, 729, 1,000, 1,331, 1,728.</p>
+
+<p>The <b>cube root</b> undoes a cube. The cube root of 8, written <span class="math">∛8</span>, is 2, because <span class="math">2<sup>3</sup> = 8</span>. Lecture 5.2 did the same with squares and square roots. On a calculator, use a key marked ∛ if there is one. Otherwise type <span class="calc">8 ^ (1/3)</span>. The parentheses matter: without them, order of operations gives <span class="calc">8 ^ 1 / 3</span> = 8 ÷ 3 = 2.667, which is wrong. Check any cube root by cubing the answer.</p>
+
+<p>Cube roots answer the scaling question backward. Suppose you want a base cabinet with the same shape as the 30-inch one that holds twice as much. The volume ratio is <span class="math">k<sup>3</sup> = 2</span>, so</p>
+<p class="display"><span class="math">k = ∛2 = 1.26</span> (to two decimal places).</p>
+<p>Every length is multiplied by k. With four decimal places, k = 1.2599: 30 × 1.2599 = 37.8 in wide, 24 × 1.2599 = 30.2 in deep, 34.5 × 1.2599 = 43.5 in tall. Check: <span class="math">37.8 × 30.2 × 43.5 = 49,658</span>, close to <span class="math">2 × 24,840 = 49,680</span>; the small gap comes from rounding. Doubling the volume this way needs each length only 26% larger. The surface area, and so the paint, grows by <span class="math">k<sup>2</sup> = 1.26<sup>2</sup> = 1.59</span>.</p>
+<p>Real cabinets come in widths in steps of 3 inches [1], so the closest standard widths are 36 or 39 inches, and a standard base cabinet is never 43.5 inches tall. In practice you would pick the nearest standard sizes and compute the volume again.</p>
+
+<div class="task">
+<p class="label">Task 7 (about 2 minutes, calculator)</p>
+<p>You want a box with the same shape as the 30-inch base cabinet that holds 3 times as much. (a) Find the scale factor k to two decimal places, and check it by cubing. (b) By what factor does the paint needed for the outside grow?</p>
+</div>
+<details class="solution"><summary>Solution to Task 7</summary>
+<p>(a) <span class="math">k<sup>3</sup> = 3</span>, so <span class="math">k = ∛3</span>. Type <span class="calc">3 ^ (1/3)</span> to get 1.4422…, which is 1.44. Check: <span class="math">1.44<sup>3</sup> = 2.99</span>, close to 3, and the unrounded <span class="math">1.4422<sup>3</sup> = 3.000</span> (to three decimal places).</p>
+<p>(b) The surface area is multiplied by <span class="math">k<sup>2</sup> = 1.4422<sup>2</sup> = 2.08</span>. Three times the storage takes about 2.08 times the paint, because area grows more slowly than volume.</p>
+</details>
+
+<h2>Sources</h2>
+<ol class="sources">
+  <li>KraftMaid, "What Are Standard Kitchen Cabinet Sizes?", posted 23 June 2022, <a href="https://www.kraftmaid.com/kraftmaid/kitchen-cabinet-sizes">kraftmaid.com/kraftmaid/kitchen-cabinet-sizes</a>, accessed 4 October 2026. Figures quoted: &#8216;The standard base cabinet height for kitchen cabinets is 34-1/2" tall&#8217;; &#8216;The industry standard base cabinet depth for kitchen cabinets is 24"&#8217;; &#8216;The standard wall cabinet depth is 12"&#8217;; wall cabinets &#8216;range from 12" to 54" tall&#8217;; widths from 6 to 48 inches in 3-inch increments.</li>
+  <li>Benjamin Moore, Technical Data Sheet, ADVANCE Waterborne Interior Alkyd Semi Gloss 793, document M72 793 US 012419 (24 January 2019), <a href="https://media.benjaminmoore.com/WebServices/prod/assets/production/datasheets/TDS_0793/20190124%20793%20TDS%20US%20OKF.pdf">media.benjaminmoore.com (PDF)</a>, accessed 4 October 2026. Figures quoted: "Coverage per Gallon at Recommended Film Thickness 400 – 500 sq. ft."; "Depending on surface texture and porosity"; "1 or 2 coats"; "Ideal for interior doors, trim, cabinets, walls, and ceilings"; primers for cabinetry: "Advance® Waterborne Interior Alkyd Primer (790), Fresh Start® Multi-Purpose Latex Primer (N023) or Multi-Purpose Oil Based Primer (024)".</li>
+</ol>
+
+</main>
+
+<script>
+(function () {
+  // Spreadsheet layout: copy and CSV download
+  var rows = [
+    ["Cabinet", "Width (in)", "Depth (in)", "Height (in)", "Volume (cu in)", "Volume (cu ft)"],
+    ["Base 36", "36", "24", "34.5"],
+    ["Base 30", "30", "24", "34.5"],
+    ["Base 24", "24", "24", "34.5"],
+    ["Base 30", "30", "24", "34.5"],
+    ["Wall 36", "36", "12", "30"],
+    ["Wall 30", "30", "12", "30"],
+    ["Wall 24", "24", "12", "30"],
+    ["Wall 30", "30", "12", "30"]
+  ];
+  function csvCell(s) { return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  var csv = rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (row) { return row.join("\t"); }).join("\n");
+  var link = document.getElementById("csvLink");
+  try {
+    link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  } catch (e) {
+    link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+  }
+  var msg = document.getElementById("copyMsg");
+  document.getElementById("copyLayout").addEventListener("click", function () {
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = tsv; document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      msg.textContent = ok ? "Copied. Click cell A1 and paste." : "Copy failed. Use the CSV download.";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () {
+        msg.textContent = "Copied. Click cell A1 and paste.";
+      }, fallback);
+    } else { fallback(); }
+  });
+
+  // Scaling slider
+  var W = 30, D = 24, H = 34.5, V0 = W * D * H, A0 = 2 * (W * D + W * H + D * H);
+  var slider = document.getElementById("kSlider");
+  var svg = document.getElementById("scaleSvg");
+  var NS = "http://www.w3.org/2000/svg";
+  function fmt(x, dp) {
+    var s = x.toFixed(dp);
+    if (dp > 0) s = s.replace(/\.?0+$/, "");
+    var parts = s.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  }
+  function box(w, d, h, s, x0, y0, fill, stroke, dash) {
+    // oblique drawing: front face w x h, depth drawn at 30 degrees, half length
+    var dx = d * 0.5 * Math.cos(Math.PI / 6) * s, dy = d * 0.5 * Math.sin(Math.PI / 6) * s;
+    var fw = w * s, fh = h * s;
+    var faces = [
+      [[x0, y0 - fh], [x0 + dx, y0 - fh - dy], [x0 + fw + dx, y0 - fh - dy], [x0 + fw, y0 - fh]],
+      [[x0 + fw, y0], [x0 + fw, y0 - fh], [x0 + fw + dx, y0 - fh - dy], [x0 + fw + dx, y0 - dy]],
+      [[x0, y0], [x0, y0 - fh], [x0 + fw, y0 - fh], [x0 + fw, y0]]
+    ];
+    var shades = fill ? [fill[0], fill[1], fill[2]] : ["none", "none", "none"];
+    var g = document.createElementNS(NS, "g");
+    faces.forEach(function (f, i) {
+      var p = document.createElementNS(NS, "polygon");
+      p.setAttribute("points", f.map(function (q) { return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" "));
+      p.setAttribute("fill", shades[i]);
+      p.setAttribute("stroke", stroke);
+      p.setAttribute("stroke-width", "1.5");
+      if (dash) p.setAttribute("stroke-dasharray", "5 4");
+      g.appendChild(p);
+    });
+    return g;
+  }
+  function draw() {
+    var k = parseFloat(slider.value);
+    document.getElementById("kVal").textContent = fmt(k, 2);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    // zoom so the larger box fills the 420 x 380 panel
+    var m = Math.max(k, 1);
+    var uw = (W + D * 0.5 * Math.cos(Math.PI / 6)) * m, uh = (H + D * 0.5 * Math.sin(Math.PI / 6)) * m;
+    var s = Math.min(396 / uw, 356 / uh), x0 = 12, y0 = 368;
+    svg.appendChild(box(W * k, D * k, H * k, s, x0, y0, ["#e8dcc6", "#cbb48c", "#d9c6a5"], "#1d1d1f", false));
+    svg.appendChild(box(W, D, H, s, x0, y0, null, "#555a60", true));
+    var w = W * k, d = D * k, h = H * k;
+    var A = 2 * (w * d + w * h + d * h), V = w * d * h;
+    document.getElementById("rDims").textContent = fmt(w, 4) + " × " + fmt(d, 4) + " × " + fmt(h, 4);
+    document.getElementById("rLen").textContent = fmt(k, 2);
+    document.getElementById("rArea").textContent = fmt(A, 2);
+    document.getElementById("rAreaRatio").textContent = fmt(A / A0, 6);
+    document.getElementById("rVol").textContent = fmt(V, 2);
+    document.getElementById("rVolRatio").textContent = fmt(V / V0, 6);
+  }
+  slider.addEventListener("input", draw);
+  draw();
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-05/5-2-square-roots-and-the-pythagorean-theorem/" style="color:inherit">&larr; 5.2 Square roots and the Pythagorean theorem</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-06/6-1-counting-drink-orders/" style="color:inherit">6.1 Counting drink orders &rarr;</a></nav>
+</body>
+</html>

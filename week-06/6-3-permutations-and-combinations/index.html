@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Permutations and Combinations</title>
+<style>
+:root {
+  --bg: #fbfaf7;
+  --text: #1d1d1b;
+  --muted: #5b5a55;
+  --rule: #d9d6cc;
+  --accent: #00704a;
+  --task-bg: #eef6f1;
+  --task-border: #00704a;
+  --sol-bg: #ffffff;
+  --formula-bg: #f3f0e6;
+  --code-bg: #efece3;
+  --th-bg: #f0ede4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161715;
+    --text: #ecebe6;
+    --muted: #aaa89f;
+    --rule: #3a3b37;
+    --accent: #5cc99a;
+    --task-bg: #1d2a24;
+    --task-border: #5cc99a;
+    --sol-bg: #1b1c1a;
+    --formula-bg: #24241f;
+    --code-bg: #2a2a25;
+    --th-bg: #24241f;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161715; --text: #ecebe6; --muted: #aaa89f; --rule: #3a3b37; --accent: #5cc99a;
+  --task-bg: #1d2a24; --task-border: #5cc99a; --sol-bg: #1b1c1a; --formula-bg: #24241f;
+  --code-bg: #2a2a25; --th-bg: #24241f;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 18px; line-height: 1.55;
+}
+main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+.course { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; }
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 24px; }
+h2 { font-size: 1.4rem; margin: 40px 0 12px; padding-top: 12px; border-top: 1px solid var(--rule); }
+p, ul, ol { margin: 0 0 14px; }
+li { margin-bottom: 4px; }
+.table-wrap { overflow-x: auto; margin: 0 0 16px; }
+table { border-collapse: collapse; font-size: 0.95rem; }
+th, td { border: 1px solid var(--rule); padding: 5px 10px; text-align: left; vertical-align: top; }
+th { background: var(--th-bg); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.formula {
+  background: var(--formula-bg); border-radius: 6px; padding: 10px 14px; margin: 0 0 16px;
+  font-size: 1.05rem; overflow-x: auto;
+}
+.formula p { margin: 4px 0; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 3px; }
+.frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 3px; }
+.frac > span:last-child { padding: 0 3px; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; background: var(--code-bg); padding: 1px 4px; border-radius: 3px; }
+.task {
+  border: 2px solid var(--task-border); background: var(--task-bg); border-radius: 8px;
+  padding: 12px 16px 6px; margin: 20px 0 8px;
+}
+.task h3 { margin: 0 0 8px; font-size: 1.1rem; color: var(--accent); }
+details.solution {
+  border: 1px solid var(--rule); background: var(--sol-bg); border-radius: 8px;
+  padding: 8px 16px; margin: 0 0 20px;
+}
+details.solution summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details.solution[open] summary { margin-bottom: 10px; }
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0 0 16px; }
+.group { border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; }
+.group b { display: block; margin-bottom: 4px; }
+.group .mono { background: none; padding: 0; }
+button {
+  font: inherit; font-size: 0.95rem; padding: 6px 14px; margin: 0 8px 8px 0; border-radius: 6px;
+  border: 1px solid var(--accent); background: var(--bg); color: var(--accent); cursor: pointer;
+}
+button:hover { background: var(--task-bg); }
+.status { color: var(--muted); font-size: 0.9rem; }
+.nw, td code { white-space: nowrap; }
+.small { font-size: 0.92rem; color: var(--muted); }
+ol.sources li { margin-bottom: 10px; word-break: break-word; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.scroll-hint { display: none; font-size: 0.92rem; color: var(--muted); margin-bottom: 6px; }
+@media (max-width: 520px) {
+  .scroll-hint { display: block; }
+  table.compact { font-size: 0.8rem; }
+  table.compact th, table.compact td { padding: 3px 4px; }
+}
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  h1 { font-size: 1.6rem; }
+  th, td { padding: 4px 6px; }
+}
+</style>
+</head>
+<body>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-06/6-2-sets-and-subsets/" style="color:inherit">&larr; 6.2 Sets and subsets</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-07/7-1-probability-by-counting/" style="color:inherit">7.1 Probability by counting &rarr;</a></nav>
+
+<main>
+<!--
+Instructor note on timing (not shown on the page): task times add up to 3 + 4 + 3 + 5 + 5 + 8 = 28 minutes.
+If time runs short, skip Task 2(c) and Task 3(b) (about 3 minutes) so that section 7 and Task 6,
+which carry the link to 2^n from lecture 6.2 and the only spreadsheet work, are not cut.
+-->
+
+<p class="course">Math 111 · Module: Ordering at Starbucks (week 6) · Lecture 3 of 3</p>
+<h1>Permutations and combinations</h1>
+
+<!-- ============ 1 ============ -->
+<h2 id="s1">1. The Starbucks fall drink menu</h2>
+
+<p>Starbucks started its 2026 fall menu on August 25. Its announcement names 12 fall drinks: 6 returning and 6 new [1]. All 12 were on the starbucks.com online menu on 4 October 2026 [2].</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th class="num">#</th><th>Drink</th><th>New or returning</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Pumpkin Spice Latte</td><td>Returning</td></tr>
+<tr><td class="num">2</td><td>Pumpkin Cream Cold Brew</td><td>Returning</td></tr>
+<tr><td class="num">3</td><td>Iced Pumpkin Cream Chai</td><td>Returning</td></tr>
+<tr><td class="num">4</td><td>Iced Pumpkin Cream Shaken Espresso</td><td>New</td></tr>
+<tr><td class="num">5</td><td>Iced Pumpkin Cream Matcha</td><td>New</td></tr>
+<tr><td class="num">6</td><td>Pumpkin Spice Chai</td><td>New</td></tr>
+<tr><td class="num">7</td><td>Pecan Cortado</td><td>Returning</td></tr>
+<tr><td class="num">8</td><td>Iced Pecan Crunch Latte</td><td>Returning</td></tr>
+<tr><td class="num">9</td><td>Pecan Crunch Latte</td><td>Returning</td></tr>
+<tr><td class="num">10</td><td>Iced Banana Bread Latte</td><td>New</td></tr>
+<tr><td class="num">11</td><td>Iced Banana Bread Chai</td><td>New</td></tr>
+<tr><td class="num">12</td><td>Iced Chaider</td><td>New</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>A group of friends orders a round of fall drinks. Two kinds of counting questions come up at the counter.</p>
+<ul>
+<li><b>Choosing.</b> The group wants to share 3 different drinks from the 12 and taste them all. How many different sets of 3 drinks could they order?</li>
+<li><b>Ordering.</b> The barista finishes the drinks one at a time. In how many different orders can the drinks come out?</li>
+</ul>
+<p>In the first question, the order the drinks are picked in does not change what ends up on the table. In the second question, different orders are different answers. Both questions can be answered by listing every possibility, but the lists get long very fast. A short calculation gives the same counts.</p>
+<p class="small">Simplifications: the group sizes in this lecture are made up. The lecture assumes all 12 drinks are available unless a problem says otherwise; actual availability varies by store.</p>
+
+<div class="task">
+<h3>Task 1 (about 3 minutes, paper)</h3>
+<p>Three friends order a Pumpkin Spice Latte (L), an Iced Pumpkin Cream Matcha (M) and an Iced Chaider (H). The barista finishes them one at a time.</p>
+<ol type="a">
+<li>List every order in which the three drinks can come out. One order is L, M, H.</li>
+<li>Use the multiplication principle from lecture 6.1 to count the possible orders for 4 different drinks, and then for 6 different drinks. Write the product you used each time.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 1</summary>
+<p>(a) There are 6 orders: LMH, LHM, MLH, MHL, HLM, HML. Two of them start with L, two start with M and two start with H.</p>
+<p>(b) With 4 drinks there are 4 choices for the first drink out, then 3 for the second, 2 for the third and 1 for the last: 4 × 3 × 2 × 1 = 24 orders. With 6 drinks: 6 × 5 × 4 × 3 × 2 × 1 = 720 orders.</p>
+</details>
+
+<!-- ============ 2 ============ -->
+<h2 id="s2">2. Arranging n items in a row: n factorial</h2>
+
+<p>The count in Task 1 follows the multiplication principle. Any of the 3 drinks can come out first. After that, 2 drinks are left for second place, and then 1 drink for last place. The number of orders is 3 × 2 × 1 = 6. The same reasoning works for any number of different items.</p>
+
+<div class="formula">
+<p><b>n factorial.</b> For a whole number n ≥ 1, <b>n!</b> (read "n factorial") is the product</p>
+<p>n! = n × (n − 1) × (n − 2) × … × 2 × 1.</p>
+<p>It counts the ways to arrange n different items in a row.</p>
+</div>
+
+<p>Examples: 3! = 3 × 2 × 1 = 6, 4! = 24, 5! = 120 and 6! = 720. By agreement, 0! = 1: there is exactly one way to arrange no items. Excel follows the same agreement: <code>=FACT(0)</code> returns 1 [3]. The formulas in sections 3 and 4 need it.</p>
+
+<p>Factorials grow quickly. If the barista had to make all 12 fall drinks one after another, the number of possible orders would be 12! = 479,001,600, close to half a billion.</p>
+
+<div class="task">
+<h3>Task 2 (about 4 minutes, calculator)</h3>
+<ol type="a">
+<li>Compute 10! and 12!.</li>
+<li>Divide 12! by 10!. Write one sentence explaining why the answer equals 12 × 11.</li>
+<li>Someone writes down one order of all 12 fall drinks every second, without stopping. How many years would it take to write all 12! orders? Use 365.25 days per year.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 2</summary>
+<p>(a) 10! = 3,628,800 and 12! = 479,001,600.</p>
+<p>(b) 12! ÷ 10! = 132 = 12 × 11. The product 12! is 12 × 11 × (10 × 9 × … × 1) = 12 × 11 × 10!, so dividing by 10! leaves 12 × 11.</p>
+<p>(c) Convert seconds to years by multiplying by fractions equal to 1, as in week 1:</p>
+<p>479,001,600 s × (1 min / 60 s) × (1 h / 60 min) × (1 day / 24 h) = 5,544 days.</p>
+<p>5,544 days × (1 year / 365.25 days) ≈ 15.2 years.</p>
+</details>
+
+<!-- ============ 3 ============ -->
+<h2 id="s3">3. Choosing and ordering k of n items: permutations</h2>
+
+<p>Three friends each order a different fall drink from the 12, and we keep track of who gets which. Friend 1 has 12 choices. Friend 2 has 11 choices left, and Friend 3 has 10. By the multiplication principle there are 12 × 11 × 10 = 1,320 ways.</p>
+<p>Here order matters, in the same sense as in section 2. Friend 1, Friend 2 and Friend 3 act like first, second and third place: a way of handing out drinks is a list of 3 drinks in a fixed order, the first for Friend 1, the second for Friend 2 and the third for Friend 3. "Friend 1 gets the Pumpkin Spice Latte and Friend 2 gets the Iced Chaider" is a different outcome from "Friend 1 gets the Iced Chaider and Friend 2 gets the Pumpkin Spice Latte."</p>
+
+<div class="formula">
+<p><b>Permutation.</b> A <b>permutation of k items from n</b> is a choice of k different items from n items, in a particular order. The number of them is written <b>P(n, k)</b>:</p>
+<p>P(n, k) = n × (n − 1) × … × (n − k + 1)  (k factors).</p>
+</div>
+
+<p>For three friends and 12 drinks, n = 12 and k = 3. The product has 3 factors, and the last one is <span class="nw">12 − 3 + 1 = 10</span>, so <span class="nw">P(12, 3)</span> = 12 × 11 × 10 = 1,320.</p>
+
+<p>The same number comes from factorials. Write 12! and 9! as products and cancel the common factors 9 × 8 × … × 1:</p>
+<div class="formula">
+<p class="nw">P(12, 3) = <span class="frac"><span>12!</span><span class="sr"> divided by </span><span>9!</span></span></p>
+<p class="nw">= <span class="frac"><span>12 × 11 × 10 × 9 × … × 1</span><span class="sr"> divided by </span><span>9 × … × 1</span></span></p>
+<p class="nw">= 12 × 11 × 10 = 1,320.</p>
+<p>In general, <span class="nw">P(n, k)</span> = <span class="frac"><span>n!</span><span class="sr"> divided by </span><span>(n − k)!</span></span> for whole numbers k from 0 to n.</p>
+</div>
+<p>When k = n, this gives n! ÷ 0! = n!, the count of arrangements from section 2. When k = 0, it gives n! ÷ n! = 1: there is one way to choose nothing.</p>
+<p class="small">Simplification: each friend orders a different drink. If two friends could order the same drink, each friend would have 12 choices and the count would be 12 × 12 × 12 = 1,728.</p>
+
+<div class="task">
+<h3>Task 3 (about 3 minutes, calculator)</h3>
+<ol type="a">
+<li>Suppose (made up for this task) that 2 of the 12 fall drinks are sold out, so 10 are available. Three friends each order a different one of the 10. Keeping track of who gets which, how many ways are there?</li>
+<li>A group of 5 friends (made up) each orders a different drink from all 12. Compute <span class="nw">P(12, 5)</span> two ways: as a product of 5 factors, and as 12! ÷ 7!.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 3</summary>
+<p>(a) <span class="nw">P(10, 3)</span> = 10 × 9 × 8 = 720.</p>
+<p>(b) <span class="nw">P(12, 5)</span> = 12 × 11 × 10 × 9 × 8 = 95,040. Also 12! ÷ 7! = 479,001,600 ÷ 5,040 = 95,040.</p>
+</details>
+
+<!-- ============ 4 ============ -->
+<h2 id="s4">4. Choosing k of n when order does not matter: combinations</h2>
+
+<p>Back to the choosing question from section 1. The friends will order 3 different drinks to share, chosen from all 12 fall drinks. Nobody cares who orders which. The group only cares which 3 drinks end up on the table.</p>
+<p>The count <span class="nw">P(12, 3)</span> = 1,320 from section 3 is too big for this question. It counts "Pumpkin Spice Latte, then Iced Chaider, then Pecan Cortado" and "Pecan Cortado, then Pumpkin Spice Latte, then Iced Chaider" as different, though both put the same 3 drinks on the table. To find out how much too big, start with a list small enough to write out.</p>
+
+<div class="task">
+<h3>Task 4 (about 5 minutes, paper)</h3>
+<p>Use four iced fall drinks: B = Iced Banana Bread Latte, H = Iced Chaider, M = Iced Pumpkin Cream Matcha, S = Iced Pumpkin Cream Shaken Espresso.</p>
+<ol type="a">
+<li>List every ordered choice of 3 of these drinks (tasted first, second, third), such as BHM and BMH. Check with the multiplication principle that you have 4 × 3 × 2 = 24.</li>
+<li>Sort your list into groups that use the same 3 drinks, ignoring order. How many groups are there? How many ordered choices are in each group?</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 4</summary>
+<p>The 24 ordered choices fall into 4 groups of 6:</p>
+<div class="groups">
+<div class="group"><b>Drinks B, H, M</b><span class="mono">BHM BMH HBM HMB MBH MHB</span></div>
+<div class="group"><b>Drinks B, H, S</b><span class="mono">BHS BSH HBS HSB SBH SHB</span></div>
+<div class="group"><b>Drinks B, M, S</b><span class="mono">BMS BSM MBS MSB SBM SMB</span></div>
+<div class="group"><b>Drinks H, M, S</b><span class="mono">HMS HSM MHS MSH SHM SMH</span></div>
+</div>
+<p>Each group has 6 = 3! ordered choices, because putting 3 chosen drinks in order is arranging 3 items in a row.</p>
+</details>
+
+<p>Task 4 shows the pattern. Each unordered choice of 3 drinks appears in the ordered list exactly 3! = 6 times, once for each way to arrange those 3 drinks. So the number of unordered choices is the ordered count divided by 6:</p>
+<p>24 ÷ 3! = 24 ÷ 6 = 4.</p>
+<p>The same reasoning works for choosing 2 of the 4 drinks. There are 4 × 3 = 12 ordered choices: BH, HB, BM, MB, BS, SB, HM, MH, HS, SH, MS, SM. Each pair appears 2! = 2 times, so there are 12 ÷ 2 = 6 pairs: BH, BM, BS, HM, HS, MS.</p>
+
+<div class="formula">
+<p><b>Combination.</b> A <b>combination of k items from n</b> is a choice of k different items from n items where order does not matter. In the language of lecture 6.2, it is a subset with k elements. The number of them is written <b>C(n, k)</b> and read "n choose k".</p>
+<p>Each combination is counted k! times in <span class="nw">P(n, k)</span>, so, for whole numbers k from 0 to n,</p>
+<p>C(n, k) = <span class="frac"><span>P(n, k)</span><span class="sr"> divided by </span><span>k!</span></span> = <span class="frac"><span>n!</span><span class="sr"> divided by the product k! times (n − k)!</span><span aria-hidden="true">k! (n − k)!</span></span>.</p>
+</div>
+
+<p>The choosing question from section 1, with all 12 fall drinks available:</p>
+<p><span class="nw">C(12, 3)</span> = <span class="frac"><span>12 × 11 × 10</span><span class="sr"> divided by </span><span>3 × 2 × 1</span></span> = <span class="frac"><span>1,320</span><span class="sr"> divided by </span><span>6</span></span> = 220.</p>
+<p>The group can order 220 different sets of 3 drinks. Listing them at 10 seconds per set would take 2,200 seconds, about 37 minutes.</p>
+<p>With the made-up sold-out case from Task 3, only 10 drinks are available, and the count is <span class="nw">C(10, 3)</span> = 720 ÷ 6 = 120.</p>
+
+<p><b>Computing on a calculator.</b> When dividing by a product, put the product in parentheses:</p>
+<p>12 × 11 × 10 ÷ (3 × 2 × 1) = 220.</p>
+<p>Typing 12 × 11 × 10 ÷ 3 × 2 × 1 without parentheses gives 880, because the calculator divides by 3 and then multiplies by 2 (order of operations, week 1). Dividing by each factor in turn also works: 12 × 11 × 10 ÷ 3 ÷ 2 ÷ 1 = 220. Some scientific calculators have functions marked nPr and nCr, on a key or in a menu, and some phone calculators show a factorial key (x! or n!) in scientific mode. Without them, the products above are enough.</p>
+
+<!-- ============ 5 ============ -->
+<h2 id="s5">5. Deciding from the wording whether order matters</h2>
+
+<p>To decide between <span class="nw">P(n, k)</span> and <span class="nw">C(n, k)</span>, use the swap test. Take one outcome and swap two of the chosen items. If the result is a different outcome, order matters and the count is a permutation. If the result is the same outcome, order does not matter and the count is a combination.</p>
+<p>Certain words usually point one way. The swap test decides when the words are unclear.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Order matters: permutation</th><th>Order does not matter: combination</th></tr></thead>
+<tbody>
+<tr><td>first, second, third</td><td>choose a group of</td></tr>
+<tr><td>rank, top 3 in order</td><td>pick some to share</td></tr>
+<tr><td>who gets which (each person is a place in line, as in section 3)</td><td>which ones, a set of</td></tr>
+<tr><td>in what order, line up</td><td>a sampler, a flight</td></tr>
+</tbody>
+</table>
+</div>
+<p>Example: "Three friends each order a different drink from the 12." If the question cares which friend gets which drink, swapping two friends' drinks gives a different outcome, and the count is <span class="nw">P(12, 3)</span> = 1,320. If the question only asks which 3 drinks get ordered, the swap changes nothing, and the count is <span class="nw">C(12, 3)</span> = 220.</p>
+
+<div class="task">
+<h3>Task 5 (about 5 minutes, calculator)</h3>
+<p>For each problem, decide whether order matters. Write the count as <span class="nw">P(n, k)</span>, <span class="nw">C(n, k)</span> or n!, and compute it.</p>
+<ol type="a">
+<li>The group orders a flight of 4 different fall drinks, chosen from all 12, to share.</li>
+<li>Four friends (made up) each order a different fall drink from the 12. We keep track of who gets which.</li>
+<li>You rank your top 3 of the 6 new fall drinks, from favorite to third favorite.</li>
+<li>You choose 2 of the 6 new fall drinks to try this week.</li>
+<li>The group picks 2 different fall drinks from the 12: one to order on Friday and one to order on Saturday.</li>
+</ol>
+</div>
+<details class="solution">
+<summary>Solution to Task 5</summary>
+<ol type="a">
+<li>Swapping two drinks in the flight gives the same flight. Order does not matter: <span class="nw">C(12, 4)</span> = (12 × 11 × 10 × 9) ÷ (4 × 3 × 2 × 1) = 11,880 ÷ 24 = 495.</li>
+<li>The four friends act like first, second, third and fourth place, so swapping two friends' drinks gives a different outcome. Order matters: <span class="nw">P(12, 4)</span> = 12 × 11 × 10 × 9 = 11,880.</li>
+<li>Swapping your first and second favorite changes the ranking. Order matters: <span class="nw">P(6, 3)</span> = 6 × 5 × 4 = 120.</li>
+<li>Trying drink X and then drink Y gives the same 2 drinks as trying Y and then X. Order does not matter: <span class="nw">C(6, 2)</span> = (6 × 5) ÷ 2 = 15.</li>
+<li>The word "picks" suggests a combination, but the swap test says otherwise. Pumpkin Spice Latte on Friday and Iced Chaider on Saturday is a different plan from Iced Chaider on Friday and Pumpkin Spice Latte on Saturday. Friday and Saturday act like first and second place. Order matters: <span class="nw">P(12, 2)</span> = 12 × 11 = 132.</li>
+</ol>
+</details>
+
+<!-- ============ 6 ============ -->
+<h2 id="s6">6. Spreadsheet functions: FACT, PERMUT and COMBIN</h2>
+
+<p>Excel [3] and Google Sheets [4] have one function for each count, with the same names in both.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Function and what it counts</th><th>Example and result</th></tr></thead>
+<tbody>
+<tr><td><code>FACT(n)</code><br>n!, arrangements of n items</td><td><code>=FACT(12)</code><br>gives 479,001,600</td></tr>
+<tr><td><code>PERMUT(n, k)</code><br><span class="nw">P(n, k)</span>, ordered choices</td><td><code>=PERMUT(12,3)</code><br>gives 1,320</td></tr>
+<tr><td><code>COMBIN(n, k)</code><br><span class="nw">C(n, k)</span>, unordered choices</td><td><code>=COMBIN(12,3)</code><br>gives 220</td></tr>
+</tbody>
+</table>
+</div>
+<p>The inputs can be cell references. If cell A2 holds 12 and B2 holds 3, then <code>=COMBIN(A2,B2)</code> returns 220. In Excel, PERMUT and COMBIN return an error if k is larger than n [3], because you cannot choose more different drinks than the menu has.</p>
+
+<!-- ============ 7 ============ -->
+<h2 id="s7">7. Combinations and the 2<sup>n</sup> subsets</h2>
+
+<p>Lecture 6.2 showed that a set with n elements has 2<sup>n</sup> subsets: each element is either in the subset or out, so there are 2 × 2 × … × 2 = 2<sup>n</sup> subsets. A combination of k items is a subset with k elements, so sorting all the subsets by size gives a second way to count them. Task 1 of lecture 6.2 sorted the subsets of three toppings this way.</p>
+<p>Take the 3 drinks from Task 1: Pumpkin Spice Latte (L), Iced Pumpkin Cream Matcha (M) and Iced Chaider (H).</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th class="num">Size k</th><th>Subsets</th><th class="num"><span class="nw">C(3, k)</span></th></tr></thead>
+<tbody>
+<tr><td class="num">0</td><td>∅ (order none of the three)</td><td class="num">1</td></tr>
+<tr><td class="num">1</td><td>{L}, {M}, {H}</td><td class="num">3</td></tr>
+<tr><td class="num">2</td><td>{L, M}, {L, H}, {M, H}</td><td class="num">3</td></tr>
+<tr><td class="num">3</td><td>{L, M, H}</td><td class="num">1</td></tr>
+<tr><th>Total</th><td></td><td class="num">8</td></tr>
+</tbody>
+</table>
+</div>
+<p>The total 1 + 3 + 3 + 1 = 8 equals 2<sup>3</sup>. Both sides count the same 8 subsets. The left side counts them size by size. The right side counts them by deciding in or out for each drink. The same holds for any n:</p>
+<div class="formula">
+<p>C(n, 0) + <span class="nw">C(n, 1)</span> + <span class="nw">C(n, 2)</span> + … + <span class="nw">C(n, n) = 2<sup>n</sup>.</span></p>
+<p>In summation notation (week 4): <span class="nw"><span style="font-size:1.25em">Σ</span><sub>k=0</sub><sup>n</sup> <span class="nw">C(n, k)</span> = 2<sup>n</sup>.</span></p>
+</div>
+
+<div class="task">
+<h3>Task 6 (about 8 minutes, spreadsheet)</h3>
+<p>Build a table of <span class="nw">C(12, k)</span> for the 12 fall drinks, for every size k from 0 to 12.</p>
+<ol type="a">
+<li>Type rows 1 to 3 of the layout below. Then select cells A3 to E3 and copy them down to row 14, so column A runs from 0 to 12. Add rows 15 and 16. (Or download the CSV file or copy the layout and paste it into cell A1.)</li>
+<li>Check that column E matches column B in every row.</li>
+<li>Write down the total in B15 and the value in B16.</li>
+<li>Which size k gives the most choices? What do the rows k = 0 and k = 12 mean for the group's order?</li>
+</ol>
+<p class="scroll-hint">On a phone, scroll the layout sideways to see columns D and E.</p>
+<div class="table-wrap">
+<table class="layout">
+<thead><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead>
+<tbody>
+<tr><th>1</th><td>k</td><td>C(12,k)</td><td>P(12,k)</td><td>k!</td><td>P / k!</td></tr>
+<tr><th>2</th><td>0</td><td><code>=COMBIN(12,A2)</code></td><td><code>=PERMUT(12,A2)</code></td><td><code>=FACT(A2)</code></td><td><code>=C2/D2</code></td></tr>
+<tr><th>3</th><td><code>=A2+1</code></td><td><code>=COMBIN(12,A3)</code></td><td><code>=PERMUT(12,A3)</code></td><td><code>=FACT(A3)</code></td><td><code>=C3/D3</code></td></tr>
+<tr><th>…</th><td colspan="5">rows 4 to 14: copy row 3 down</td></tr>
+<tr><th>15</th><td>Total</td><td><code>=SUM(B2:B14)</code></td><td></td><td></td><td></td></tr>
+<tr><th>16</th><td>2 to the 12th</td><td><code>=2^12</code></td><td></td><td></td><td></td></tr>
+</tbody>
+</table>
+</div>
+<p>
+<button type="button" id="dl-csv">Download CSV</button>
+<button type="button" id="copy-layout">Copy layout</button>
+<span class="status" id="copy-status" aria-live="polite"></span>
+</p>
+<p class="small">The CSV file and the copied layout contain all 16 rows with formulas. They were not tested in Excel or Google Sheets. If a formula shows as text after pasting, retype it in the cell starting with =.</p>
+</div>
+<details class="solution">
+<summary>Solution to Task 6</summary>
+<div class="table-wrap">
+<table class="compact">
+<thead><tr><th class="num">k</th><th class="num">C(12, k)</th><th class="num">P(12, k)</th><th class="num">k!</th><th class="num">P / k!</th></tr></thead>
+<tbody>
+<tr><td class="num">0</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td class="num">1</td><td class="num">12</td><td class="num">12</td><td class="num">1</td><td class="num">12</td></tr>
+<tr><td class="num">2</td><td class="num">66</td><td class="num">132</td><td class="num">2</td><td class="num">66</td></tr>
+<tr><td class="num">3</td><td class="num">220</td><td class="num">1,320</td><td class="num">6</td><td class="num">220</td></tr>
+<tr><td class="num">4</td><td class="num">495</td><td class="num">11,880</td><td class="num">24</td><td class="num">495</td></tr>
+<tr><td class="num">5</td><td class="num">792</td><td class="num">95,040</td><td class="num">120</td><td class="num">792</td></tr>
+<tr><td class="num">6</td><td class="num">924</td><td class="num">665,280</td><td class="num">720</td><td class="num">924</td></tr>
+<tr><td class="num">7</td><td class="num">792</td><td class="num">3,991,680</td><td class="num">5,040</td><td class="num">792</td></tr>
+<tr><td class="num">8</td><td class="num">495</td><td class="num">19,958,400</td><td class="num">40,320</td><td class="num">495</td></tr>
+<tr><td class="num">9</td><td class="num">220</td><td class="num">79,833,600</td><td class="num">362,880</td><td class="num">220</td></tr>
+<tr><td class="num">10</td><td class="num">66</td><td class="num">239,500,800</td><td class="num">3,628,800</td><td class="num">66</td></tr>
+<tr><td class="num">11</td><td class="num">12</td><td class="num">479,001,600</td><td class="num">39,916,800</td><td class="num">12</td></tr>
+<tr><td class="num">12</td><td class="num">1</td><td class="num">479,001,600</td><td class="num">479,001,600</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+<p>(b) Column E equals column B in every row, because <span class="nw">C(12, k)</span> = <span class="nw">P(12, k)</span> ÷ k!. Row k = 0 uses <span class="nw">P(12, 0)</span> = 1 and 0! = 1 from sections 2 and 3.</p>
+<p>(c) The total in B15 is 4,096, and B16 is 2<sup>12</sup> = 4,096. If the group may order any set of different fall drinks, from none to all 12, there are 4,096 possible sets.</p>
+<p>(d) Size k = 6 gives the most choices: <span class="nw">C(12, 6)</span> = 924. Row k = 0 is ordering no fall drink, the empty set ∅, and row k = 12 is ordering all 12; there is exactly 1 way to do each.</p>
+<p>The column of <span class="nw">C(12, k)</span> reads the same from the bottom up: <span class="nw">C(12, 3)</span> = <span class="nw">C(12, 9)</span> = 220. Choosing 3 drinks to order is the same as choosing the 9 drinks to skip.</p>
+</details>
+
+<!-- ============ Sources ============ -->
+<h2 id="sources">Sources</h2>
+<ol class="sources">
+<li>Starbucks Stories &amp; News, "Starbucks Pumpkin Spice Latte and the season fans have been waiting for is back Aug. 25," published August 24, 2026. <span class="mono">https://about.starbucks.com/stories/2026/starbucks-pumpkin-spice-latte-and-the-season-fans-have-been-waiting-for-is-back-aug-25/</span>. Accessed 4 October 2026. Figures used: the fall menu starts Aug. 25; the 12 fall drink names in the table in section 1, of which 6 are described as new (Iced Pumpkin Cream Shaken Espresso, Iced Pumpkin Cream Matcha, Pumpkin Spice Chai, Iced Banana Bread Latte, Iced Banana Bread Chai, Iced Chaider) and 6 as returning. The count of 12 is our count of the drinks the article names.</li>
+<li>Starbucks, online menu. <span class="mono">https://www.starbucks.com/menu</span>; the page needs JavaScript, and its menu data is served at <span class="mono">https://www.starbucks.com/apiproxy/v1/ordering/menu</span>, read on 4 October 2026. Figures used: all 12 drinks in the table in section 1 are listed, for example "Pecan Cortado" in the Cortado group and "Iced Chaider" under Specialty Chai.</li>
+<li>Microsoft Support, Excel function reference pages for FACT, PERMUT and COMBIN. <span class="mono">https://support.microsoft.com/en-us/office/fact-function-ca8588c2-15f2-41c0-8e8c-c11bd471a4f3</span>, <span class="mono">https://support.microsoft.com/en-us/office/permut-function-3bd1cb9a-2880-41ab-a197-f246a7a602d3</span>, <span class="mono">https://support.microsoft.com/en-us/office/combin-function-12a3f276-0a21-423a-8de6-06990aaf638a</span>. Accessed 4 October 2026. Figures used: "=FACT(0)" returns 1; COMBIN and PERMUT return the #NUM! error when the number is less than the number chosen; syntax FACT(number), PERMUT(number, number_chosen), COMBIN(number, number_chosen).</li>
+<li>Google Docs Editors Help, "Google Sheets function list," <span class="mono">https://support.google.com/docs/table/25273</span>, and "PERMUT," <span class="mono">https://support.google.com/docs/answer/3094036</span>. Accessed 4 October 2026. Figures used: the list includes COMBIN(n, k), PERMUT(n, k) and FACT(value); the PERMUT page describes it as counting the ways to choose objects from a pool "considering order."</li>
+</ol>
+
+</main>
+<script>
+(function () {
+  var rows = [["k", "C(12,k)", "P(12,k)", "k!", "P / k!"],
+              ["0", "=COMBIN(12,A2)", "=PERMUT(12,A2)", "=FACT(A2)", "=C2/D2"]];
+  for (var r = 3; r <= 14; r++) {
+    rows.push(["=A" + (r - 1) + "+1", "=COMBIN(12,A" + r + ")", "=PERMUT(12,A" + r + ")",
+               "=FACT(A" + r + ")", "=C" + r + "/D" + r]);
+  }
+  rows.push(["Total", "=SUM(B2:B14)", "", "", ""]);
+  rows.push(["2 to the 12th", "=2^12", "", "", ""]);
+
+  function csvCell(s) { return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  var csv = rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+  var tsv = rows.map(function (r) { return r.join("\t"); }).join("\n");
+
+  document.getElementById("dl-csv").addEventListener("click", function () {
+    var blob = new Blob([csv], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "fall-drinks-combinations.csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+
+  var status = document.getElementById("copy-status");
+  function fallbackCopy() {
+    var ta = document.createElement("textarea");
+    ta.value = tsv; ta.setAttribute("readonly", "");
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    status.textContent = ok ? "Copied. Paste into cell A1." : "Copy failed. Use the CSV download.";
+  }
+  document.getElementById("copy-layout").addEventListener("click", function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tsv).then(function () {
+        status.textContent = "Copied. Paste into cell A1.";
+      }, fallbackCopy);
+    } else { fallbackCopy(); }
+  });
+})();
+</script>
+<nav class="m111-course-nav" aria-label="Course" style="font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;max-width:960px;margin:0 auto;padding:10px 16px;box-sizing:border-box"><a href="../../week-06/6-2-sets-and-subsets/" style="color:inherit">&larr; 6.2 Sets and subsets</a><a href="../../" style="color:inherit">All lectures</a><a href="../../week-07/7-1-probability-by-counting/" style="color:inherit">7.1 Probability by counting &rarr;</a></nav>
+</body>
+</html>
