@@ -326,11 +326,12 @@ button {
 <tr><th>7</th><td>f = 1 + r</td><td><code>=1+B5</code></td></tr>
 <tr><th>8</th><td>Monthly payment P</td><td><code>=B2*B5*B7^B6/(B7^B6-1)</code></td></tr>
 <tr><th>9</th><td>Payment, all in one cell</td><td><code>=B2*(B3/12)*(1+B3/12)^(B4*12)/((1+B3/12)^(B4*12)-1)</code></td></tr>
-<tr><th>10</th><td>Total paid</td><td><code>=ROUND(B8,2)*B6</code></td></tr>
-<tr><th>11</th><td>Total interest</td><td><code>=B10-B2</code></td></tr>
+<tr><th>10</th><td>Left over after n rounded payments</td><td><code>=ROUND(B2*B7^B6-ROUND(B8,2)*(B7^B6-1)/B5,2)</code></td></tr>
+<tr><th>11</th><td>Total paid</td><td><code>=ROUND(B8,2)*B6+B10</code></td></tr>
+<tr><th>12</th><td>Total interest</td><td><code>=B11-B2</code></td></tr>
 </tbody>
 </table></div>
-<p>The symbol <code>^</code> means “to the power”. Cell B9 does the whole calculation from the three inputs, so B8 and B9 should show the same number. <code>ROUND(B8,2)</code> rounds the payment to the cent, the amount actually paid each month, before multiplying by the number of months. On a phone, scroll the table sideways to see the whole formula in B9.</p>
+<p>The symbol <code>^</code> means “to the power”. Cell B9 does the whole calculation from the three inputs, so B8 and B9 should show the same number. <code>ROUND(B8,2)</code> rounds the payment to the cent, the amount actually paid each month. Because of that rounding, <i>n</i> equal payments do not end exactly at zero. B10 uses the balance formula from Section 6 to find what is left over, and, as in lecture 4.1, the last payment is adjusted by that amount: a negative number means the last payment is smaller. B11 adds it to the regular payments. On a phone, scroll the table sideways to see the whole formula in B9.</p>
 <div class="buttons">
 <button type="button" id="dlcsv">Download layout as CSV</button>
 <button type="button" id="copytsv">Copy layout for pasting into cell A1</button>
@@ -341,21 +342,21 @@ button {
 <div class="task" id="task6">
 <p class="label">Task 6 (about 5 minutes, spreadsheet)</p>
 <ol>
-<li>Build the layout above (or paste it in) and check that B8 and B9 both show 4625.275…, which rounds to 4625.28. (To show 2 decimals, use Format → Number, or press the “decrease decimal” button until 2 decimals show.) Write down the total interest in B11.</li>
-<li>Change the inputs to the 15-year fixed rate from the same survey, 6.60% [2]: type 0.066 in B3 and 15 in B4. Write down the new monthly payment and total interest.</li>
+<li>Build the layout above (or paste it in) and check that B8 and B9 both show 4625.275…, which rounds to 4625.28. (To show 2 decimals, use Format → Number, or press the “decrease decimal” button until 2 decimals show.) Write down the leftover in B10 and the total interest in B12.</li>
+<li>Change the inputs to the 15-year fixed rate from the same survey, 6.60% [2]: type 0.066 in B3 and 15 in B4. Write down the new monthly payment, leftover and total interest.</li>
 <li>Write one sentence comparing the two loans: how much more a month the 15-year loan costs, and how much less interest it pays in total.</li>
 </ol>
 </div>
 <details class="sol"><summary>Solution to Task 6</summary>
 <div class="tablewrap"><table>
-<thead><tr><th>Loan of $676,000</th><th class="num">r</th><th class="num">f<sup>n</sup></th><th class="num">Monthly payment</th><th class="num">Total paid</th><th class="num">Total interest</th></tr></thead>
+<thead><tr><th>Loan of $676,000</th><th class="num">r</th><th class="num">f<sup>n</sup></th><th class="num">Monthly payment</th><th class="num">Left over</th><th class="num">Total paid</th><th class="num">Total interest</th></tr></thead>
 <tbody>
-<tr><td>30 years at 7.28%</td><td class="num">0.0060667</td><td class="num">8.82335226</td><td class="num">$4,625.28</td><td class="num">$1,665,100.80</td><td class="num">$989,100.80</td></tr>
-<tr><td>15 years at 6.60%</td><td class="num">0.0055</td><td class="num">2.68394423</td><td class="num">$5,925.91</td><td class="num">$1,066,663.80</td><td class="num">$390,663.80</td></tr>
+<tr><td>30 years at 7.28%</td><td class="num">0.0060667</td><td class="num">8.82335226</td><td class="num">$4,625.28</td><td class="num">−$6.41</td><td class="num">$1,665,094.39</td><td class="num">$989,094.39</td></tr>
+<tr><td>15 years at 6.60%</td><td class="num">0.0055</td><td class="num">2.68394423</td><td class="num">$5,925.91</td><td class="num">$0.49</td><td class="num">$1,066,664.29</td><td class="num">$390,664.29</td></tr>
 </tbody>
 </table></div>
 <p>Check of the 15-year payment by calculator: 676,000 × 0.0055 = 3,718; 3,718 × 2.68394423 = 9,978.9047; 9,978.9047 ÷ 1.68394423 = 5,925.91.</p>
-<p>The 15-year loan costs $5,925.91 − $4,625.28 = $1,300.63 more each month and pays $989,100.80 − $390,663.80 = $598,437.00 less interest in total. The payment of $5,925.91 lies inside the bracket from Task 1.</p>
+<p>The 15-year loan costs $5,925.91 − $4,625.28 = $1,300.63 more each month and pays $989,094.39 − $390,664.29 = $598,430.10 less interest in total. These totals match lecture 4.1. Multiplying the rounded payment by <i>n</i> without the last-payment adjustment would give $989,100.80 and $390,663.80, which are estimates a few dollars off. The payment of $5,925.91 lies inside the bracket from Task 1.</p>
 </details>
 
 <h2 id="s8">8. What-if questions: price and down payment</h2>
@@ -400,8 +401,9 @@ button {
     ["f = 1 + r", "=1+B5"],
     ["Monthly payment P", "=B2*B5*B7^B6/(B7^B6-1)"],
     ["Payment, all in one cell", "=B2*(B3/12)*(1+B3/12)^(B4*12)/((1+B3/12)^(B4*12)-1)"],
-    ["Total paid", "=ROUND(B8,2)*B6"],
-    ["Total interest", "=B10-B2"]
+    ["Left over after n rounded payments", "=ROUND(B2*B7^B6-ROUND(B8,2)*(B7^B6-1)/B5,2)"],
+    ["Total paid", "=ROUND(B8,2)*B6+B10"],
+    ["Total interest", "=B11-B2"]
   ];
   function csvCell(s) {
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;

@@ -1,0 +1,12 @@
+Source [4]: Starbucks, Cortado, online menu.
+Page: https://www.starbucks.com/menu/product/2124649/hot
+Data: https://www.starbucks.com/apiproxy/v1/ordering/2124649/hot
+Accessed 2026-10-04.
+
+Top-level "sizes" array: 1 entry
+  [ { "name": "Short", "sizeCode": "Short", "servingSize": " 8 fl oz" } ]
+No Tall, Grande or Venti size entry. (Tall, Grande and Venti cups appear only as
+"Cup Sizes" customization options, i.e. a bigger cup, not a bigger drink.)
+Milk Options group, 12 products: 2% Milk, Almondmilk, Coconutmilk, Breve (Half & Half),
+Heavy Cream, Nonfat Milk, Oatmilk, Protein-boosted Milk, Soymilk,
+Nondairy Vanilla Sweet Cream, Vanilla Sweet Cream, Whole Milk.

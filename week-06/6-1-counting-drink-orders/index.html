@@ -276,8 +276,9 @@ button{font:inherit;font-size:.95rem;padding:.4rem .8rem;border-radius:6px;borde
 
 <h2 id="s8">8. Orders of magnitude for large counts</h2>
 
-<p>To judge a large count, round it to one non-zero digit and write it as that digit times a power of 10. For example, 786,432 rounds to 800,000 = 8 × 10<sup>5</sup>. The power of 10 in this form is the <strong>order of magnitude</strong> of the number. The order of magnitude of 786,432 is 10<sup>5</sup>.</p>
-<p>The number of digits gives the same answer: a number with 6 digits lies between 10<sup>5</sup> = 100,000 and 10<sup>6</sup> = 1,000,000, and its order of magnitude is 10<sup>5</sup>. In general, a number with <i>n</i> digits has order of magnitude 10<sup><i>n</i>−1</sup>.</p>
+<p>To judge a large count, write it as a number from 1 up to (but not including) 10, times a power of 10. For example, 786,432 = 7.86432 × 10<sup>5</sup>. The power of 10 in this form is the <strong>order of magnitude</strong> of the number. The order of magnitude of 786,432 is 10<sup>5</sup>. For a quick sense of size, also round the first number to one digit: 786,432 is about 8 × 10<sup>5</sup> = 800,000.</p>
+<p>The number of digits gives the same answer: a number with 6 digits lies between 10<sup>5</sup> = 100,000 and 10<sup>6</sup> = 1,000,000, and its order of magnitude is 10<sup>5</sup>. In general, a whole number with <i>n</i> digits has order of magnitude 10<sup><i>n</i>−1</sup>.</p>
+<p>Find the order of magnitude before rounding, because rounding can carry into the next power of 10. For example, 999,999 = 9.99999 × 10<sup>5</sup> has order of magnitude 10<sup>5</sup>, but rounded to one digit it becomes 1,000,000 = 1 × 10<sup>6</sup>.</p>
 
 <p>An estimate without a calculator: 2<sup>10</sup> = 1,024, which is about 1,000. So 2<sup>14</sup> = 2<sup>10</sup> × 2<sup>4</sup> is about 1,000 × 16 = 16,000, and 48 × 16,000 = 768,000. That is close to the exact 786,432. Both have 6 digits, so both have order of magnitude 10<sup>5</sup>. Getting the order of magnitude right is what a quick estimate is for.</p>
 
@@ -291,7 +292,7 @@ button{font:inherit;font-size:.95rem;padding:.4rem .8rem;border-radius:6px;borde
 <p>The answers have more digits than many phone calculators show. Use the spreadsheet from Task 5: type <code>=5^14</code> into an empty cell. If a calculator shows a number like 2.9296875E11 or 2.9296875e11, it means 2.9296875 × 10<sup>11</sup>.</p>
 <ol type="a">
 <li>How many options does one syrup now have? How many ways are there to set all 14 syrups? Give the exact number.</li>
-<li>Multiply by the 48 size and milk choices. Give the exact result, then round it to one non-zero digit times a power of 10 and give its order of magnitude.</li>
+<li>Multiply by the 48 size and milk choices. Give the exact result, then give its order of magnitude and round it to one non-zero digit times a power of 10.</li>
 <li>At one drink a day, how many days would it take to order every one of these drinks? Convert the days to years.</li>
 </ol>
 </div>
@@ -304,7 +305,7 @@ button{font:inherit;font-size:.95rem;padding:.4rem .8rem;border-radius:6px;borde
 </details>
 
 <h2 id="s9">Sources</h2>
-<p class="small">The product pages at starbucks.com/menu/product/… need JavaScript to display. The menu data they display is served by starbucks.com at the "data" address given for each source; those addresses were read on the access date. Saved extracts are in the folder <code>src/</code> that accompanies this page. They are extracts returned by a web-reading tool, not raw copies of the data.</p>
+<p class="small">The product pages at starbucks.com/menu/product/… need JavaScript to display. The menu data they display is served by starbucks.com at the "data" address given for each source; those addresses were read on the access date. Saved extracts are in the folder <code>src/</code> that accompanies this page: <a href="src/README.txt">README</a>, <a href="src/1-caffe-latte-hot.txt">[1]</a>, <a href="src/2-iced-caffe-latte.txt">[2]</a>, <a href="src/3-menu-hot-coffees.txt">[3]</a>, <a href="src/4-cortado.txt">[4]</a>, <a href="src/5-espresso.txt">[5]</a>. They are extracts returned by a web-reading tool, not raw copies of the data.</p>
 <ol class="sources">
 <li>Starbucks, "Caffè Latte" (hot), online menu. https://www.starbucks.com/menu/product/407/hot; data https://www.starbucks.com/apiproxy/v1/ordering/407/hot. Accessed 4 October 2026. Figures used: sizes "Short" 8 fl oz, "Tall" 12 fl oz, "Grande" 16 fl oz, "Venti" 20 fl oz; "Milk Options", 12 items: "2% Milk", "Almondmilk", "Coconutmilk", "Breve (Half &amp; Half)", "Heavy Cream", "Nonfat Milk", "Oatmilk", "Protein-boosted Milk", "Soymilk", "Nondairy Vanilla Sweet Cream", "Vanilla Sweet Cream", "Whole Milk" (2% Milk is the default); "Syrups" (measured in "pump(s)"), 14 items: "Brown Sugar Syrup", "Banana Syrup", "Caramel Syrup", "Sugar-Free Caramel Syrup", "Cinnamon Dolce Syrup", "Hazelnut Syrup", "Horchata Syrup", "Mango Syrup", "Pecan Syrup", "Peppermint Syrup", "Raspberry Syrup", "Toasted Coconut Syrup", "Sugar-Free Vanilla Syrup", "Vanilla Syrup"; each syrup has the settings "add" and "no", e.g. "Vanilla Syrup" / "No Vanilla Syrup"; no limit on the number of syrups is given; no syrup by default. "Honey Blend Syrup" is listed in a separate group, "Liquid Sweeteners", and is not counted with the syrups.</li>
 <li>Starbucks, "Iced Caffè Latte", online menu. https://www.starbucks.com/menu/product/407/iced; data https://www.starbucks.com/apiproxy/v1/ordering/407/iced. Accessed 4 October 2026. Figures used: sizes "Tall" 12 fl oz, "Grande" 16 fl oz, "Venti" 24 fl oz, no "Short"; the same 12 "Milk Options" as [1].</li>

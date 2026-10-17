@@ -116,7 +116,7 @@ code{font:.88em ui-monospace,Menlo,Consolas,monospace}
 </ul>
 <p>Banks state these rates as an <em>annual percentage yield</em> (APY): the percent the balance grows in one year. To work month by month, as in lecture 4.1, we divide the yearly rate by 12. For Ally that gives a monthly rate of</p>
 <p class="display"><var>r</var> = 0.031 ÷ 12 = 0.0025833…</p>
-<p>This is a simplification. Ally adds interest daily, and the APY already includes that. Dividing by 12 makes the balance grow by about 3.14% in a year instead of 3.10%. The difference is small for our questions.</p>
+<p>This is a simplification. Ally adds interest daily, and the APY already includes that. Dividing by 12 makes the balance grow by about 3.14% in a year instead of 3.10%. The difference is small for most of our questions, but it is not always zero: Task 6 shows a case where it moves the answer by two months.</p>
 
 <h3>The balance rule with no payments</h3>
 <p>In lecture 4.1 the loan balance followed the rule</p>
@@ -342,6 +342,7 @@ code{font:.88em ui-monospace,Menlo,Consolas,monospace}
 <p>At the end of year 12 the goal is larger; at the end of year 13 the savings are larger. The savings are still short at month 144 and ahead at month 156, so they catch the goal during year 13, between months 144 and 156. Part 1 gives month 152.</p>
 <p>The wait nearly doubles, from 77 to 152 months, because the goal is an exponential that starts large. In the first year at 6.42% the goal rises by 169,000 × 0.0642 = $10,849.80, while the savings rise by 24,000 in deposits plus $343.95 in interest. The savings gain 24,343.95 − 10,849.80 = $13,494.15 on the goal that year. Each year the goal’s rise is 6.42% of a larger amount: from year 12 to year 13 it rises by $22,892.90.</p>
 <p>Both ranges compared here run between real rates from the sources. Moving the savings rate from the national average (0.37%) to Ally’s 3.10% saved 7 months (from 84 to 77, Task 4 and Figure 2). Moving price growth from last year’s 0.33% to the 10-year average of 6.42% adds 152 − 79 = 73 months. Over these ranges, price growth changes the answer far more than the savings rate does.</p>
+<p>The months in the table come from dividing 3.10% by 12 (section 2). With the bank&rsquo;s actual growth of 3.10% a year, a monthly factor of 1.031<sup>1/12</sup>, the 0%, 0.33% and 4.49% months stay the same, but the 6.42% case reaches the goal in month 154 instead of 152. So read month 152 as an answer within this model, about 12&frac12; to 13 years, not as an exact date.</p>
 </details>
 
 <!-- ========== Sources ========== -->

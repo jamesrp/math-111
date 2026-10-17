@@ -1,0 +1,18 @@
+Source [5]: Starbucks, Espresso, online menu.
+Page: https://www.starbucks.com/menu/product/410/hot
+Data: https://www.starbucks.com/apiproxy/v1/ordering/410/hot
+Accessed 2026-10-04.
+
+Sizes array (extract):
+[ { "name": "Solo",   "sizeCode": "Single", "servingSize": " 0.75 fl oz" },
+  { "name": "Doppio", "sizeCode": "Double", "servingSize": " 1.5 fl oz" },
+  { "name": "Triple", "sizeCode": "Triple", "servingSize": " 2.25 fl oz" },
+  { "name": "Quad",   "sizeCode": "Quad",   "servingSize": " 3 fl oz" } ]
+No "Milk Options" group is listed for this drink (it has "Creamer", "Add-ins" and others).
+
+Revision check, 2026-10-04: no group named "Milk Options". Group "Creamer"
+(categoryNumber 236), 10 products: "Splash of 2% Milk", "Splash of Almondmilk",
+"Splash of Coconutmilk", "Splash of Cream (Half & Half)", "Splash of Heavy Cream",
+"Splash of Nonfat Milk", "Splash of Oatmilk", "Splash of Soymilk",
+"Splash of Vanilla Sweet Cream", "Splash of Whole Milk".
+The lecture's espresso count (4, size only) leaves out the optional splash and says so.

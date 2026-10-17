@@ -1,0 +1,22 @@
+Source [3]: Starbucks, online menu, hot coffee drinks.
+Page: https://www.starbucks.com/menu
+Data: https://www.starbucks.com/apiproxy/v1/ordering/menu
+Accessed 2026-10-04.
+
+Brewed Coffee: "Blonde Roast - Starbucks® Sunsera" (873068625), "Medium Roast - Pike Place® Roast" (480),
+  "Featured Dark Roast - Starbucks 1971 Roast™" (479), "Half-Caff – Pike Place® Roast" (41050),
+  "Decaf Roast - Pike Place® Roast" (481), "Caffè Misto" (478)
+Americano: "Caffè Americano" (406)
+Latte: "Caffè Latte" (407), "Pumpkin Spice Latte" (418), "Pecan Crunch Latte" (40876), "Lavender Latte" (34919),
+  "Toasted Coconut Latte" (40492), "Pistachio Latte" (2123404), "Vanilla Protein Latte" (28499),
+  "Sugar-Free Vanilla Protein Latte" (28501), "Caramel Protein Latte" (28576), "Cinnamon Dolce Latte" (414),
+  "Sugar-Free Caramel Protein Latte" (34819), "Starbucks® Blonde Vanilla Latte" (2122164)
+Cappuccino: "Cappuccino" (409)
+Mocha: "Caffè Mocha" (408), "White Chocolate Mocha" (420)
+Macchiato: "Espresso Macchiato" (412), "Caramel Macchiato" (413)
+Flat White: "Flat White" (565)
+Cortado: "Cortado" (2124649), "Pecan Cortado" (40812), "Pistachio Cortado" (34806),
+  "Brown Sugar Oatmilk Cortado" (2124651)
+Espresso Shot: "Espresso" (410), "Espresso Con Panna" (411)
+Coffee Traveler: "Coffee Traveler – Pike Place® Roast", "Coffee Traveler – Decaf Pike Place® Roast"
+All with formCode "Hot".

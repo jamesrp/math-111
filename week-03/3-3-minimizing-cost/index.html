@@ -155,14 +155,14 @@ svg text { font-family: system-ui, sans-serif; }
 
 <h2>3. The corner-point method</h2>
 
-<p>The feasible region is a polygon: a shape bounded by straight edges on all sides. When a straight line slides across such a polygon, the last point it touches is a corner. The one exception is when the line is parallel to an edge. Then it leaves along that whole edge at once, and every point of the edge, including the two corners at its ends, has the same cost. In both cases some corner has the lowest cost. The region must be bounded for this to work. Without the Calorie and budget maximums, the region from lecture 3.2 would continue forever up and to the right, and a line sliding the other way would never leave it.</p>
+<p>The feasible region is a polygon: a shape bounded by straight edges on all sides. When a straight line slides across such a polygon, the last point it touches is a corner. The one exception is when the line is parallel to an edge. Then it leaves along that whole edge at once, and every point of the edge, including the two corners at its ends, has the same cost. In both cases some corner has the lowest cost. Our region is bounded (it does not go on forever), and for a bounded polygon this always works. An unbounded region needs a check of which way the cost goes. Without the Calorie and budget maximums, the region from lecture 3.2 would continue forever up and to the right. A line sliding that way would never leave it, so there would be no most expensive breakfast. The cheapest breakfast would still be at a corner, because a line sliding toward lower costs still leaves the region at a corner. For some other unbounded regions the cost can drop forever, and then there is no minimum at all.</p>
 
 <div class="method">
 <p><b>Corner-point method.</b> When the cost is a linear function and the feasible region is a bounded polygon:</p>
 <ol>
 <li>Find every corner of the feasible region. Each corner solves a pair of boundary equations (lecture 3.2, Section 5).</li>
 <li>Compute the cost at each corner.</li>
-<li>The corner with the smallest cost is the cheapest feasible breakfast. If two corners tie, every point of the edge between them costs the same.</li>
+<li>The corner with the smallest cost is the cheapest feasible breakfast. If two corners tie for the smallest cost, every point on the edge joining them has that same smallest cost.</li>
 </ol>
 </div>
 

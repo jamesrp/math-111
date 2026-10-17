@@ -252,19 +252,19 @@ Years: 2,520 ÷ 365 ≈ 6.9.</p>
 
 <p>Each applicant goes down their own list and never proposes to the same program twice. An applicant has n programs on their list, so an applicant makes at most n proposals. There are n applicants, so the total number of proposals is at most</p>
 <p style="text-align:center">n × n = n<sup>2</sup>.</p>
-<p>Every round except the last has at least one rejection, and every rejection leads to a new proposal in the next round. So the algorithm cannot run forever: after at most n<sup>2</sup> proposals there is nothing left to propose. In the examples so far, Example 1 took 3 proposals, below 3<sup>2</sup> = 9. Example 2 took 7 and Example 3 took 10, both below 4<sup>2</sup> = 16.</p>
+<p>Every round except the last has at least one rejection, and every rejection leads to a new proposal in the next round. So the algorithm cannot run forever: after at most n<sup>2</sup> proposals there is nothing left to propose. In the examples so far, Example 1 took 3 proposals, below 3<sup>2</sup> = 9. Example 2 took 7 and Example 3 took 10, both below 4<sup>2</sup> = 16. The bound n<sup>2</sup> is not always reached: with 2 applicants the algorithm never needs more than 3 proposals, not 4. For showing that the algorithm stops, an upper bound is enough.</p>
 
 <p>It remains to check that no applicant is rejected by every program and runs off the end of their list. Once a program receives a proposal, it holds someone from then on. If some applicant had been rejected by all n programs, then all n programs would be holding someone other than that applicant. That needs n other applicants, and there are only n − 1. So every applicant ends up held by a program, and since there are n of each, every program ends up with an applicant.</p>
 
 <div class="task">
 <div class="label">Task 3 (about 2 minutes, calculator)</div>
 <p>Use the made-up version of the 2026 Match from Lecture 9.1: 41,482 applicants and 41,482 programs with one position each. (41,482 is the number of positions filled in 2026 [1]. One position per program is a simplification: real programs have several.)</p>
-<p>Produce: n<sup>2</sup>, the largest number of proposals the algorithm could need, with its number of digits; and the number of seconds a computer needs for that many proposals at one billion (1,000,000,000) proposals per second. The speed is the made-up one from Lecture 9.1, Section 7.</p>
+<p>Produce: n<sup>2</sup>, an upper bound on the number of proposals (the algorithm makes at most this many), with its number of digits; and the most seconds a computer could need for that many proposals at one billion (1,000,000,000) proposals per second. The speed is the made-up one from Lecture 9.1, Section 7.</p>
 </div>
 <details>
 <summary>Solution to Task 3</summary>
 <p class="calc">41,482<sup>2</sup> = 41,482 × 41,482 = 1,720,756,324, which has 10 digits.<br>
-1,720,756,324 ÷ 1,000,000,000 ≈ 1.7 seconds.</p>
+1,720,756,324 ÷ 1,000,000,000 ≈ 1.7 seconds at most.</p>
 <p>The number of matchings, 41,482!, has 173,546 digits. The number of proposals has at most 10 digits, and at the same made-up speed they take under 2 seconds.</p>
 </details>
 
