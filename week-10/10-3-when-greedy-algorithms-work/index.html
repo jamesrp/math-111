@@ -193,7 +193,8 @@ a{color:var(--blue)}
 </figure>
 </div></details>
 
-<h3>The safe-edge rule on any map</h3>
+<h3>The safe-edge rule on any map (continuation)</h3>
+<p class="small">Continuation, for reading after class or if time allows. Tasks 1 and 2 are the core of this section: they show the idea on this map.</p>
 
 <p>Task 2 is one case of an argument that works on every map. Take any group of towns. Let <i>e</i> be a cheapest edge leaving the group, and let W be any minimum spanning tree.</p>
 <ol>
@@ -205,7 +206,8 @@ a{color:var(--blue)}
 <li>W is a minimum spanning tree, so the new tree cannot cost less. It costs the same, so it is also a minimum spanning tree, and it contains <i>e</i>. So <i>e</i> is safe.</li>
 </ol>
 
-<h3>Why Kruskal's tree is a minimum spanning tree on every map</h3>
+<h3>Why Kruskal's tree is a minimum spanning tree on every map (continuation)</h3>
+<p class="small">Continuation, for reading after class or if time allows.</p>
 
 <p>In Kruskal's algorithm a group is a set of towns joined to each other by the edges built so far, as in Lecture 10.2. At each step the algorithm builds an edge whose two towns are in different groups. Take the group of one of those two towns. Every cheaper edge was looked at earlier and was either built or skipped. Either way its two towns are now in the same group, so it does not leave this group. The edge being built is therefore a cheapest edge leaving the group, and by the safe-edge rule it is safe.</p>
 
@@ -218,7 +220,8 @@ a{color:var(--blue)}
 </ul>
 <p>So after every step some minimum spanning tree contains all the edges built so far. After the last step the algorithm has built n&nbsp;−&nbsp;1 edges. A minimum spanning tree has exactly n&nbsp;−&nbsp;1 edges, so the one that contains them has no others. Kruskal's tree is that minimum spanning tree.</p>
 
-<h3>Why the swap test works</h3>
+<h3>Why the swap test works (continuation)</h3>
+<p class="small">Continuation, for reading after class or if time allows.</p>
 
 <p>Lecture 10.2 used this fact from the literature [9]: <i>if no single swap lowers the total of a spanning tree, that tree is a minimum spanning tree.</i> Here is the argument when no two edges cost the same, as on this map. It is a proof by contradiction, as in week 9.</p>
 
@@ -284,7 +287,8 @@ a{color:var(--blue)}
 <p>(b) 6 → hand 4, 2 left → hand 1, 1 left → hand 1. Coins: 4 + 1 + 1, which is 3 coins. Two 3-cent coins make 3 + 3 = 6 with only 2 coins. The greedy rule does not give the fewest coins here.</p>
 </div></details>
 
-<h3>Why greedy change works for U.S. coins</h3>
+<h3>Why greedy change works for U.S. coins (continuation)</h3>
+<p class="small">Continuation, for reading after class or if time allows. Task 4 and the change checker below are the core of this section.</p>
 
 <p>Take any way of making an amount with the fewest U.S. coins. It cannot contain any of these, because each could be traded for fewer coins of the same total:</p>
 <ul>
