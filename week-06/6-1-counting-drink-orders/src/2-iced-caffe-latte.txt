@@ -1,0 +1,21 @@
+Source [2]: Starbucks, Iced Caffè Latte, online menu.
+Page: https://www.starbucks.com/menu/product/407/iced
+Data: https://www.starbucks.com/apiproxy/v1/ordering/407/iced
+Accessed 2026-10-04.
+
+Product name: "Iced Caffè Latte"
+Top-level "sizes" array: 3 entries
+  Tall:   " 12 fl oz"
+  Grande: " 16 fl oz"
+  Venti:  " 24 fl oz"
+"Short" is not present.
+Milk Options group: the same 12 products as the hot Caffè Latte
+(2% Milk, Almondmilk, Coconutmilk, Breve (Half & Half), Heavy Cream, Nonfat Milk,
+Oatmilk, Protein-boosted Milk, Soymilk, Nondairy Vanilla Sweet Cream,
+Vanilla Sweet Cream, Whole Milk).
+(The extract of the Syrups group for the iced drink was inconsistent, 15 or 16 names,
+and is not used in the lecture.)
+
+Revision check, 2026-10-04: one WebFetch extract listed 15 products in the iced
+latte's "Syrups" group: the 14 hot-latte syrups plus "Honey Blend Syrup" (2123154).
+The lecture does not use the iced syrup count.

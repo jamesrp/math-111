@@ -1,0 +1,80 @@
+Source [1]: Starbucks, Caffè Latte (hot), online menu.
+Page: https://www.starbucks.com/menu/product/407/hot
+Data: https://www.starbucks.com/apiproxy/v1/ordering/407/hot
+Accessed 2026-10-04.
+
+Product name: "Caffè Latte"
+
+Sizes array (extract):
+{
+  "sizes": [
+    { "name": "Short",  "sizeCode": "Short",  "nutrition": { "servingSize": { "displayValue": " 8 fl oz" } },  "sku": "40" },
+    { "name": "Tall",   "sizeCode": "Tall",   "nutrition": { "servingSize": { "displayValue": " 12 fl oz" } }, "sku": "41" },
+    { "name": "Grande", "sizeCode": "Grande", "nutrition": { "servingSize": { "displayValue": " 16 fl oz" } }, "sku": "42" },
+    { "name": "Venti",  "sizeCode": "Venti",  "nutrition": { "servingSize": { "displayValue": " 20 fl oz" } }, "sku": "70" }
+  ]
+}
+
+Option group "Milk" (categoryNumber 239) has child groups "Milk Foam", "Milk Options", "Milk Temperature".
+Option group "Milk Options" (categoryNumber 484), 12 products:
+ 1. 63       "2% Milk"
+ 2. 2121965  "Almondmilk"
+ 3. 1306     "Coconutmilk"
+ 4. 65       "Breve (Half & Half)"
+ 5. 66       "Heavy Cream"
+ 6. 61       "Nonfat Milk"
+ 7. 2122556  "Oatmilk"
+ 8. 28507    "Protein-boosted Milk"
+ 9. 64       "Soymilk"
+10. 2123875  "Nondairy Vanilla Sweet Cream"
+11. 2123684  "Vanilla Sweet Cream"
+12. 67       "Whole Milk"
+(2% Milk is the default milk.)
+
+Option group "Syrups" (categoryNumber 486, "attributes": {"unitOfMeasure": "pump(s)"}), 14 products:
+ 1. 2123422 "Brown Sugar Syrup"
+ 2. 28582   "Banana Syrup"
+ 3. 91      "Caramel Syrup"
+ 4. 1211    "Sugar-Free Caramel Syrup"
+ 5. 93      "Cinnamon Dolce Syrup"
+ 6. 96      "Hazelnut Syrup"
+ 7. 27524   "Horchata Syrup"
+ 8. 2121333 "Mango Syrup"
+ 9. 2123907 "Pecan Syrup"
+10. 100     "Peppermint Syrup"
+11. 102     "Raspberry Syrup"
+12. 2122191 "Toasted Coconut Syrup"
+13. 109     "Sugar-Free Vanilla Syrup"
+14. 111     "Vanilla Syrup"
+
+Entry for one syrup (extract):
+{ "productNumber": 111,
+  "form": { "name": "Vanilla Syrup", "formCode": "qty", "availability": "Available",
+    "sizes": [ { "sizeCode": "add", "name": "Vanilla Syrup", "sku": "109917" },
+               { "sizeCode": "no",  "name": "No Vanilla Syrup", "sku": "523887" } ] } }
+The Caffè Latte recipe has no syrup by default.
+
+Other option groups listed for this drink: "Flavors", "Sauces", "Powders", "Toppings",
+"Cold Foams", "Tea", "Sweeteners", "Cup Options", "Espresso & Shot Options".
+
+Revision check, 2026-10-04 (several WebFetch extracts of /apiproxy/v1/ordering/407/hot):
+- Asked for the productNumber values between "name":"Syrups" and the end of that
+  group. Returned, in order: 2123422, 28582, 91, 1211, 93, 96, 27524, 2121333,
+  2123907, 100, 102, 2122191, 109, 111 (14 products, the list above).
+  Group header returned verbatim:
+  {"categoryNumber":486,"displayOrder":102,"name":"Syrups","attributes":{"unitOfMeasure":"pump(s)"},"products":[...
+- "Honey Blend Syrup" (productNumber 2123154): one summary extract claimed it was in
+  both "Syrups" and "Sweeteners". Asked for the raw text around it, WebFetch returned
+  it directly after "Classic Syrup" (productNumber 94), in the group
+  {"categoryNumber":688,"displayOrder":100,"name":"Liquid Sweeteners","attributes":{"unitOfMeasure":"pump(s)"},"products":[
+  followed by {"categoryNumber":686,...,"name":"Sweetener Packets"...}.
+  Its other occurrences were in that sweetener data, not in the Syrups group (486).
+  Conclusion: the hot latte's "Syrups" group has 14 products; Honey Blend Syrup and
+  Classic Syrup are "Liquid Sweeteners" and are not counted in the lecture.
+- Venti serving size returned verbatim:
+  "servingSize":{"displayName":"Serving Size","displayValue":" 20 fl oz"}
+  (one earlier summary omitted it; another reviewer extract said 16 fl oz; the
+  verbatim request returned 20 fl oz.)
+- No maxSelection, maxQuantity or other limit on the number of syrups was found in
+  the Syrups group. The lecture names "any combination of the 14 syrups" as a
+  simplification.

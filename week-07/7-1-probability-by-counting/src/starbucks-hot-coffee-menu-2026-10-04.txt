@@ -1,0 +1,68 @@
+Source: Starbucks Coffee Company, online menu, starbucks.com.
+Page: https://www.starbucks.com/menu  (the page loads its menu with JavaScript from
+https://www.starbucks.com/apiproxy/v1/ordering/menu ; the text below was read from that menu data
+with the WebFetch tool)
+Accessed: 2026-10-04 (Sunday, October 4, 2026)
+
+Menu category "Coffee & Espresso" > "Hot Coffee & Espresso".
+Product names, verbatim, grouped by sub-category, with the count per sub-category.
+
+Brewed Coffee (6 products)
+- Blonde Roast - Starbucks® Sunsera
+- Medium Roast - Pike Place® Roast
+- Featured Dark Roast - Starbucks 1971 Roast™
+- Half-Caff – Pike Place® Roast
+- Decaf Roast - Pike Place® Roast
+- Caffè Misto
+
+Americano (1 product)
+- Caffè Americano
+
+Latte (12 products)
+- Caffè Latte
+- Pumpkin Spice Latte
+- Pecan Crunch Latte
+- Lavender Latte
+- Toasted Coconut Latte
+- Pistachio Latte
+- Vanilla Protein Latte
+- Sugar-Free Vanilla Protein Latte
+- Caramel Protein Latte
+- Cinnamon Dolce Latte
+- Sugar-Free Caramel Protein Latte
+- Starbucks® Blonde Vanilla Latte
+
+Cappuccino (1 product)
+- Cappuccino
+
+Mocha (2 products)
+- Caffè Mocha
+- White Chocolate Mocha
+
+Macchiato (2 products)
+- Espresso Macchiato
+- Caramel Macchiato
+
+Flat White (1 product)
+- Flat White
+
+Cortado (4 products)
+- Cortado
+- Pecan Cortado
+- Pistachio Cortado
+- Brown Sugar Oatmilk Cortado
+
+Espresso Shot (2 products)
+- Espresso
+- Espresso Con Panna
+
+Coffee Traveler (2 products)
+- Coffee Traveler – Pike Place® Roast
+- Coffee Traveler – Decaf Pike Place® Roast
+
+Total in "Hot Coffee & Espresso": 6+1+12+1+2+2+1+4+2+2 = 33 products.
+
+Figures quoted in the lecture: 31 hot coffee drinks in 9 groups, not counting the 2 Coffee Traveler
+items (boxes of brewed coffee for a group), the same count as lecture 6.1; 12 of them in the Latte
+group; 4 in the Cortado group; 6 in the Brewed Coffee group. The menu changes over time, so the list
+is as of the access date.

@@ -1,0 +1,13 @@
+# Source: Our World in Data, "Life expectancy" grapher data download,
+# https://ourworldindata.org/grapher/life-expectancy.csv?csvType=filtered&country=~CAF
+# Fetched with WebFetch on 4 October 2026. Rows for 2015-2023 copied as returned.
+Entity,Code,Year,Life expectancy
+Central African Republic,CAF,2015,51.9338
+Central African Republic,CAF,2016,50.9988
+Central African Republic,CAF,2017,45.2315
+Central African Republic,CAF,2018,52.2973
+Central African Republic,CAF,2019,31.5302
+Central African Republic,CAF,2020,50.5959
+Central African Republic,CAF,2021,40.2791
+Central African Republic,CAF,2022,18.8177
+Central African Republic,CAF,2023,57.4077

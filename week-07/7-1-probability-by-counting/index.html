@@ -116,7 +116,7 @@ svg text { font-family: system-ui, sans-serif; }
 <li>6 drinks are brewed coffee: 6/31 ≈ 0.194 = 19.4%.</li>
 <li>Two drinks have “Pistachio” in the name, Pistachio Latte and Pistachio Cortado: 2/31 ≈ 0.065 = 6.5%.</li>
 </ol>
-<p>To turn a decimal into a percentage, multiply by 100: 0.129 × 100 = 12.9%. The fraction, the decimal and the percentage are the same number written three ways.</p>
+<p>To turn a decimal into a percentage, multiply by 100 and add the % sign: 0.129 × 100 = 12.9, so 0.129 = 12.9%. The fraction, the decimal and the percentage are the same number written three ways.</p>
 </div></details>
 
 <h2 id="s2">2. Sample space, events and the counting formula</h2>
@@ -180,11 +180,11 @@ svg text { font-family: system-ui, sans-serif; }
 </div>
 </div>
 <details><summary>Solution to Task 2</summary><div>
-<p>Your numbers will differ from everyone else’s, because the rolls are random. The pattern is the same for everyone.</p>
+<p>Your numbers will differ from everyone else’s, because the rolls are random. The pattern below is what usually happens, not a guarantee for every run.</p>
 <ul>
 <li>After 10 rolls the fraction jumps around a lot. With only 10 rolls it can only be 0, 0.1, 0.2, 0.3 and so on, so it can never equal 0.167. Two tries can differ a lot, for example one at 0 and another at 0.3. No six at all in 10 rolls happens in about 16% of tries (a calculation beyond this course gives (5/6)<sup>10</sup> ≈ 0.162).</li>
 <li>After 100 rolls the fraction is usually between 0.10 and 0.23 (a calculation beyond this course gives about 94% of tries).</li>
-<li>After 1000 rolls the fraction is usually between 0.14 and 0.19 (about 97% of tries). It changes the least, and it stays closest to 0.167.</li>
+<li>After 1000 rolls the fraction is usually between 0.14 and 0.19 (about 97% of tries). It changes the least from try to try, and it is usually the closest to 0.167. Usually, not always: a run with 2 sixes in the first 10 rolls, 17 in the first 100 and 180 in the first 1000 gives 0.20, 0.17 and 0.18, so its 100-roll fraction is the closest. If your run did something like that, it is a fair result, not a mistake. Comparing many tries across the room shows the pattern better than any one run.</li>
 </ul>
 <p>On the simulator, the lines are far apart on the left of the graph and jump up and down. As the number of rolls grows, they settle and squeeze together around the dashed line at 1/6.</p>
 <p>The more rolls, the closer the fraction of sixes tends to be to 1/6. That is what P(6) = 1/6 means.</p>
@@ -335,7 +335,7 @@ svg text { font-family: system-ui, sans-serif; }
 
 <h2 id="sources">Sources</h2>
 <ol class="sources">
-<li>Starbucks, online menu, hot coffee drinks. https://www.starbucks.com/menu; data https://www.starbucks.com/apiproxy/v1/ordering/menu. Accessed 4 October 2026 (the same source as [3] in lecture 6.1). Figures used: 31 hot coffee drinks in the groups Brewed Coffee (6), Americano (1), Latte (12), Cappuccino (1), Mocha (2), Macchiato (2), Flat White (1), Cortado (4), Espresso Shot (2), not counting the 2 “Coffee Traveler” items; the drink names in the table of Section 1. Drink names are shortened slightly (trademark symbols, the “Starbucks” prefix and some dashes removed). The menu changes over time; the list is as it stood on the access date. A saved extract is in the folder src/ that accompanies this page.</li>
+<li>Starbucks, online menu, hot coffee drinks. https://www.starbucks.com/menu; data https://www.starbucks.com/apiproxy/v1/ordering/menu. Accessed 4 October 2026 (the same source as [3] in lecture 6.1). Figures used: 31 hot coffee drinks in the groups Brewed Coffee (6), Americano (1), Latte (12), Cappuccino (1), Mocha (2), Macchiato (2), Flat White (1), Cortado (4), Espresso Shot (2), not counting the 2 “Coffee Traveler” items; the drink names in the table of Section 1. Drink names are shortened slightly (trademark symbols, the “Starbucks” prefix and some dashes removed). The menu changes over time; the list is as it stood on the access date. A saved extract is in the folder src/ that accompanies this page: <a href="src/starbucks-hot-coffee-menu-2026-10-04.txt">src/starbucks-hot-coffee-menu-2026-10-04.txt</a>.</li>
 </ol>
 
 </main>

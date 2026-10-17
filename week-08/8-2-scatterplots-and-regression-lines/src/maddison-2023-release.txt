@@ -1,0 +1,9 @@
+Source: Groningen Growth and Development Centre, "Maddison Project Database 2023"
+URL: https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2023
+Accessed: 4 October 2026 (WebFetch extract)
+
+Page title: "Maddison Project Database 2023 | Releases | Groningen Growth and Development Centre"
+Published April 26, 2024; last modified September 24, 2024
+Suggested citation: Bolt, Jutta and Jan Luiten van Zanden (2024), "Maddison style estimates of the evolution of the world economy: A new 2023 update", Journal of Economic Surveys, 1–41. DOI: 10.1111/joes.12618
+Coverage: data "up to 2022" across 169 countries.
+(The page does not state the price base; OWID's metadata gives "international-$ in 2011 prices".)

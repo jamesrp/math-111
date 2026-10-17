@@ -1,0 +1,30 @@
+Source: Our World in Data, "Life expectancy vs. GDP per capita"
+Chart page: https://ourworldindata.org/grapher/life-expectancy-vs-gdp-per-capita
+Metadata URL: https://ourworldindata.org/grapher/life-expectancy-vs-gdp-per-capita.metadata.json
+Data URL used: https://ourworldindata.org/grapher/life-expectancy-vs-gdp-per-capita.csv?csvType=filtered&time=2022
+Accessed: 4 October 2026 with the WebFetch tool (text below is the tool's extract of the metadata JSON)
+
+Chart Title: "Life expectancy vs. GDP per capita"
+Subtitle: "The period life expectancy at birth, in a given year. GDP per capita is adjusted for inflation and differences in living costs between countries."
+Citation: Riley (2005); Zijdeman et al. (2015); HMD (2025); UN WPP (2024); Bolt and van Zanden – Maddison Project Database 2023
+
+Life expectancy at birth
+  Title: "Period life expectancy at birth"
+  Unit: years
+  Description: "Period life expectancy is the number of years the average person born in a certain year would live if they experienced the same chances of dying at each age as people did that year."
+  Citation (full): Riley (2005); Zijdeman et al. (2015); HMD (2025); UN WPP (2024) – with major processing by Our World in Data
+  Last updated: October 22, 2025
+  Notes: UN World Population Prospects data from 1950 onward.
+
+GDP per capita
+  Title: "GDP per capita"
+  Unit: international-$ in 2011 prices; short unit $
+  Description: "Average economic output per person in a country or region per year. This data is adjusted for inflation and differences in living costs between countries."
+  Citation (full): Bolt and van Zanden – Maddison Project Database 2023 – with minor processing by Our World in Data
+  Last updated: April 26, 2024
+
+Cross-checks made on 4 October 2026:
+  https://ourworldindata.org/grapher/life-expectancy.csv?csvType=filtered&time=2022&country=NGA~QAT~CAF~USA~JPN~VNM
+    Central African Republic 18.8177; Japan 84.0541; Nigeria 54.079; Qatar 81.8566; United States 77.9789; Vietnam 74.5025  (match the combined file)
+  https://ourworldindata.org/grapher/gdp-per-capita-maddison-project-database.csv?csvType=filtered&time=2022
+    all 165 GDP per capita values match the combined file.

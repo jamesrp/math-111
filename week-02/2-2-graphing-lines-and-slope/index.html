@@ -173,13 +173,13 @@ a { color: var(--accent); overflow-wrap: anywhere; }
 
 <p>A <b>solution</b> of 6.3<var>x</var> + 0.0995<var>y</var> = 30 is a pair (<var>x</var>, <var>y</var>) that makes the equation true. The <b>graph of the equation</b> is the set of all points whose coordinates are solutions.</p>
 
-<p>An equation in <var>x</var> and <var>y</var> is a <b>linear equation</b> if it has the form <span class="math">(number)<var>x</var> + (number)<var>y</var> = (number)</span>: each unknown is multiplied by a number, the two results are added, and the sum equals a number. Squares such as <var>x</var><sup>2</sup>, products such as <var>xy</var>, and unknowns in a denominator do not appear. The protein equation <span class="math">6.3<var>x</var> + 0.0995<var>y</var> = 30</span> is linear, and so is the oats and yogurt equation <span class="math">0.132<var>x</var> + 0.0995<var>y</var> = 30</span> from lecture 2.1. The graph of a linear equation is a straight line. Section 5 shows why this holds for the protein equation.</p>
+<p>An equation in <var>x</var> and <var>y</var> is a <b>linear equation</b> if it has the form <span class="math">(number)<var>x</var> + (number)<var>y</var> = (number)</span>: each unknown is multiplied by a number, the two results are added, and the sum equals a number. The two numbers in front of <var>x</var> and <var>y</var> must not both be 0. Squares such as <var>x</var><sup>2</sup>, products such as <var>xy</var>, and unknowns in a denominator do not appear. The protein equation <span class="math">6.3<var>x</var> + 0.0995<var>y</var> = 30</span> is linear, and so is the oats and yogurt equation <span class="math">0.132<var>x</var> + 0.0995<var>y</var> = 30</span> from lecture 2.1. The graph of a linear equation is a straight line. Section 5 shows why this holds for the protein equation.</p>
 
 <p>Every point on the line is an egg and yogurt combination with exactly 30 g of protein. Every combination with 30 g of protein is a point on the line. Table 1 and Task 1 found seven of these points, rounded to 0.1 g. The line contains all of them, and all the combinations between them.</p>
 
 <p>To <b>check a point</b>, substitute its coordinates into the equation. For (2, 174.9):</p>
 <div class="display"><div class="math">6.3 × 2 + 0.0995 × 174.9 = 12.6 + 17.4 = 30.0.</div></div>
-<p>The left side equals 30 (to 0.1 g, since 174.9 is rounded), so (2, 174.9) is on the line.</p>
+<p>The left side is 30.00255, which is 30 to 0.1 g. It is not exactly 30, because 174.9 is rounded: the exact point on the line is (2, 174.874…). So (2, 174.9) checks to within rounding, and it is the rounded name of a point on the line. Every pair in Table 1 is rounded the same way.</p>
 
 <p>Drag the orange point in Figure 2 along the line, tap the graph, or use the slider, and read the amounts below the graph.</p>
 <figure>
@@ -201,7 +201,7 @@ a { color: var(--accent); overflow-wrap: anywhere; }
 <summary>Solution to Task 2</summary>
 <ol>
 <li>At 3.5 eggs the readout shows 79.9 g of yogurt. The pair is (3.5, 79.9).</li>
-<li>6.3 × 3.5 + 0.0995 × 79.9 = 22.05 + 7.95 = 30.0. The left side is 30.0 to 0.1 g. Since 79.9 is rounded, the pair is a solution to within rounding, and the point is on the line.</li>
+<li>6.3 × 3.5 + 0.0995 × 79.9 = 22.05 + 7.95 = 30.0. The left side is 30.0 to 0.1 g. Since 79.9 is rounded, the pair checks to within rounding: it is the rounded name of the point on the line at 3.5 eggs, not an exact solution.</li>
 <li>6.3 × 2 + 0.0995 × 200 = 12.6 + 19.9 = 32.5. That is 32.5 g of protein, which is more than 30, so (2, 200) is not on the line. On the line, 2 eggs go with 174.9 g of yogurt. The point (2, 200) has more yogurt, so it sits above the line. Points above this line are breakfasts with more than 30 g of protein. Points below it have less: for example (3, 100) gives 18.9 + 9.95 = 28.85 g.</li>
 </ol>
 </details>
@@ -238,7 +238,7 @@ a { color: var(--accent); overflow-wrap: anywhere; }
 
 <p>In Table 1, going from 1 egg to 2 eggs, the yogurt goes from 238.2 g to 174.9 g. The change is 174.9 − 238.2 = −63.3 g. The minus sign says the yogurt went down.</p>
 
-<p>The <b>slope</b> of a line measures this kind of change. For two points (<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>) and (<var>x</var><sub>2</sub>, <var>y</var><sub>2</sub>) on the line,</p>
+<p>The <b>slope</b> of a line measures this kind of change. For two points (<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>) and (<var>x</var><sub>2</sub>, <var>y</var><sub>2</sub>) on the line, with different <var>x</var>-coordinates,</p>
 <div class="display"><div class="math">slope = (change in <var>y</var>) ÷ (change in <var>x</var>) = (<var>y</var><sub>2</sub> − <var>y</var><sub>1</sub>) ÷ (<var>x</var><sub>2</sub> − <var>x</var><sub>1</sub>).</div></div>
 <p>The change in <var>y</var> is often called the <b>rise</b> and the change in <var>x</var> the <b>run</b>, so slope is "rise over run". With (1, 238.2) and (2, 174.9):</p>
 <div class="display"><div class="math">slope = (174.9 − 238.2) ÷ (2 − 1) = −63.3 ÷ 1 = −63.3 g of yogurt per egg.</div></div>
@@ -247,7 +247,7 @@ a { color: var(--accent); overflow-wrap: anywhere; }
 
 <p><b>Negative slope.</b> The slope is negative because one amount goes up while the other goes down. On the graph, the line falls as you move to the right. A positive slope would mean both amounts rise together, and a line that climbs to the right.</p>
 
-<p><b>Why the slope is the same everywhere.</b> One more egg adds 6.3 g of protein. To stay at 30 g you remove 6.3 g of protein worth of yogurt. Converting with a fraction equal to 1, as in week 1:</p>
+<p><b>Why the slope is the same everywhere.</b> One more egg adds 6.3 g of protein. To stay at 30 g you remove 6.3 g of protein worth of yogurt. Use the yogurt&rsquo;s protein content as a rate, as with the dose rates in week 1, so that grams of protein cancel:</p>
 <div class="display"><div class="math">6.3 g protein × (1 g yogurt / 0.0995 g protein) = 63.3 g yogurt.</div></div>
 <p>This does not depend on how many eggs you already have, so any two points on the line give the same slope. A constant slope is what makes the graph a straight line. Unrounded, the slope is −6.3 ÷ 0.0995 = −63.32. Because Table 1 is rounded to 0.1 g, a few pairs of rows give a slightly different slope, such as −63.4 for the rows with 3 and 4 eggs.</p>
 
@@ -290,16 +290,16 @@ a { color: var(--accent); overflow-wrap: anywhere; }
 <div class="display">
   <div class="math">0.0995<var>y</var> = 30 − 6.3<var>x</var></div>
   <div class="math"><var>y</var> = 30 ÷ 0.0995 − (6.3 ÷ 0.0995)<var>x</var></div>
-  <div class="math"><var>y</var> = 301.5 − 63.3<var>x</var></div>
-  <div class="math"><var>y</var> = −63.3<var>x</var> + 301.5</div>
+  <div class="math"><var>y</var> ≈ 301.5 − 63.3<var>x</var></div>
+  <div class="math"><var>y</var> ≈ −63.3<var>x</var> + 301.5</div>
 </div>
 <p>The last line only puts the term with <var>x</var> first: −63.3<var>x</var> + 301.5 and 301.5 − 63.3<var>x</var> are the same number for every <var>x</var>.</p>
 <p>An equation written as <b><var>y</var> = <var>m</var><var>x</var> + <var>b</var></b> is in <b>slope-intercept form</b>. The number <var>m</var> is the slope and <var>b</var> is the <var>y</var>-intercept. Here <var>m</var> = −63.3 and <var>b</var> = 301.5, the same numbers as in sections 4 and 5. In breakfast terms: start from 301.5 g of yogurt with no eggs, and take away 63.3 g for each egg. For any number of eggs, the yogurt is now one multiplication and one addition.</p>
 <p>For 3 eggs: <span class="math"><var>y</var> = −63.3 × 3 + 301.5 = −189.9 + 301.5 = 111.6 g</span>, which matches Table 1.</p>
-<p>Since −63.3 and 301.5 are rounded, this form can differ from the protein equation by about 0.1 g. At 4 eggs it gives 48.3 g, and Table 1 has 48.2 g.</p>
+<p>The sign ≈ means "approximately equal". Since −63.3 and 301.5 are rounded, <var>y</var> = −63.3<var>x</var> + 301.5 is a line very close to the protein line, not the same line, and it can differ by about 0.1 g. At 4 eggs it gives 48.3 g, and Table 1 has 48.2 g. The exact equation is <var>y</var> = −(6.3 ÷ 0.0995)<var>x</var> + 30 ÷ 0.0995.</p>
 
 <h3>From two points</h3>
-<p>When you know two points on a line, the method has four steps.</p>
+<p>When you know two points on a line with different <var>x</var>-coordinates, the method has four steps. (If the two <var>x</var>-coordinates are equal, the line is vertical, the run is 0, and the slope is not defined. A vertical line has an equation <var>x</var> = (number) and cannot be written as <var>y</var> = <var>m</var><var>x</var> + <var>b</var>. None of the food lines in this course is vertical.)</p>
 <ol>
 <li>Compute the slope <var>m</var> from the two points.</li>
 <li>Substitute <var>m</var> and one of the points into <var>y</var> = <var>m</var><var>x</var> + <var>b</var>, and solve for <var>b</var>.</li>

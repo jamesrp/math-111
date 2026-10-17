@@ -1,0 +1,51 @@
+Source [1]
+Starbucks, "Caffè Latte" (hot), online menu (same product and data address as source [1] of lecture 6.1)
+Product page: https://www.starbucks.com/menu/product/407/hot
+Data read:    https://www.starbucks.com/apiproxy/v1/ordering/407/hot
+Accessed 4 October 2026 with the WebFetch tool. The text below is the tool's extraction of the JSON,
+not a raw copy.
+
+Sizes: Short, Tall, Grande, Venti   (fl oz as in lecture 6.1: 8, 12, 16, 20)
+Grande default recipe: 2% Milk, 2 espresso shots, regular foam, steamed hot milk, Signature Espresso Roast
+  (no topping in the default recipe)
+
+Toppings group. Subgroup names: "Powders", "Topping Options", "Drizzle", "Whipped Cream"
+  Powders:
+    "productNumber":130,     "name":"Cinnamon Powder"
+  Topping Options:
+    "productNumber":2123051, "name":"Caramel Crunch Topping"
+    "productNumber":137,     "name":"Cinnamon Dolce Sprinkles"
+    "productNumber":191,     "name":"Toasted Coconut Flakes"
+    "productNumber":207,     "name":"Cookie Crumble Topping"
+    "productNumber":2123909, "name":"Pecan Crunch Topping"
+    "productNumber":135,     "name":"Pumpkin Spice Topping"
+    "productNumber":2123372, "name":"Salted Brown-Buttery Topping"
+  Drizzle:
+    "productNumber":126,     "name":"Caramel Drizzle"
+    "productNumber":127,     "name":"Mocha Drizzle"
+  Whipped Cream:
+    "productNumber":125,     "name":"Whipped Cream"
+  Tool's answer on amounts: all toppings have the settings "light", "regular", "extra" and "no".
+  Tool's answer on limits: no minimum or maximum selection counts appear in the Toppings group.
+
+Syrups subgroup under Flavors (14 items, the same list as lecture 6.1):
+  Brown Sugar Syrup, Banana Syrup, Caramel Syrup, Sugar-Free Caramel Syrup, Cinnamon Dolce Syrup,
+  Hazelnut Syrup, Horchata Syrup, Mango Syrup, Pecan Syrup, Peppermint Syrup, Raspberry Syrup,
+  Toasted Coconut Syrup, Sugar-Free Vanilla Syrup, Vanilla Syrup
+  (the tool's heading said "15 items" but it listed these 14; Honey Blend Syrup is listed under
+  "Liquid Sweeteners" together with "Classic Syrup", as lecture 6.1 reports)
+
+Milk Options (12, same as lecture 6.1): 2% Milk, Almondmilk, Coconutmilk, Breve (Half & Half), Heavy Cream,
+  Nonfat Milk, Oatmilk, Protein-boosted Milk, Soymilk, Nondairy Vanilla Sweet Cream, Vanilla Sweet Cream,
+  Whole Milk
+
+Cross-check, same day: https://www.starbucks.com/apiproxy/v1/ordering/407/iced (Iced Caffè Latte) lists the
+same 11 toppings in the same four subgroups. Not cited in the lecture.
+
+
+Search for real customer counts (4 October 2026)
+WebSearch: "Starbucks number of orders with syrup and nondairy milk data customization statistics".
+Results were news articles on the share of drinks that are customized in general (tastingtable.com,
+mfour.com) and on the end of the nondairy surcharge (worldcoffeeportal.com, scrippsnews.com). None gave
+counts of orders with a syrup, a nondairy milk, a topping or whipped cream, or of the overlaps. The
+order counts in Section 7 and Tasks 4 and 5 are therefore made up and labeled as made up.
