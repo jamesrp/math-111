@@ -1,0 +1,1 @@
+Write the material for one Math 111 lecture. The lecture brief and the course context are below, followed by the team's standard for lecture material. Follow that standard closely: the instructors edit everything by hand, and anything that departs from it costs them time.

@@ -1,0 +1,19 @@
+Module: What's for breakfast? (week 2)   Lecture: 1 of 3   Title: Linear equations from a nutrition target
+
+Situation: A student wants about 30 grams of protein at breakfast from foods they actually buy (for example rolled oats, eggs, Greek yogurt, milk, peanut butter), using the nutrition labels. The question students will care about: how much of each food reaches the target, and how many different combinations work?
+
+Mathematics: Reading a nutrition label as a rate (grams of protein per serving or per gram of food); writing a linear equation from a word problem (amount of food 1 × protein rate 1 + amount of food 2 × protein rate 2 = target); solving a linear equation in one unknown when the other amount is fixed, with each step justified (do the same thing to both sides); tabulating many combinations of two foods, by hand and then in a spreadsheet, and noticing that there are infinitely many solutions that follow a pattern. The pattern (they lie on a line) is named as the question for lecture 2.2 but not graphed here.
+
+Learning objectives addressed: translating word problems into equations; basic algebra and equations in one variable; arithmetic with fractions and decimals; basic Excel use.
+
+Students already know: Week 1 (lectures 1.1 to 1.3): rates written as fractions and unit conversion by multiplying by a fraction equal to 1; order of operations on a calculator; estimating the size of an answer; converting between fractions, decimals and percentages; concentrations and dilution; Spreadsheet skills so far (lecture 1.3): columns with a header row, formulas that refer to other cells, copying a formula down with relative references. Fixed cell references ($A$1) are not taught until lecture 4.1; do not use them. Nothing yet about equations or graphs in this course.
+
+Data and sources (the writer must find, verify and cite each; save the source text in draft/src/):
+- Protein (and calories, carbohydrate, fat) per serving for 3 to 5 common breakfast foods, from USDA FoodData Central or the product's Nutrition Facts label; quote serving size and values. Lectures 2.2 and 2.3 will reuse these foods, so pick plainly and state the values in a table.
+- A sourced daily or per-meal protein reference only if you use one (for example the FDA Daily Value for protein, 50 g); otherwise present 30 g as the student's own target.
+
+In-class tools: calculators (phones are fine), laptops with Excel or Google Sheets, projector, whiteboard.
+
+Format and length: a single self-contained HTML page (inline CSS and JavaScript, no external dependencies, no MathJax; math in plain HTML) that the instructor projects and students read afterwards, and that works on a phone. Header line "Math 111 · Module: What's for breakfast? (week 2) · Lecture 1 of 3", then the lecture title. Numbered sections with plain titles that name their content. In-class tasks are boxed and numbered with time and tool in the label, for example "Task 2 (about 4 minutes, calculator)", each saying exactly what to produce, with its solution in a collapsed box right after it; task times add up to about half the period. A Sources list at the end, cited in the text with bracketed numbers, each source with its date and the figure quoted. Include an interactive element (for example a slider or a draggable point that redraws a graph) only if students use it in a task; when the lecture has graphs, draw them with inline SVG or canvas. Where students use a spreadsheet, give the layout as a CSV download and a copy-to-clipboard layout, with formulas, and say they were not tested in Excel or Google Sheets unless you tested them. The lecture period is 50 minutes, including in-class tasks.
+
+Note on network access: direct curl/wget to outside sites is blocked in this environment; use the WebFetch tool to read sources, and save the relevant source text in draft/src/. A number that stands for the world is real and sourced, or labeled as made up.
